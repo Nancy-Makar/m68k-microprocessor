@@ -1,4 +1,4 @@
-; G:\COURSES\ELEC 465\M68K SYSTEMS\DE1\VERILOG\M68KV6.0 - 800BY480 - (VERILOG) FOR STUDENTS\PROGRAMS\DEBUGMONITORCODE\M68KDEBUG.C - Compiled by CC68K  Version 5.00 (c) 1991-2005  Peter J. Fondse
+; C:\CPEN412\LAB1\M68KV6.0 - 800BY480\PROGRAMS\DEBUGMONITORCODE\M68KDEBUG.C - Compiled by CC68K  Version 5.00 (c) 1991-2005  Peter J. Fondse
 ; #include "DebugMonitor.h"
 ; // use 08030000 for a system running from sram or 0B000000 for system running from dram
 ; #define StartOfExceptionVectorTable 0x08030000
@@ -269,7 +269,7 @@ _SwitchTest:
 ; int i, switches = 0 ;
        clr.l     D3
 ; printf("\r\n") ;
-       pea       @m68kde~1_1.L
+       pea       @m68kde~2_1.L
        jsr       (A2)
        addq.w    #4,A7
 ; while(1)    {
@@ -283,7 +283,7 @@ SwitchTest_1:
        or.l      D1,D0
        move.l    D0,D3
 ; printf("\rSwitches SW[7-0] = ") ;
-       pea       @m68kde~1_2.L
+       pea       @m68kde~2_2.L
        jsr       (A2)
        addq.w    #4,A7
 ; for( i = (int)(0x00000080); i > 0; i = i >> 1)  {
@@ -296,14 +296,14 @@ SwitchTest_4:
        and.l     D2,D0
        bne.s     SwitchTest_7
 ; printf("0") ;
-       pea       @m68kde~1_3.L
+       pea       @m68kde~2_3.L
        jsr       (A2)
        addq.w    #4,A7
        bra.s     SwitchTest_8
 SwitchTest_7:
 ; else
 ; printf("1") ;
-       pea       @m68kde~1_4.L
+       pea       @m68kde~2_4.L
        jsr       (A2)
        addq.w    #4,A7
 SwitchTest_8:
@@ -620,7 +620,7 @@ _DisassembleProgram:
 ; int i, j ;
 ; unsigned short int *ProgramPtr ; // pointer to where the program is stored
 ; printf("\r\nEnter Start Address: ") ;
-       pea       @m68kde~1_5.L
+       pea       @m68kde~2_5.L
        jsr       (A3)
        addq.w    #4,A7
 ; ProgramPtr = Get8HexDigits(0) ;
@@ -629,7 +629,7 @@ _DisassembleProgram:
        addq.w    #4,A7
        move.l    D0,D2
 ; printf("\r\n<ESC> = Abort, SPACE to Continue") ;
-       pea       @m68kde~1_6.L
+       pea       @m68kde~2_6.L
        jsr       (A3)
        addq.w    #4,A7
 ; while(1)    {
@@ -657,7 +657,7 @@ DisassembleProgram_4:
        and.l     #65535,D1
        move.l    D1,-(A7)
        move.l    D2,-(A7)
-       pea       @m68kde~1_7.L
+       pea       @m68kde~2_7.L
        jsr       (A3)
        add.w     #16,A7
        bra       DisassembleProgram_15
@@ -677,7 +677,7 @@ DisassembleProgram_7:
        and.l     #65535,D1
        move.l    D1,-(A7)
        move.l    D2,-(A7)
-       pea       @m68kde~1_8.L
+       pea       @m68kde~2_8.L
        jsr       (A3)
        add.w     #20,A7
        bra       DisassembleProgram_15
@@ -701,7 +701,7 @@ DisassembleProgram_9:
        and.l     #65535,D1
        move.l    D1,-(A7)
        move.l    D2,-(A7)
-       pea       @m68kde~1_9.L
+       pea       @m68kde~2_9.L
        jsr       (A3)
        add.w     #24,A7
        bra       DisassembleProgram_15
@@ -729,7 +729,7 @@ DisassembleProgram_11:
        and.l     #65535,D1
        move.l    D1,-(A7)
        move.l    D2,-(A7)
-       pea       @m68kde~1_10.L
+       pea       @m68kde~2_10.L
        jsr       (A3)
        add.w     #28,A7
        bra       DisassembleProgram_15
@@ -761,7 +761,7 @@ DisassembleProgram_13:
        and.l     #65535,D1
        move.l    D1,-(A7)
        move.l    D2,-(A7)
-       pea       @m68kde~1_11.L
+       pea       @m68kde~2_11.L
        jsr       (A3)
        add.w     #32,A7
 DisassembleProgram_15:
@@ -800,11 +800,11 @@ _DumpMemory:
 ; int i, j ;
 ; unsigned char *RamPtr,c ; // pointer to where the program is download (assumed)
 ; printf("\r\nDump Memory Block: <ESC> to Abort, <SPACE> to Continue") ;
-       pea       @m68kde~1_12.L
+       pea       @m68kde~2_12.L
        jsr       (A2)
        addq.w    #4,A7
 ; printf("\r\nEnter Start Address: ") ;
-       pea       @m68kde~1_13.L
+       pea       @m68kde~2_5.L
        jsr       (A2)
        addq.w    #4,A7
 ; RamPtr = Get8HexDigits(0) ;
@@ -821,7 +821,7 @@ DumpMemory_4:
        bge       DumpMemory_6
 ; printf("\r\n%08x ", RamPtr) ;
        move.l    D3,-(A7)
-       pea       @m68kde~1_14.L
+       pea       @m68kde~2_13.L
        jsr       (A2)
        addq.w    #8,A7
 ; for(j=0; j < 16; j ++)  {
@@ -834,7 +834,7 @@ DumpMemory_7:
        move.b    0(A0,D2.L),D1
        and.l     #255,D1
        move.l    D1,-(A7)
-       pea       @m68kde~1_15.L
+       pea       @m68kde~2_14.L
        jsr       (A2)
        addq.w    #8,A7
 ; putchar(' ') ;
@@ -847,7 +847,7 @@ DumpMemory_9:
 ; }
 ; // now display the data as ASCII at the end
 ; printf("  ") ;
-       pea       @m68kde~1_16.L
+       pea       @m68kde~2_15.L
        jsr       (A2)
        addq.w    #4,A7
 ; for(j = 0; j < 16; j++) {
@@ -892,7 +892,7 @@ DumpMemory_12:
 DumpMemory_6:
 ; }
 ; printf("\r\n") ;
-       pea       @m68kde~1_17.L
+       pea       @m68kde~2_1.L
        jsr       (A2)
        addq.w    #4,A7
 ; c = _getch() ;
@@ -919,11 +919,11 @@ _FillMemory:
 ; char *StartRamPtr, *EndRamPtr ;
 ; unsigned char FillData ;
 ; printf("\r\nFill Memory Block") ;
-       pea       @m68kde~1_18.L
+       pea       @m68kde~2_16.L
        jsr       (A2)
        addq.w    #4,A7
 ; printf("\r\nEnter Start Address: ") ;
-       pea       @m68kde~1_19.L
+       pea       @m68kde~2_5.L
        jsr       (A2)
        addq.w    #4,A7
 ; StartRamPtr = Get8HexDigits(0) ;
@@ -932,7 +932,7 @@ _FillMemory:
        addq.w    #4,A7
        move.l    D0,D2
 ; printf("\r\nEnter End Address: ") ;
-       pea       @m68kde~1_20.L
+       pea       @m68kde~2_17.L
        jsr       (A2)
        addq.w    #4,A7
 ; EndRamPtr = Get8HexDigits(0) ;
@@ -941,7 +941,7 @@ _FillMemory:
        addq.w    #4,A7
        move.l    D0,D4
 ; printf("\r\nEnter Fill Data: ") ;
-       pea       @m68kde~1_21.L
+       pea       @m68kde~2_18.L
        jsr       (A2)
        addq.w    #4,A7
 ; FillData = Get2HexDigits(0) ;
@@ -954,7 +954,7 @@ _FillMemory:
        move.l    D3,-(A7)
        move.l    D4,-(A7)
        move.l    D2,-(A7)
-       pea       @m68kde~1_22.L
+       pea       @m68kde~2_19.L
        jsr       (A2)
        add.w     #16,A7
 ; while(StartRamPtr < EndRamPtr)
@@ -992,7 +992,7 @@ _Load_SRecordFile:
 ; Echo = 0 ;                              // don't echo S records during download
        clr.l     _Echo.L
 ; printf("\r\nUse HyperTerminal to Send Text File (.hex)\r\n") ;
-       pea       @m68kde~1_23.L
+       pea       @m68kde~2_20.L
        jsr       (A4)
        addq.w    #4,A7
 ; while(1)    {
@@ -1156,7 +1156,7 @@ Load_SRecordFile_3:
        bne.s     Load_SRecordFile_25
 ; printf("\r\nLoad Failed at Address = [$%08X]\r\n", FailedAddress) ;
        move.l    -26(A6),-(A7)
-       pea       @m68kde~1_24.L
+       pea       @m68kde~2_21.L
        jsr       (A4)
        addq.w    #8,A7
        bra.s     Load_SRecordFile_26
@@ -1165,7 +1165,7 @@ Load_SRecordFile_25:
 ; else
 ; printf("\r\nSuccess: Downloaded %d bytes\r\n", ByteTotal) ;
        move.l    A5,-(A7)
-       pea       @m68kde~1_25.L
+       pea       @m68kde~2_22.L
        jsr       (A4)
        addq.w    #8,A7
 Load_SRecordFile_26:
@@ -1197,15 +1197,15 @@ _MemoryChange:
 ; unsigned char *RamPtr,c ; // pointer to memory
 ; int Data ;
 ; printf("\r\nExamine and Change Memory") ;
-       pea       @m68kde~1_26.L
+       pea       @m68kde~2_23.L
        jsr       (A2)
        addq.w    #4,A7
 ; printf("\r\n<ESC> to Stop, <SPACE> to Advance, '-' to Go Back, <DATA> to change") ;
-       pea       @m68kde~1_27.L
+       pea       @m68kde~2_24.L
        jsr       (A2)
        addq.w    #4,A7
 ; printf("\r\nEnter Address: ") ;
-       pea       @m68kde~1_28.L
+       pea       @m68kde~2_25.L
        jsr       (A2)
        addq.w    #4,A7
 ; RamPtr = Get8HexDigits(0) ;
@@ -1221,7 +1221,7 @@ MemoryChange_1:
        and.l     #255,D1
        move.l    D1,-(A7)
        move.l    D3,-(A7)
-       pea       @m68kde~1_29.L
+       pea       @m68kde~2_26.L
        jsr       (A2)
        add.w     #12,A7
 ; c = tolower(_getch()) ;
@@ -1284,7 +1284,7 @@ MemoryChange_9:
        and.l     #255,D1
        move.l    D1,-(A7)
        move.l    D4,-(A7)
-       pea       @m68kde~1_30.L
+       pea       @m68kde~2_27.L
        jsr       (A2)
        add.w     #12,A7
 MemoryChange_11:
@@ -1327,7 +1327,7 @@ _ProgramFlashChip:
        xdef      _LoadFromFlashChip
 _LoadFromFlashChip:
 ; printf("\r\nLoading Program From SPI Flash....") ;
-       pea       @m68kde~1_31.L
+       pea       @m68kde~2_28.L
        jsr       _printf
        addq.w    #4,A7
        rts
@@ -1463,7 +1463,7 @@ DumpRegisters_1:
        lsl.l     #2,D1
        lea       _WatchPointAddress.L,A0
        move.l    0(A0,D1.L),-(A7)
-       pea       @m68kde~1_32.L
+       pea       @m68kde~2_29.L
        move.l    A5,D1
        ext.l     D2
        move.l    D0,-(A7)
@@ -1501,7 +1501,7 @@ DumpRegisters_9:
        move.b    0(A0,D1.L),D1
        and.l     #255,D1
        move.l    D1,-(A7)
-       pea       @m68kde~1_33.L
+       pea       @m68kde~2_14.L
        pea       _TempString.L
        jsr       _sprintf
        add.w     #12,A7
@@ -1522,7 +1522,7 @@ DumpRegisters_9:
 DumpRegisters_11:
 ; }
 ; strcat(WatchPointString[x]," ") ;
-       pea       @m68kde~1_34.L
+       pea       @m68kde~2_30.L
        move.l    A5,D1
        ext.l     D2
        move.l    D0,-(A7)
@@ -1538,7 +1538,7 @@ DumpRegisters_11:
 DumpRegisters_8:
 ; }
 ; strcat(WatchPointString[x], "  ") ;
-       pea       @m68kde~1_35.L
+       pea       @m68kde~2_15.L
        move.l    A5,D1
        ext.l     D2
        move.l    D0,-(A7)
@@ -1574,7 +1574,7 @@ DumpRegisters_12:
        bhs.s     DumpRegisters_15
 DumpRegisters_17:
 ; sprintf(TempString, ".") ;
-       pea       @m68kde~1_36.L
+       pea       @m68kde~2_31.L
        pea       _TempString.L
        jsr       _sprintf
        addq.w    #8,A7
@@ -1587,7 +1587,7 @@ DumpRegisters_15:
        move.b    0(A0,D3.L),D1
        and.l     #255,D1
        move.l    D1,-(A7)
-       pea       @m68kde~1_37.L
+       pea       @m68kde~2_32.L
        pea       _TempString.L
        jsr       _sprintf
        add.w     #12,A7
@@ -1613,7 +1613,7 @@ DumpRegisters_4:
 ; }
 ; else
 ; strcpy(WatchPointString[x], "") ;
-       pea       @m68kde~1_38.L
+       pea       @m68kde~2_33.L
        move.l    A5,D1
        ext.l     D2
        move.l    D0,-(A7)
@@ -1632,43 +1632,43 @@ DumpRegisters_3:
 ; printf("\r\n\r\n D0 = $%08X  A0 = $%08X",d0,a0) ;
        move.l    _a0.L,-(A7)
        move.l    _d0.L,-(A7)
-       pea       @m68kde~1_39.L
+       pea       @m68kde~2_34.L
        jsr       (A3)
        add.w     #12,A7
 ; printf("\r\n D1 = $%08X  A1 = $%08X",d1,a1) ;
        move.l    _a1.L,-(A7)
        move.l    _d1.L,-(A7)
-       pea       @m68kde~1_40.L
+       pea       @m68kde~2_35.L
        jsr       (A3)
        add.w     #12,A7
 ; printf("\r\n D2 = $%08X  A2 = $%08X",d2,a2) ;
        move.l    _a2.L,-(A7)
        move.l    _d2.L,-(A7)
-       pea       @m68kde~1_41.L
+       pea       @m68kde~2_36.L
        jsr       (A3)
        add.w     #12,A7
 ; printf("\r\n D3 = $%08X  A3 = $%08X",d3,a3) ;
        move.l    _a3.L,-(A7)
        move.l    _d3.L,-(A7)
-       pea       @m68kde~1_42.L
+       pea       @m68kde~2_37.L
        jsr       (A3)
        add.w     #12,A7
 ; printf("\r\n D4 = $%08X  A4 = $%08X",d4,a4) ;
        move.l    _a4.L,-(A7)
        move.l    _d4.L,-(A7)
-       pea       @m68kde~1_43.L
+       pea       @m68kde~2_38.L
        jsr       (A3)
        add.w     #12,A7
 ; printf("\r\n D5 = $%08X  A5 = $%08X",d5,a5) ;
        move.l    _a5.L,-(A7)
        move.l    _d5.L,-(A7)
-       pea       @m68kde~1_44.L
+       pea       @m68kde~2_39.L
        jsr       (A3)
        add.w     #12,A7
 ; printf("\r\n D6 = $%08X  A6 = $%08X",d6,a6) ;
        move.l    _a6.L,-(A7)
        move.l    _d6.L,-(A7)
-       pea       @m68kde~1_45.L
+       pea       @m68kde~2_40.L
        jsr       (A3)
        add.w     #12,A7
 ; printf("\r\n D7 = $%08X  A7 = $%08X",d7,((SR & (unsigned short int)(0x2000)) == ((unsigned short int)(0x2000))) ? SSP : USP) ;
@@ -1683,29 +1683,29 @@ DumpRegisters_18:
 DumpRegisters_19:
        move.l    D1,-(A7)
        move.l    _d7.L,-(A7)
-       pea       @m68kde~1_46.L
+       pea       @m68kde~2_41.L
        jsr       (A3)
        add.w     #12,A7
 ; printf("\r\n\r\nUSP = $%08X  (A7) User SP", USP ) ;
        move.l    _USP.L,-(A7)
-       pea       @m68kde~1_47.L
+       pea       @m68kde~2_42.L
        jsr       (A3)
        addq.w    #8,A7
 ; printf("\r\nSSP = $%08X  (A7) Supervisor SP", SSP) ;
        move.l    _SSP.L,-(A7)
-       pea       @m68kde~1_48.L
+       pea       @m68kde~2_43.L
        jsr       (A3)
        addq.w    #8,A7
 ; printf("\r\n SR = $%04X   ",SR) ;
        move.w    (A4),D1
        and.l     #65535,D1
        move.l    D1,-(A7)
-       pea       @m68kde~1_49.L
+       pea       @m68kde~2_44.L
        jsr       (A3)
        addq.w    #8,A7
 ; // display the status word in characters etc.
 ; printf("   [") ;
-       pea       @m68kde~1_50.L
+       pea       @m68kde~2_45.L
        jsr       (A3)
        addq.w    #4,A7
 ; if((SR & (unsigned short int)(0x8000)) == (unsigned short int)(0x8000)) putchar('T') ; else putchar('-') ;      // Trace bit(bit 15)
@@ -1854,7 +1854,7 @@ DumpRegisters_39:
        addq.w    #4,A7
 ; printf("\r\n PC = $%08X  ", PC) ;
        move.l    _PC.L,-(A7)
-       pea       @m68kde~1_51.L
+       pea       @m68kde~2_46.L
        jsr       (A3)
        addq.w    #8,A7
 ; if(*(unsigned short int *)(PC) != 0x4e4e)   {
@@ -1871,7 +1871,7 @@ DumpRegisters_39:
        jsr       _FormatInstructionForTrace
 ; printf("%s", Instruction) ;
        pea       _Instruction.L
-       pea       @m68kde~1_52.L
+       pea       @m68kde~2_47.L
        jsr       (A3)
        addq.w    #8,A7
        bra.s     DumpRegisters_41
@@ -1879,12 +1879,12 @@ DumpRegisters_40:
 ; }
 ; else
 ; printf("[BREAKPOINT]") ;
-       pea       @m68kde~1_53.L
+       pea       @m68kde~2_48.L
        jsr       (A3)
        addq.w    #4,A7
 DumpRegisters_41:
 ; printf("\r\n") ;
-       pea       @m68kde~1_54.L
+       pea       @m68kde~2_1.L
        jsr       (A3)
        addq.w    #4,A7
 ; for(i=0; i < 8; i++)    {
@@ -1911,7 +1911,7 @@ DumpRegisters_42:
        move.l    D1,-(A7)
        ext.l     D4
        move.l    D4,-(A7)
-       pea       @m68kde~1_55.L
+       pea       @m68kde~2_49.L
        jsr       (A3)
        add.w     #12,A7
 DumpRegisters_45:
@@ -1930,21 +1930,21 @@ _DumpRegistersandPause:
        move.l    A2,-(A7)
        lea       _printf.L,A2
 ; printf("\r\n\r\n\r\n\r\n\r\n\r\nSingle Step  :[ON]") ;
-       pea       @m68kde~1_56.L
+       pea       @m68kde~2_50.L
        jsr       (A2)
        addq.w    #4,A7
 ; printf("\r\nBreak Points :[Disabled]") ;
-       pea       @m68kde~1_57.L
+       pea       @m68kde~2_51.L
        jsr       (A2)
        addq.w    #4,A7
 ; DumpRegisters() ;
        jsr       _DumpRegisters
 ; printf("\r\nPress <SPACE> to Execute Next Instruction");
-       pea       @m68kde~1_58.L
+       pea       @m68kde~2_52.L
        jsr       (A2)
        addq.w    #4,A7
 ; printf("\r\nPress <ESC> to Resume Program") ;
-       pea       @m68kde~1_59.L
+       pea       @m68kde~2_53.L
        jsr       (A2)
        addq.w    #4,A7
 ; menu() ;
@@ -1997,7 +1997,7 @@ _ChangeRegisters:
        bge.s     ChangeRegisters_3
 ChangeRegisters_5:
 ; printf("\r\nIllegal Data Register : Use D0-D7.....\r\n") ;
-       pea       @m68kde~1_60.L
+       pea       @m68kde~2_54.L
        jsr       (A2)
        addq.w    #4,A7
 ; return ;
@@ -2009,7 +2009,7 @@ ChangeRegisters_3:
        ext.w     D2
        ext.l     D2
        move.l    D2,-(A7)
-       pea       @m68kde~1_61.L
+       pea       @m68kde~2_55.L
        jsr       (A2)
        addq.w    #8,A7
 ; reg_val = Get8HexDigits(0) ;    // read 32 bit value from user keyboard
@@ -2086,7 +2086,7 @@ ChangeRegisters_1:
        bge.s     ChangeRegisters_23
 ChangeRegisters_25:
 ; printf("\r\nIllegal Address Register : Use A0-A7.....\r\n") ;
-       pea       @m68kde~1_62.L
+       pea       @m68kde~2_56.L
        jsr       (A2)
        addq.w    #4,A7
 ; return ;
@@ -2098,7 +2098,7 @@ ChangeRegisters_23:
        ext.w     D2
        ext.l     D2
        move.l    D2,-(A7)
-       pea       @m68kde~1_63.L
+       pea       @m68kde~2_57.L
        jsr       (A2)
        addq.w    #8,A7
 ; reg_val = Get8HexDigits(0) ;    // read 32 bit value from user keyboard
@@ -2181,7 +2181,7 @@ ChangeRegisters_21:
        cmp.l     #112,D0
        bne.s     ChangeRegisters_42
 ; printf("\r\nUser SP = ") ;
-       pea       @m68kde~1_64.L
+       pea       @m68kde~2_58.L
        jsr       (A2)
        addq.w    #4,A7
 ; USP = Get8HexDigits(0) ;    // read 32 bit value from user keyboard
@@ -2194,7 +2194,7 @@ ChangeRegisters_42:
 ; }
 ; else {
 ; printf("\r\nIllegal Register....") ;
-       pea       @m68kde~1_65.L
+       pea       @m68kde~2_59.L
        jsr       (A2)
        addq.w    #4,A7
 ; return ;
@@ -2221,7 +2221,7 @@ ChangeRegisters_40:
        cmp.l     #112,D0
        bne.s     ChangeRegisters_46
 ; printf("\r\nSystem SP = ") ;
-       pea       @m68kde~1_66.L
+       pea       @m68kde~2_60.L
        jsr       (A2)
        addq.w    #4,A7
 ; SSP = Get8HexDigits(0) ;    // read 32 bit value from user keyboard
@@ -2234,7 +2234,7 @@ ChangeRegisters_46:
 ; }
 ; else {
 ; printf("\r\nIllegal Register....") ;
-       pea       @m68kde~1_67.L
+       pea       @m68kde~2_59.L
        jsr       (A2)
        addq.w    #4,A7
 ; return ;
@@ -2251,7 +2251,7 @@ ChangeRegisters_44:
        cmp.b     #99,D2
        bne.s     ChangeRegisters_48
 ; printf("\r\nPC = ") ;
-       pea       @m68kde~1_68.L
+       pea       @m68kde~2_61.L
        jsr       (A2)
        addq.w    #4,A7
 ; PC = Get8HexDigits(0) ;    // read 32 bit value from user keyboard
@@ -2269,7 +2269,7 @@ ChangeRegisters_48:
        cmp.b     #114,D2
        bne.s     ChangeRegisters_50
 ; printf("\r\nSR = ") ;
-       pea       @m68kde~1_69.L
+       pea       @m68kde~2_62.L
        jsr       (A2)
        addq.w    #4,A7
 ; SR = Get4HexDigits(0) ;    // read 16 bit value from user keyboard
@@ -2282,7 +2282,7 @@ ChangeRegisters_50:
 ; }
 ; else
 ; printf("\r\nIllegal Register: Use A0-A7, D0-D7, SSP, USP, PC or SR\r\n") ;
-       pea       @m68kde~1_70.L
+       pea       @m68kde~2_63.L
        jsr       (A2)
        addq.w    #4,A7
 ChangeRegisters_51:
@@ -2326,11 +2326,11 @@ BreakPointDisplay_3:
        cmp.l     #1,D3
        bne.s     BreakPointDisplay_6
 ; printf("\r\n\r\nNum     Address      Instruction") ;
-       pea       @m68kde~1_71.L
+       pea       @m68kde~2_64.L
        jsr       (A2)
        addq.w    #4,A7
 ; printf("\r\n---     ---------    -----------") ;
-       pea       @m68kde~1_72.L
+       pea       @m68kde~2_65.L
        jsr       (A2)
        addq.w    #4,A7
        bra.s     BreakPointDisplay_7
@@ -2338,7 +2338,7 @@ BreakPointDisplay_6:
 ; }
 ; else
 ; printf("\r\nNo BreakPoints Set") ;
-       pea       @m68kde~1_73.L
+       pea       @m68kde~2_66.L
        jsr       (A2)
        addq.w    #4,A7
 BreakPointDisplay_7:
@@ -2383,12 +2383,12 @@ BreakPointDisplay_8:
        lsl.l     #2,D1
        move.l    0(A3,D1.L),-(A7)
        move.l    D2,-(A7)
-       pea       @m68kde~1_74.L
+       pea       @m68kde~2_67.L
        jsr       (A2)
        add.w     #12,A7
 ; printf("    %s", Instruction);
        pea       _Instruction.L
-       pea       @m68kde~1_75.L
+       pea       @m68kde~2_68.L
        jsr       (A2)
        addq.w    #8,A7
 BreakPointDisplay_11:
@@ -2398,7 +2398,7 @@ BreakPointDisplay_10:
 ; }
 ; }
 ; printf("\r\n") ;
-       pea       @m68kde~1_76.L
+       pea       @m68kde~2_1.L
        jsr       (A2)
        addq.w    #4,A7
        movem.l   (A7)+,D2/D3/A2/A3
@@ -2437,11 +2437,11 @@ WatchPointDisplay_3:
        cmp.l     #1,D3
        bne.s     WatchPointDisplay_6
 ; printf("\r\nNum     Address") ;
-       pea       @m68kde~1_77.L
+       pea       @m68kde~2_69.L
        jsr       (A2)
        addq.w    #4,A7
 ; printf("\r\n---     ---------") ;
-       pea       @m68kde~1_78.L
+       pea       @m68kde~2_70.L
        jsr       (A2)
        addq.w    #4,A7
        bra.s     WatchPointDisplay_7
@@ -2449,7 +2449,7 @@ WatchPointDisplay_6:
 ; }
 ; else
 ; printf("\r\nNo WatchPoints Set") ;
-       pea       @m68kde~1_79.L
+       pea       @m68kde~2_71.L
        jsr       (A2)
        addq.w    #4,A7
 WatchPointDisplay_7:
@@ -2471,7 +2471,7 @@ WatchPointDisplay_8:
        lea       _WatchPointAddress.L,A0
        move.l    0(A0,D1.L),-(A7)
        move.l    D2,-(A7)
-       pea       @m68kde~1_80.L
+       pea       @m68kde~2_67.L
        jsr       (A2)
        add.w     #12,A7
 WatchPointDisplay_11:
@@ -2480,7 +2480,7 @@ WatchPointDisplay_11:
 WatchPointDisplay_10:
 ; }
 ; printf("\r\n") ;
-       pea       @m68kde~1_81.L
+       pea       @m68kde~2_1.L
        jsr       (A2)
        addq.w    #4,A7
        movem.l   (A7)+,D2/D3/A2
@@ -2498,7 +2498,7 @@ _BreakPointClear:
 ; BreakPointDisplay() ;
        jsr       _BreakPointDisplay
 ; printf("\r\nEnter Break Point Number: ") ;
-       pea       @m68kde~1_82.L
+       pea       @m68kde~2_72.L
        jsr       (A2)
        addq.w    #4,A7
 ; i = xtod(_getch()) ;           // get break pointer number
@@ -2518,7 +2518,7 @@ _BreakPointClear:
        bls.s     BreakPointClear_1
 BreakPointClear_3:
 ; printf("\r\nIllegal Range : Use 0 - 7") ;
-       pea       @m68kde~1_83.L
+       pea       @m68kde~2_73.L
        jsr       (A2)
        addq.w    #4,A7
 ; return ;
@@ -2559,7 +2559,7 @@ BreakPointClear_1:
        lea       _BreakPointInstruction.L,A0
        clr.w     0(A0,D0.L)
 ; printf("\r\nBreak Point Cleared.....\r\n") ;
-       pea       @m68kde~1_84.L
+       pea       @m68kde~2_74.L
        jsr       (A2)
        addq.w    #4,A7
        bra.s     BreakPointClear_6
@@ -2567,7 +2567,7 @@ BreakPointClear_5:
 ; }
 ; else
 ; printf("\r\nBreak Point wasn't Set.....") ;
-       pea       @m68kde~1_85.L
+       pea       @m68kde~2_75.L
        jsr       (A2)
        addq.w    #4,A7
 BreakPointClear_6:
@@ -2589,7 +2589,7 @@ _WatchPointClear:
 ; WatchPointDisplay() ;
        jsr       _WatchPointDisplay
 ; printf("\r\nEnter Watch Point Number: ") ;
-       pea       @m68kde~1_86.L
+       pea       @m68kde~2_76.L
        jsr       (A2)
        addq.w    #4,A7
 ; i = xtod(_getch()) ;           // get watch pointer number
@@ -2609,7 +2609,7 @@ _WatchPointClear:
        bls.s     WatchPointClear_1
 WatchPointClear_3:
 ; printf("\r\nIllegal Range : Use 0 - 7") ;
-       pea       @m68kde~1_87.L
+       pea       @m68kde~2_73.L
        jsr       (A2)
        addq.w    #4,A7
 ; return ;
@@ -2634,7 +2634,7 @@ WatchPointClear_1:
        lea       _WatchPointSetOrCleared.L,A0
        clr.l     0(A0,D0.L)
 ; printf("\r\nWatch Point Cleared.....\r\n") ;
-       pea       @m68kde~1_88.L
+       pea       @m68kde~2_77.L
        jsr       (A2)
        addq.w    #4,A7
        bra.s     WatchPointClear_6
@@ -2642,7 +2642,7 @@ WatchPointClear_5:
 ; }
 ; else
 ; printf("\r\nWatch Point Was not Set.....") ;
-       pea       @m68kde~1_89.L
+       pea       @m68kde~2_78.L
        jsr       (A2)
        addq.w    #4,A7
 WatchPointClear_6:
@@ -2844,7 +2844,7 @@ SetBreakPoint_3:
        cmp.l     #8,D2
        bne.s     SetBreakPoint_6
 ; printf("\r\nNo FREE Break Points.....") ;
-       pea       @m68kde~1_90.L
+       pea       @m68kde~2_79.L
        jsr       (A2)
        addq.w    #4,A7
 ; return ;
@@ -2852,7 +2852,7 @@ SetBreakPoint_3:
 SetBreakPoint_6:
 ; }
 ; printf("\r\nBreak Point Address: ") ;
-       pea       @m68kde~1_91.L
+       pea       @m68kde~2_80.L
        jsr       (A2)
        addq.w    #4,A7
 ; BPAddress = Get8HexDigits(0) ;
@@ -2868,7 +2868,7 @@ SetBreakPoint_6:
        cmp.l     #1,D0
        bne.s     SetBreakPoint_9
 ; printf("\r\nError : Break Points CANNOT be set at ODD addresses") ;
-       pea       @m68kde~1_92.L
+       pea       @m68kde~2_81.L
        jsr       (A2)
        addq.w    #4,A7
 ; return ;
@@ -2879,7 +2879,7 @@ SetBreakPoint_9:
        cmp.l     #32768,D3
        bhs.s     SetBreakPoint_11
 ; printf("\r\nError : Break Points CANNOT be set for ROM in Range : [$0-$00007FFF]") ;
-       pea       @m68kde~1_93.L
+       pea       @m68kde~2_82.L
        jsr       (A2)
        addq.w    #4,A7
 ; return ;
@@ -2900,7 +2900,7 @@ SetBreakPoint_13:
        bne.s     SetBreakPoint_16
 ; printf("\r\nError: Break Point Already Exists at Address : %08x\r\n", BPAddress) ;
        move.l    D3,-(A7)
-       pea       @m68kde~1_94.L
+       pea       @m68kde~2_83.L
        jsr       (A2)
        addq.w    #8,A7
 ; return ;
@@ -2932,7 +2932,7 @@ SetBreakPoint_16:
 ; printf("\r\nBreak Point Set at Address: [$%08x], Instruction = %s", ProgramBreakPointAddress, Instruction) ;
        pea       _Instruction.L
        move.l    D4,-(A7)
-       pea       @m68kde~1_95.L
+       pea       @m68kde~2_84.L
        jsr       (A2)
        add.w     #12,A7
 ; *ProgramBreakPointAddress = (unsigned short int)(0x4e4e)    ;   // put a Trap14 instruction at the user specified address
@@ -2944,7 +2944,7 @@ SetBreakPoint_16:
        lea       _BreakPointAddress.L,A0
        move.l    D3,0(A0,D0.L)
 ; printf("\r\n") ;
-       pea       @m68kde~1_96.L
+       pea       @m68kde~2_1.L
        jsr       (A2)
        addq.w    #4,A7
 ; BreakPointDisplay() ;       // display the break points
@@ -2995,7 +2995,7 @@ SetWatchPoint_3:
        cmp.l     #8,D2
        bne.s     SetWatchPoint_6
 ; printf("\r\nNo FREE Watch Points.....") ;
-       pea       @m68kde~1_97.L
+       pea       @m68kde~2_85.L
        jsr       (A2)
        addq.w    #4,A7
 ; return ;
@@ -3003,7 +3003,7 @@ SetWatchPoint_3:
 SetWatchPoint_6:
 ; }
 ; printf("\r\nWatch Point Address: ") ;
-       pea       @m68kde~1_98.L
+       pea       @m68kde~2_86.L
        jsr       (A2)
        addq.w    #4,A7
 ; WPAddress = Get8HexDigits(0) ;
@@ -3027,7 +3027,7 @@ SetWatchPoint_9:
        beq.s     SetWatchPoint_12
 ; printf("\r\nError: Watch Point Already Set at Address : %08x\r\n", WPAddress) ;
        move.l    D3,-(A7)
-       pea       @m68kde~1_99.L
+       pea       @m68kde~2_87.L
        jsr       (A2)
        addq.w    #8,A7
 ; return ;
@@ -3045,7 +3045,7 @@ SetWatchPoint_12:
        move.l    #1,0(A3,D0.L)
 ; printf("\r\nWatch Point Set at Address: [$%08x]", WPAddress) ;
        move.l    D3,-(A7)
-       pea       @m68kde~1_100.L
+       pea       @m68kde~2_88.L
        jsr       (A2)
        addq.w    #8,A7
 ; WatchPointAddress[i] = WPAddress ;                              // record the address of this watch point in the debugger
@@ -3054,7 +3054,7 @@ SetWatchPoint_12:
        lea       _WatchPointAddress.L,A0
        move.l    D3,0(A0,D0.L)
 ; printf("\r\n") ;
-       pea       @m68kde~1_101.L
+       pea       @m68kde~2_1.L
        jsr       (A2)
        addq.w    #4,A7
 ; WatchPointDisplay() ;       // display the break points
@@ -3086,15 +3086,15 @@ _HandleBreakPoint:
 ; PC = PC - 2 ;  // ready for user to resume after reaching breakpoint
        subq.l    #2,(A4)
 ; printf("\r\n\r\n\r\n\r\n@BREAKPOINT") ;
-       pea       @m68kde~1_102.L
+       pea       @m68kde~2_89.L
        jsr       (A3)
        addq.w    #4,A7
 ; printf("\r\nSingle Step : [ON]") ;
-       pea       @m68kde~1_103.L
+       pea       @m68kde~2_90.L
        jsr       (A3)
        addq.w    #4,A7
 ; printf("\r\nBreakPoints : [Enabled]") ;
-       pea       @m68kde~1_104.L
+       pea       @m68kde~2_91.L
        jsr       (A3)
        addq.w    #4,A7
 ; // now clear the break point (put original instruction back)
@@ -3143,11 +3143,11 @@ HandleBreakPoint_3:
 ; DumpRegisters() ;
        jsr       _DumpRegisters
 ; printf("\r\nPress <SPACE> to Execute Next Instruction");
-       pea       @m68kde~1_105.L
+       pea       @m68kde~2_52.L
        jsr       (A3)
        addq.w    #4,A7
 ; printf("\r\nPress <ESC> to Resume User Program\r\n") ;
-       pea       @m68kde~1_106.L
+       pea       @m68kde~2_92.L
        jsr       (A3)
        addq.w    #4,A7
 ; menu() ;
@@ -3161,7 +3161,7 @@ HandleBreakPoint_3:
        xdef      _UnknownCommand
 _UnknownCommand:
 ; printf("\r\nUnknown Command.....\r\n") ;
-       pea       @m68kde~1_107.L
+       pea       @m68kde~2_93.L
        jsr       _printf
        addq.w    #4,A7
 ; Help() ;
@@ -3174,7 +3174,7 @@ _UnknownCommand:
        xdef      _CallDebugMonitor
 _CallDebugMonitor:
 ; printf("\r\nProgram Ended (TRAP #15)....") ;
-       pea       @m68kde~1_108.L
+       pea       @m68kde~2_94.L
        jsr       _printf
        addq.w    #4,A7
 ; menu();
@@ -3207,7 +3207,7 @@ Breakpoint_1:
        cmp.b     #75,D2
        bne.s     Breakpoint_3
 ; printf("\r\nKill All Break Points...(y/n)?") ;
-       pea       @m68kde~1_109.L
+       pea       @m68kde~2_95.L
        jsr       _printf
        addq.w    #4,A7
 ; c = toupper(_getch());
@@ -3277,7 +3277,7 @@ Watchpoint_1:
        cmp.b     #75,D2
        bne.s     Watchpoint_3
 ; printf("\r\nKill All Watch Points...(y/n)?") ;
-       pea       @m68kde~1_110.L
+       pea       @m68kde~2_96.L
        jsr       _printf
        addq.w    #4,A7
 ; c = toupper(_getch());
@@ -3369,14 +3369,14 @@ _Help:
        movem.l   D2/A2,-(A7)
        lea       _printf.L,A2
 ; char *banner = "\r\n----------------------------------------------------------------" ;
-       lea       @m68kde~1_111.L,A0
+       lea       @m68kde~2_97.L,A0
        move.l    A0,D2
 ; printf(banner) ;
        move.l    D2,-(A7)
        jsr       (A2)
        addq.w    #4,A7
 ; printf("\r\n  Debugger Command Summary") ;
-       pea       @m68kde~1_112.L
+       pea       @m68kde~2_98.L
        jsr       (A2)
        addq.w    #4,A7
 ; printf(banner) ;
@@ -3384,72 +3384,72 @@ _Help:
        jsr       (A2)
        addq.w    #4,A7
 ; printf("\r\n  .(reg)       - Change Registers: e.g A0-A7,D0-D7,PC,SSP,USP,SR");
-       pea       @m68kde~1_113.L
+       pea       @m68kde~2_99.L
        jsr       (A2)
        addq.w    #4,A7
 ; printf("\r\n  BD/BS/BC/BK  - Break Point: Display/Set/Clear/Kill") ;
-       pea       @m68kde~1_114.L
+       pea       @m68kde~2_100.L
        jsr       (A2)
        addq.w    #4,A7
 ; printf("\r\n  C            - Copy Program from Flash to Main Memory") ;
-       pea       @m68kde~1_115.L
+       pea       @m68kde~2_101.L
        jsr       (A2)
        addq.w    #4,A7
 ; printf("\r\n  DI           - Disassemble Program");
-       pea       @m68kde~1_116.L
+       pea       @m68kde~2_102.L
        jsr       (A2)
        addq.w    #4,A7
 ; printf("\r\n  DU           - Dump Memory Contents to Screen") ;
-       pea       @m68kde~1_117.L
+       pea       @m68kde~2_103.L
        jsr       (A2)
        addq.w    #4,A7
 ; printf("\r\n  E            - Enter String into Memory") ;
-       pea       @m68kde~1_118.L
+       pea       @m68kde~2_104.L
        jsr       (A2)
        addq.w    #4,A7
 ; printf("\r\n  F            - Fill Memory with Data") ;
-       pea       @m68kde~1_119.L
+       pea       @m68kde~2_105.L
        jsr       (A2)
        addq.w    #4,A7
 ; printf("\r\n  G            - Go Program Starting at Address: $%08X", PC) ;
        move.l    _PC.L,-(A7)
-       pea       @m68kde~1_120.L
+       pea       @m68kde~2_106.L
        jsr       (A2)
        addq.w    #8,A7
 ; printf("\r\n  L            - Load Program (.HEX file) from Laptop") ;
-       pea       @m68kde~1_121.L
+       pea       @m68kde~2_107.L
        jsr       (A2)
        addq.w    #4,A7
 ; printf("\r\n  M            - Memory Examine and Change");
-       pea       @m68kde~1_122.L
+       pea       @m68kde~2_108.L
        jsr       (A2)
        addq.w    #4,A7
 ; printf("\r\n  P            - Program Flash Memory with User Program") ;
-       pea       @m68kde~1_123.L
+       pea       @m68kde~2_109.L
        jsr       (A2)
        addq.w    #4,A7
 ; printf("\r\n  R            - Display 68000 Registers") ;
-       pea       @m68kde~1_124.L
+       pea       @m68kde~2_110.L
        jsr       (A2)
        addq.w    #4,A7
 ; printf("\r\n  S            - Toggle ON/OFF Single Step Mode") ;
-       pea       @m68kde~1_125.L
+       pea       @m68kde~2_111.L
        jsr       (A2)
        addq.w    #4,A7
 ; printf("\r\n  TM           - Test Memory") ;
-       pea       @m68kde~1_126.L
+       pea       @m68kde~2_112.L
        jsr       (A2)
        addq.w    #4,A7
 ; printf("\r\n  TS           - Test Switches: SW7-0") ;
-       pea       @m68kde~1_127.L
+       pea       @m68kde~2_113.L
        jsr       (A2)
        addq.w    #4,A7
 ; printf("\r\n  TD           - Test Displays: LEDs and 7-Segment") ;
-       pea       @m68kde~1_128.L
+       pea       @m68kde~2_114.L
        jsr       (A2)
        addq.w    #4,A7
 ; printf("\r\n  WD/WS/WC/WK  - Watch Point: Display/Set/Clear/Kill") ;
-       pea       @m68kde~1_129.L
+       pea       @m68kde~2_115.L
        jsr       (A2)
        addq.w    #4,A7
 ; printf(banner) ;
@@ -3474,7 +3474,7 @@ menu_1:
 ; FlushKeyboard() ;               // dump unread characters from keyboard
        jsr       _FlushKeyboard
 ; printf("\r\n#") ;
-       pea       @m68kde~1_130.L
+       pea       @m68kde~2_116.L
        jsr       (A2)
        addq.w    #4,A7
 ; c = toupper(_getch());
@@ -3518,11 +3518,11 @@ menu_10:
        cmp.b     #71,D2
        bne.s     menu_12
 ; printf("\r\nProgram Running.....") ;
-       pea       @m68kde~1_131.L
+       pea       @m68kde~2_117.L
        jsr       (A2)
        addq.w    #4,A7
 ; printf("\r\nPress <RESET> button <Key0> on DE1 to stop") ;
-       pea       @m68kde~1_132.L
+       pea       @m68kde~2_118.L
        jsr       (A2)
        addq.w    #4,A7
 ; GoFlag = 1 ;
@@ -3634,7 +3634,7 @@ menu_36:
 ; }
 ; else
 ; printf("\r\nError: Press 'G' first to start program") ;
-       pea       @m68kde~1_133.L
+       pea       @m68kde~2_119.L
        jsr       (A2)
        addq.w    #4,A7
        bra       menu_46
@@ -3649,22 +3649,22 @@ menu_34:
 ; DisableBreakPoints() ;
        jsr       _DisableBreakPoints
 ; printf("\r\nSingle Step  :[ON]") ;
-       pea       @m68kde~1_134.L
+       pea       @m68kde~2_120.L
        jsr       (A2)
        addq.w    #4,A7
 ; printf("\r\nBreak Points :[Disabled]") ;
-       pea       @m68kde~1_135.L
+       pea       @m68kde~2_51.L
        jsr       (A2)
        addq.w    #4,A7
 ; SR = SR | (unsigned short int)(0x8000) ;    // set T bit in status register
        or.w      #32768,(A5)
 ; printf("\r\nPress 'G' to Trace Program from address $%X.....",PC) ;
        move.l    _PC.L,-(A7)
-       pea       @m68kde~1_136.L
+       pea       @m68kde~2_121.L
        jsr       (A2)
        addq.w    #8,A7
 ; printf("\r\nPush <RESET Button> to Stop.....") ;
-       pea       @m68kde~1_137.L
+       pea       @m68kde~2_122.L
        jsr       (A2)
        addq.w    #4,A7
 ; DumpRegisters() ;
@@ -3690,15 +3690,15 @@ menu_41:
 ; SR = SR & (unsigned short int)(0x7FFF) ;    // clear T bit in status register
        and.w     #32767,(A5)
 ; printf("\r\nSingle Step : [OFF]") ;
-       pea       @m68kde~1_138.L
+       pea       @m68kde~2_123.L
        jsr       (A2)
        addq.w    #4,A7
 ; printf("\r\nBreak Points :[Enabled]") ;
-       pea       @m68kde~1_139.L
+       pea       @m68kde~2_124.L
        jsr       (A2)
        addq.w    #4,A7
 ; printf("\r\nPress <ESC> to Resume User Program.....") ;
-       pea       @m68kde~1_140.L
+       pea       @m68kde~2_125.L
        jsr       (A2)
        addq.w    #4,A7
 menu_42:
@@ -3720,19 +3720,19 @@ menu_39:
 ; SR = SR & (unsigned short int)(0x7FFF) ;    // clear T bit in status register
        and.w     #32767,(A5)
 ; printf("\r\nSingle Step  :[OFF]") ;
-       pea       @m68kde~1_141.L
+       pea       @m68kde~2_126.L
        jsr       (A2)
        addq.w    #4,A7
 ; printf("\r\nBreak Points :[Enabled]");
-       pea       @m68kde~1_142.L
+       pea       @m68kde~2_124.L
        jsr       (A2)
        addq.w    #4,A7
 ; printf("\r\nProgram Running.....") ;
-       pea       @m68kde~1_143.L
+       pea       @m68kde~2_117.L
        jsr       (A2)
        addq.w    #4,A7
 ; printf("\r\nPress <RESET> button <Key0> on DE1 to stop") ;
-       pea       @m68kde~1_144.L
+       pea       @m68kde~2_118.L
        jsr       (A2)
        addq.w    #4,A7
 ; return ;
@@ -3761,12 +3761,12 @@ menu_38:
 _PrintErrorMessageandAbort:
        link      A6,#0
 ; printf("\r\n\r\nProgram ABORT !!!!!!\r\n") ;
-       pea       @m68kde~1_145.L
+       pea       @m68kde~2_127.L
        jsr       _printf
        addq.w    #4,A7
 ; printf("%s\r\n", string) ;
        move.l    8(A6),-(A7)
-       pea       @m68kde~1_146.L
+       pea       @m68kde~2_128.L
        jsr       _printf
        addq.w    #8,A7
 ; menu() ;
@@ -3779,12 +3779,12 @@ _PrintErrorMessageandAbort:
 _IRQMessage:
        link      A6,#0
 ; printf("\r\n\r\nProgram ABORT !!!!!");
-       pea       @m68kde~1_147.L
+       pea       @m68kde~2_129.L
        jsr       _printf
        addq.w    #4,A7
 ; printf("\r\nUnhandled Interrupt: IRQ%d !!!!!", level) ;
        move.l    8(A6),-(A7)
-       pea       @m68kde~1_148.L
+       pea       @m68kde~2_130.L
        jsr       _printf
        addq.w    #8,A7
 ; menu() ;
@@ -3841,7 +3841,7 @@ _UnhandledIRQ5:
        xdef      _UnhandledIRQ6
 _UnhandledIRQ6:
 ; PrintErrorMessageandAbort("ADDRESS ERROR: 16 or 32 Bit Transfer to/from an ODD Address....") ;
-       pea       @m68kde~1_149.L
+       pea       @m68kde~2_131.L
        jsr       _PrintErrorMessageandAbort
        addq.w    #4,A7
 ; menu() ;
@@ -3861,7 +3861,7 @@ _UnhandledIRQ7:
        xdef      _UnhandledTrap
 _UnhandledTrap:
 ; PrintErrorMessageandAbort("Unhandled Trap !!!!!") ;
-       pea       @m68kde~1_150.L
+       pea       @m68kde~2_132.L
        jsr       _PrintErrorMessageandAbort
        addq.w    #4,A7
        rts
@@ -3870,7 +3870,7 @@ _UnhandledTrap:
        xdef      _BusError
 _BusError:
 ; PrintErrorMessageandAbort("BUS Error!") ;
-       pea       @m68kde~1_151.L
+       pea       @m68kde~2_133.L
        jsr       _PrintErrorMessageandAbort
        addq.w    #4,A7
        rts
@@ -3879,7 +3879,7 @@ _BusError:
        xdef      _AddressError
 _AddressError:
 ; PrintErrorMessageandAbort("ADDRESS Error!") ;
-       pea       @m68kde~1_152.L
+       pea       @m68kde~2_134.L
        jsr       _PrintErrorMessageandAbort
        addq.w    #4,A7
        rts
@@ -3888,7 +3888,7 @@ _AddressError:
        xdef      _IllegalInstruction
 _IllegalInstruction:
 ; PrintErrorMessageandAbort("ILLEGAL INSTRUCTION") ;
-       pea       @m68kde~1_153.L
+       pea       @m68kde~2_135.L
        jsr       _PrintErrorMessageandAbort
        addq.w    #4,A7
        rts
@@ -3897,7 +3897,7 @@ _IllegalInstruction:
        xdef      _Dividebyzero
 _Dividebyzero:
 ; PrintErrorMessageandAbort("DIVIDE BY ZERO") ;
-       pea       @m68kde~1_154.L
+       pea       @m68kde~2_136.L
        jsr       _PrintErrorMessageandAbort
        addq.w    #4,A7
        rts
@@ -3906,7 +3906,7 @@ _Dividebyzero:
        xdef      _Check
 _Check:
 ; PrintErrorMessageandAbort("'CHK' INSTRUCTION") ;
-       pea       @m68kde~1_155.L
+       pea       @m68kde~2_137.L
        jsr       _PrintErrorMessageandAbort
        addq.w    #4,A7
        rts
@@ -3915,7 +3915,7 @@ _Check:
        xdef      _Trapv
 _Trapv:
 ; PrintErrorMessageandAbort("TRAPV INSTRUCTION") ;
-       pea       @m68kde~1_156.L
+       pea       @m68kde~2_138.L
        jsr       _PrintErrorMessageandAbort
        addq.w    #4,A7
        rts
@@ -3924,7 +3924,7 @@ _Trapv:
        xdef      _PrivError
 _PrivError:
 ; PrintErrorMessageandAbort("PRIVILEGE VIOLATION") ;
-       pea       @m68kde~1_157.L
+       pea       @m68kde~2_139.L
        jsr       _PrintErrorMessageandAbort
        addq.w    #4,A7
        rts
@@ -3933,7 +3933,7 @@ _PrivError:
        xdef      _UnitIRQ
 _UnitIRQ:
 ; PrintErrorMessageandAbort("UNINITIALISED IRQ") ;
-       pea       @m68kde~1_158.L
+       pea       @m68kde~2_140.L
        jsr       _PrintErrorMessageandAbort
        addq.w    #4,A7
        rts
@@ -3942,7 +3942,7 @@ _UnitIRQ:
        xdef      _Spurious
 _Spurious:
 ; PrintErrorMessageandAbort("SPURIOUS IRQ") ;
-       pea       @m68kde~1_159.L
+       pea       @m68kde~2_141.L
        jsr       _PrintErrorMessageandAbort
        addq.w    #4,A7
        rts
@@ -3956,7 +3956,7 @@ _EnterString:
 ; unsigned char *Start;
 ; unsigned char c;
 ; printf("\r\nStart Address in Memory: ") ;
-       pea       @m68kde~1_160.L
+       pea       @m68kde~2_142.L
        jsr       _printf
        addq.w    #4,A7
 ; Start = Get8HexDigits(0) ;
@@ -3965,7 +3965,7 @@ _EnterString:
        addq.w    #4,A7
        move.l    D0,D2
 ; printf("\r\nEnter String (ESC to end) :") ;
-       pea       @m68kde~1_161.L
+       pea       @m68kde~2_143.L
        jsr       _printf
        addq.w    #4,A7
 ; while((c = getchar()) != 0x1b)
@@ -3987,34 +3987,1243 @@ EnterString_3:
        unlk      A6
        rts
 ; }
+; // Memory tets helper functions
+; int Get2HexDigitsForMemTest(char pat)
+; {
+       xdef      _Get2HexDigitsForMemTest
+_Get2HexDigitsForMemTest:
+       link      A6,#0
+       move.l    D2,-(A7)
+; register int i = (xtod(pat) << 4) | (xtod(pat));
+       move.b    11(A6),D1
+       ext.w     D1
+       ext.l     D1
+       move.l    D1,-(A7)
+       jsr       _xtod
+       addq.w    #4,A7
+       and.l     #255,D0
+       asl.l     #4,D0
+       move.l    D0,-(A7)
+       move.b    11(A6),D0
+       ext.w     D0
+       ext.l     D0
+       move.l    D0,-(A7)
+       jsr       _xtod
+       addq.w    #4,A7
+       move.l    D0,D1
+       move.l    (A7)+,D0
+       and.l     #255,D1
+       or.l      D1,D0
+       move.l    D0,D2
+; return i;
+       move.l    D2,D0
+       move.l    (A7)+,D2
+       unlk      A6
+       rts
+; }
+; int Get4HexDigitsForMemTest(char pat)
+; {
+       xdef      _Get4HexDigitsForMemTest
+_Get4HexDigitsForMemTest:
+       link      A6,#0
+; return (Get2HexDigits(pat) << 8) | (Get2HexDigits(pat));
+       move.b    11(A6),D1
+       ext.w     D1
+       ext.l     D1
+       move.l    D1,-(A7)
+       jsr       _Get2HexDigits
+       addq.w    #4,A7
+       asl.l     #8,D0
+       move.l    D0,-(A7)
+       move.b    11(A6),D0
+       ext.w     D0
+       ext.l     D0
+       move.l    D0,-(A7)
+       jsr       _Get2HexDigits
+       addq.w    #4,A7
+       move.l    D0,D1
+       move.l    (A7)+,D0
+       or.l      D1,D0
+       unlk      A6
+       rts
+; }
+; int Get8HexDigitsForMemTest(char pat)
+; {
+       xdef      _Get8HexDigitsForMemTest
+_Get8HexDigitsForMemTest:
+       link      A6,#0
+; return (Get4HexDigits(pat) << 16) | (Get4HexDigits(pat));
+       move.b    11(A6),D1
+       ext.w     D1
+       ext.l     D1
+       move.l    D1,-(A7)
+       jsr       _Get4HexDigits
+       addq.w    #4,A7
+       asl.l     #8,D0
+       asl.l     #8,D0
+       move.l    D0,-(A7)
+       move.b    11(A6),D0
+       ext.w     D0
+       ext.l     D0
+       move.l    D0,-(A7)
+       jsr       _Get4HexDigits
+       addq.w    #4,A7
+       move.l    D0,D1
+       move.l    (A7)+,D0
+       or.l      D1,D0
+       unlk      A6
+       rts
+; }
+; int Get7HexDigitsForMemTest(char one, char two, char three, char four, char five, char six, char seven)
+; {
+       xdef      _Get7HexDigitsForMemTest
+_Get7HexDigitsForMemTest:
+       link      A6,#0
+       movem.l   D2/A2,-(A7)
+       lea       _xtod.L,A2
+; register int i = (xtod(one) << 24) | (xtod(two) << 20) | (xtod(three) << 16) | (xtod(four) << 12) | (xtod(five) << 8) | (xtod(six) << 4) | (xtod(seven));
+       move.b    11(A6),D1
+       ext.w     D1
+       ext.l     D1
+       move.l    D1,-(A7)
+       jsr       (A2)
+       addq.w    #4,A7
+       and.l     #255,D0
+       asl.l     #8,D0
+       asl.l     #8,D0
+       asl.l     #8,D0
+       move.l    D0,-(A7)
+       move.b    15(A6),D0
+       ext.w     D0
+       ext.l     D0
+       move.l    D0,-(A7)
+       jsr       (A2)
+       addq.w    #4,A7
+       move.l    D0,D1
+       move.l    (A7)+,D0
+       and.l     #255,D1
+       asl.l     #8,D1
+       asl.l     #8,D1
+       asl.l     #4,D1
+       or.l      D1,D0
+       move.l    D0,-(A7)
+       move.b    19(A6),D0
+       ext.w     D0
+       ext.l     D0
+       move.l    D0,-(A7)
+       jsr       (A2)
+       addq.w    #4,A7
+       move.l    D0,D1
+       move.l    (A7)+,D0
+       and.l     #255,D1
+       asl.l     #8,D1
+       asl.l     #8,D1
+       or.l      D1,D0
+       move.l    D0,-(A7)
+       move.b    23(A6),D0
+       ext.w     D0
+       ext.l     D0
+       move.l    D0,-(A7)
+       jsr       (A2)
+       addq.w    #4,A7
+       move.l    D0,D1
+       move.l    (A7)+,D0
+       and.l     #255,D1
+       asl.l     #8,D1
+       asl.l     #4,D1
+       or.l      D1,D0
+       move.l    D0,-(A7)
+       move.b    27(A6),D0
+       ext.w     D0
+       ext.l     D0
+       move.l    D0,-(A7)
+       jsr       (A2)
+       addq.w    #4,A7
+       move.l    D0,D1
+       move.l    (A7)+,D0
+       and.l     #255,D1
+       asl.l     #8,D1
+       or.l      D1,D0
+       move.l    D0,-(A7)
+       move.b    31(A6),D0
+       ext.w     D0
+       ext.l     D0
+       move.l    D0,-(A7)
+       jsr       (A2)
+       addq.w    #4,A7
+       move.l    D0,D1
+       move.l    (A7)+,D0
+       and.l     #255,D1
+       asl.l     #4,D1
+       or.l      D1,D0
+       move.l    D0,-(A7)
+       move.b    35(A6),D0
+       ext.w     D0
+       ext.l     D0
+       move.l    D0,-(A7)
+       jsr       (A2)
+       addq.w    #4,A7
+       move.l    D0,D1
+       move.l    (A7)+,D0
+       and.l     #255,D1
+       or.l      D1,D0
+       move.l    D0,D2
+; return i;
+       move.l    D2,D0
+       movem.l   (A7)+,D2/A2
+       unlk      A6
+       rts
+; }
+; void FillMemoryForMemTest(char* StartRamPtr, char* EndRamPtr, unsigned char FillData, int config)
+; {
+       xdef      _FillMemoryForMemTest
+_FillMemoryForMemTest:
+       link      A6,#0
+       movem.l   D2/D3/D4/D5,-(A7)
+       move.l    12(A6),D3
+       move.b    19(A6),D4
+       and.l     #255,D4
+       move.l    20(A6),D5
+; char* start = StartRamPtr;
+       move.l    8(A6),D2
+; printf("\r\nFilling Addresses [$%08X - $%08X] with $%02X", StartRamPtr, EndRamPtr, FillData);
+       and.l     #255,D4
+       move.l    D4,-(A7)
+       move.l    D3,-(A7)
+       move.l    8(A6),-(A7)
+       pea       @m68kde~2_19.L
+       jsr       _printf
+       add.w     #16,A7
+; if (config == 1) {
+       cmp.l     #1,D5
+       bne.s     FillMemoryForMemTest_5
+; while (start <= EndRamPtr){
+FillMemoryForMemTest_3:
+       cmp.l     D3,D2
+       bhi.s     FillMemoryForMemTest_5
+; *start++ = FillData;
+       move.l    D2,A0
+       addq.l    #1,D2
+       move.b    D4,(A0)
+       bra       FillMemoryForMemTest_3
+FillMemoryForMemTest_5:
+; }
+; }
+; if (config == 2) {
+       cmp.l     #2,D5
+       bne.s     FillMemoryForMemTest_10
+; while (start <= EndRamPtr) {
+FillMemoryForMemTest_8:
+       cmp.l     D3,D2
+       bhi.s     FillMemoryForMemTest_10
+; *start = FillData;
+       move.l    D2,A0
+       move.b    D4,(A0)
+; start += 2;
+       addq.l    #2,D2
+       bra       FillMemoryForMemTest_8
+FillMemoryForMemTest_10:
+; }
+; }
+; if (config == 3) {
+       cmp.l     #3,D5
+       bne.s     FillMemoryForMemTest_15
+; while (start <= EndRamPtr) {
+FillMemoryForMemTest_13:
+       cmp.l     D3,D2
+       bhi.s     FillMemoryForMemTest_15
+; *start = FillData;
+       move.l    D2,A0
+       move.b    D4,(A0)
+; start += 4;
+       addq.l    #4,D2
+       bra       FillMemoryForMemTest_13
+FillMemoryForMemTest_15:
+       movem.l   (A7)+,D2/D3/D4/D5
+       unlk      A6
+       rts
+; }
+; }
+; }
+; void ReadMemoryForMemTest(char* StartRamPtr, char* EndRamPtr, unsigned char FillData, int config)
+; {
+       xdef      _ReadMemoryForMemTest
+_ReadMemoryForMemTest:
+       link      A6,#-4
+       movem.l   D2/D3/D4/D5/A2,-(A7)
+       move.b    19(A6),D3
+       and.l     #255,D3
+       lea       _printf.L,A2
+       move.l    12(A6),D4
+       move.l    20(A6),D5
+; int counter = 0;
+       clr.l     -4(A6)
+; unsigned char* start = StartRamPtr;
+       move.l    8(A6),D2
+; printf("\r\nReading Addresses [$%08X - $%08X] for $%02X", StartRamPtr, EndRamPtr, FillData);
+       and.l     #255,D3
+       move.l    D3,-(A7)
+       move.l    D4,-(A7)
+       move.l    8(A6),-(A7)
+       pea       @m68kde~2_144.L
+       jsr       (A2)
+       add.w     #16,A7
+; if (config == 1) {
+       cmp.l     #1,D5
+       bne       ReadMemoryForMemTest_5
+; while (start <= EndRamPtr) {
+ReadMemoryForMemTest_3:
+       cmp.l     D4,D2
+       bhi       ReadMemoryForMemTest_5
+; if (*start != FillData)
+       move.l    D2,A0
+       cmp.b     (A0),D3
+       beq.s     ReadMemoryForMemTest_6
+; printf("\r\nValue incorrect at addresses $%08X ... should be $%02X but found $%02X", start, FillData, *start);
+       move.l    D2,A0
+       move.b    (A0),D1
+       and.l     #255,D1
+       move.l    D1,-(A7)
+       and.l     #255,D3
+       move.l    D3,-(A7)
+       move.l    D2,-(A7)
+       pea       @m68kde~2_145.L
+       jsr       (A2)
+       add.w     #16,A7
+ReadMemoryForMemTest_6:
+; printf("\r\nValue: $%02X found at Address: $%08X", *start, start);
+       move.l    D2,-(A7)
+       move.l    D2,A0
+       move.b    (A0),D1
+       and.l     #255,D1
+       move.l    D1,-(A7)
+       pea       @m68kde~2_146.L
+       jsr       (A2)
+       add.w     #12,A7
+; start++;
+       addq.l    #1,D2
+       bra       ReadMemoryForMemTest_3
+ReadMemoryForMemTest_5:
+; }
+; }
+; if (config == 2) {
+       cmp.l     #2,D5
+       bne       ReadMemoryForMemTest_12
+; while (start <= EndRamPtr) {
+ReadMemoryForMemTest_10:
+       cmp.l     D4,D2
+       bhi       ReadMemoryForMemTest_12
+; if(*start != FillData)
+       move.l    D2,A0
+       cmp.b     (A0),D3
+       beq.s     ReadMemoryForMemTest_13
+; printf("\r\nValue incorrect at addresses $%08X ... should be $%02X but found $%02X", start, FillData, *start);
+       move.l    D2,A0
+       move.b    (A0),D1
+       and.l     #255,D1
+       move.l    D1,-(A7)
+       and.l     #255,D3
+       move.l    D3,-(A7)
+       move.l    D2,-(A7)
+       pea       @m68kde~2_145.L
+       jsr       (A2)
+       add.w     #16,A7
+ReadMemoryForMemTest_13:
+; printf("\r\nValue: $%02X $%02X found at Address: $%08X - $%08X", *start, *(start+1), start, (start+1));
+       move.l    D2,D1
+       addq.l    #1,D1
+       move.l    D1,-(A7)
+       move.l    D2,-(A7)
+       move.l    D2,A0
+       move.b    1(A0),D1
+       and.l     #255,D1
+       move.l    D1,-(A7)
+       move.l    D2,A0
+       move.b    (A0),D1
+       and.l     #255,D1
+       move.l    D1,-(A7)
+       pea       @m68kde~2_147.L
+       jsr       (A2)
+       add.w     #20,A7
+; start += 2;
+       addq.l    #2,D2
+       bra       ReadMemoryForMemTest_10
+ReadMemoryForMemTest_12:
+; }
+; }
+; if (config == 3) {
+       cmp.l     #3,D5
+       bne       ReadMemoryForMemTest_19
+; while (start <= EndRamPtr) {
+ReadMemoryForMemTest_17:
+       cmp.l     D4,D2
+       bhi       ReadMemoryForMemTest_19
+; if (*start != FillData)
+       move.l    D2,A0
+       cmp.b     (A0),D3
+       beq.s     ReadMemoryForMemTest_20
+; printf("\r\nValue incorrect at addresses $%08X ... should be $%02X but found $%02X", start, FillData, *start);
+       move.l    D2,A0
+       move.b    (A0),D1
+       and.l     #255,D1
+       move.l    D1,-(A7)
+       and.l     #255,D3
+       move.l    D3,-(A7)
+       move.l    D2,-(A7)
+       pea       @m68kde~2_145.L
+       jsr       (A2)
+       add.w     #16,A7
+ReadMemoryForMemTest_20:
+; printf("\r\nValue: $%02X $%02X $%02X $%02X found at Address: $%08X - $%08X", *start, *(start+3), start, (start+3));
+       move.l    D2,D1
+       addq.l    #3,D1
+       move.l    D1,-(A7)
+       move.l    D2,-(A7)
+       move.l    D2,A0
+       move.b    3(A0),D1
+       and.l     #255,D1
+       move.l    D1,-(A7)
+       move.l    D2,A0
+       move.b    (A0),D1
+       and.l     #255,D1
+       move.l    D1,-(A7)
+       pea       @m68kde~2_148.L
+       jsr       (A2)
+       add.w     #20,A7
+; start += 4;
+       addq.l    #4,D2
+       bra       ReadMemoryForMemTest_17
+ReadMemoryForMemTest_19:
+       movem.l   (A7)+,D2/D3/D4/D5/A2
+       unlk      A6
+       rts
+; }
+; }
+; }
 ; void MemoryTest(void)
 ; {
        xdef      _MemoryTest
 _MemoryTest:
-       link      A6,#-24
+       link      A6,#-48
+       movem.l   D2/D3/D4/A2/A3/A4/A5,-(A7)
+       lea       -8(A6),A2
+       lea       _printf.L,A3
+       lea       -16(A6),A4
+       lea       _scanf.L,A5
 ; unsigned int *RamPtr, counter1=1 ;
-       move.l    #1,-18(A6)
+       move.l    #1,-42(A6)
 ; register unsigned int i ;
 ; unsigned int Start, End ;
 ; char c ;
-; printf("\r\nStart Address: ") ;
-       pea       @m68kde~1_162.L
-       jsr       _printf
+; int test_config = 0;
+       clr.l     -24(A6)
+; int test_pattern = 0;
+       clr.l     -20(A6)
+; char start_addr[7];
+; int start_val = 0;
+       clr.l     D3
+; char end_addr[7];
+; int end_val = 0;
+       clr.l     D2
+; char digit;
+; // Prompt the user to entre a test configuration
+; printf("\r\nEnter memory test configuration(1 - bytes, 2 - words, 3 - long words): ");
+       pea       @m68kde~2_149.L
+       jsr       (A3)
        addq.w    #4,A7
-; Start = Get8HexDigits(0) ;
-       clr.l     -(A7)
-       jsr       _Get8HexDigits
+; scanf("%d", &test_config);
+       pea       -24(A6)
+       pea       @m68kde~2_150.L
+       jsr       (A5)
+       addq.w    #8,A7
+; // Check for invalid configuration entry and re-prompt if needed
+; while (test_config > 3 || test_config < 1) {
+MemoryTest_1:
+       move.l    -24(A6),D0
+       cmp.l     #3,D0
+       bgt.s     MemoryTest_4
+       move.l    -24(A6),D0
+       cmp.l     #1,D0
+       bge.s     MemoryTest_3
+MemoryTest_4:
+; printf("\r\nConfiguration invalid, try again");
+       pea       @m68kde~2_151.L
+       jsr       (A3)
        addq.w    #4,A7
-       move.l    D0,-10(A6)
-; printf("\r\nEnd Address: ") ;
-       pea       @m68kde~1_163.L
-       jsr       _printf
+; printf("\r\nEnter memory test configuration(1 - bytes, 2 - words, 3 - long words): ");
+       pea       @m68kde~2_149.L
+       jsr       (A3)
        addq.w    #4,A7
-; End = Get8HexDigits(0) ;
-       clr.l     -(A7)
-       jsr       _Get8HexDigits
+; scanf("%d", &test_config);
+       pea       -24(A6)
+       pea       @m68kde~2_150.L
+       jsr       (A5)
+       addq.w    #8,A7
+       bra       MemoryTest_1
+MemoryTest_3:
+; }
+; // Prompt the user to entre a test pattern
+; printf("\r\nChoose between different memory test patterns(1 - 5, 2 - A, 3 - F, 4 - 0): ");
+       pea       @m68kde~2_152.L
+       jsr       (A3)
        addq.w    #4,A7
-       move.l    D0,-6(A6)
+; scanf("%d", &test_pattern);
+       pea       -20(A6)
+       pea       @m68kde~2_150.L
+       jsr       (A5)
+       addq.w    #8,A7
+; // Check for invalid pattern entry and re-prompt if needed
+; while (test_pattern > 4 || test_pattern < 1) {
+MemoryTest_5:
+       move.l    -20(A6),D0
+       cmp.l     #4,D0
+       bgt.s     MemoryTest_8
+       move.l    -20(A6),D0
+       cmp.l     #1,D0
+       bge.s     MemoryTest_7
+MemoryTest_8:
+; printf("\r\nPattern invalid, try again");
+       pea       @m68kde~2_153.L
+       jsr       (A3)
+       addq.w    #4,A7
+; printf("\r\nChoose between different memory test patterns(1 - 5, 2 - A, 3 - F, 4 - 0): ");
+       pea       @m68kde~2_152.L
+       jsr       (A3)
+       addq.w    #4,A7
+; scanf("%d", &test_pattern);
+       pea       -20(A6)
+       pea       @m68kde~2_150.L
+       jsr       (A5)
+       addq.w    #8,A7
+       bra       MemoryTest_5
+MemoryTest_7:
+; }
+; // Prompt the user to entre a starting address
+; printf("\r\nEnter starting address(8020000 - 8030000 inclusive): ");
+       pea       @m68kde~2_154.L
+       jsr       (A3)
+       addq.w    #4,A7
+; scanf("%s", &start_addr);
+       move.l    A4,-(A7)
+       pea       @m68kde~2_47.L
+       jsr       (A5)
+       addq.w    #8,A7
+; start_val = Get7HexDigitsForMemTest(start_addr[0], start_addr[1], start_addr[2], start_addr[3], start_addr[4], start_addr[5], start_addr[6]);
+       move.b    6(A4),D1
+       ext.w     D1
+       ext.l     D1
+       move.l    D1,-(A7)
+       move.b    5(A4),D1
+       ext.w     D1
+       ext.l     D1
+       move.l    D1,-(A7)
+       move.b    4(A4),D1
+       ext.w     D1
+       ext.l     D1
+       move.l    D1,-(A7)
+       move.b    3(A4),D1
+       ext.w     D1
+       ext.l     D1
+       move.l    D1,-(A7)
+       move.b    2(A4),D1
+       ext.w     D1
+       ext.l     D1
+       move.l    D1,-(A7)
+       move.b    1(A4),D1
+       ext.w     D1
+       ext.l     D1
+       move.l    D1,-(A7)
+       move.b    (A4),D1
+       ext.w     D1
+       ext.l     D1
+       move.l    D1,-(A7)
+       jsr       _Get7HexDigitsForMemTest
+       add.w     #28,A7
+       move.l    D0,D3
+; // Check for invalid start address and re-prompt if needed
+; while (start_val < 0x8020000 || start_val > 0x8030000 || strlen(start_addr) > 7) { // start address must be 7 chars and within bounds
+MemoryTest_9:
+       cmp.l     #134348800,D3
+       blt.s     MemoryTest_12
+       cmp.l     #134414336,D3
+       bgt.s     MemoryTest_12
+       move.l    A4,-(A7)
+       jsr       _strlen
+       addq.w    #4,A7
+       cmp.l     #7,D0
+       ble       MemoryTest_11
+MemoryTest_12:
+; printf("\r\nStarting address out of bounds.. try again");
+       pea       @m68kde~2_155.L
+       jsr       (A3)
+       addq.w    #4,A7
+; printf("\r\nEnter starting address(8020000 - 8030000 inclusive): ");
+       pea       @m68kde~2_154.L
+       jsr       (A3)
+       addq.w    #4,A7
+; scanf("%s", &start_addr);
+       move.l    A4,-(A7)
+       pea       @m68kde~2_47.L
+       jsr       (A5)
+       addq.w    #8,A7
+; start_val = Get7HexDigitsForMemTest(start_addr[0], start_addr[1], start_addr[2], start_addr[3], start_addr[4], start_addr[5], start_addr[6]);
+       move.b    6(A4),D1
+       ext.w     D1
+       ext.l     D1
+       move.l    D1,-(A7)
+       move.b    5(A4),D1
+       ext.w     D1
+       ext.l     D1
+       move.l    D1,-(A7)
+       move.b    4(A4),D1
+       ext.w     D1
+       ext.l     D1
+       move.l    D1,-(A7)
+       move.b    3(A4),D1
+       ext.w     D1
+       ext.l     D1
+       move.l    D1,-(A7)
+       move.b    2(A4),D1
+       ext.w     D1
+       ext.l     D1
+       move.l    D1,-(A7)
+       move.b    1(A4),D1
+       ext.w     D1
+       ext.l     D1
+       move.l    D1,-(A7)
+       move.b    (A4),D1
+       ext.w     D1
+       ext.l     D1
+       move.l    D1,-(A7)
+       jsr       _Get7HexDigitsForMemTest
+       add.w     #28,A7
+       move.l    D0,D3
+       bra       MemoryTest_9
+MemoryTest_11:
+; }
+; // Check for illegal address, start address must be even if writing words or long words to memory
+; while (start_val % 2 != 0 && test_config != 1) {
+MemoryTest_13:
+       move.l    D3,-(A7)
+       pea       2
+       jsr       LDIV
+       move.l    4(A7),D0
+       addq.w    #8,A7
+       tst.l     D0
+       beq       MemoryTest_15
+       move.l    -24(A6),D0
+       cmp.l     #1,D0
+       beq       MemoryTest_15
+; printf("\r\nOdd starting address.. try again");
+       pea       @m68kde~2_156.L
+       jsr       (A3)
+       addq.w    #4,A7
+; printf("\r\nEnter starting address(8020000 - 8030000 inclusive): ");
+       pea       @m68kde~2_154.L
+       jsr       (A3)
+       addq.w    #4,A7
+; scanf("%s", &start_addr);
+       move.l    A4,-(A7)
+       pea       @m68kde~2_47.L
+       jsr       (A5)
+       addq.w    #8,A7
+; start_val = Get7HexDigitsForMemTest(start_addr[0], start_addr[1], start_addr[2], start_addr[3], start_addr[4], start_addr[5], start_addr[6]);
+       move.b    6(A4),D1
+       ext.w     D1
+       ext.l     D1
+       move.l    D1,-(A7)
+       move.b    5(A4),D1
+       ext.w     D1
+       ext.l     D1
+       move.l    D1,-(A7)
+       move.b    4(A4),D1
+       ext.w     D1
+       ext.l     D1
+       move.l    D1,-(A7)
+       move.b    3(A4),D1
+       ext.w     D1
+       ext.l     D1
+       move.l    D1,-(A7)
+       move.b    2(A4),D1
+       ext.w     D1
+       ext.l     D1
+       move.l    D1,-(A7)
+       move.b    1(A4),D1
+       ext.w     D1
+       ext.l     D1
+       move.l    D1,-(A7)
+       move.b    (A4),D1
+       ext.w     D1
+       ext.l     D1
+       move.l    D1,-(A7)
+       jsr       _Get7HexDigitsForMemTest
+       add.w     #28,A7
+       move.l    D0,D3
+       bra       MemoryTest_13
+MemoryTest_15:
+; }
+; // Prompt the user to entre an ending address
+; printf("\r\nEnter ending address(8020000 - 8030000 inclusive): ");
+       pea       @m68kde~2_157.L
+       jsr       (A3)
+       addq.w    #4,A7
+; scanf("%s", &end_addr);
+       move.l    A2,-(A7)
+       pea       @m68kde~2_47.L
+       jsr       (A5)
+       addq.w    #8,A7
+; end_val = Get7HexDigitsForMemTest(end_addr[0], end_addr[1], end_addr[2], end_addr[3], end_addr[4], end_addr[5], end_addr[6]);
+       move.b    6(A2),D1
+       ext.w     D1
+       ext.l     D1
+       move.l    D1,-(A7)
+       move.b    5(A2),D1
+       ext.w     D1
+       ext.l     D1
+       move.l    D1,-(A7)
+       move.b    4(A2),D1
+       ext.w     D1
+       ext.l     D1
+       move.l    D1,-(A7)
+       move.b    3(A2),D1
+       ext.w     D1
+       ext.l     D1
+       move.l    D1,-(A7)
+       move.b    2(A2),D1
+       ext.w     D1
+       ext.l     D1
+       move.l    D1,-(A7)
+       move.b    1(A2),D1
+       ext.w     D1
+       ext.l     D1
+       move.l    D1,-(A7)
+       move.b    (A2),D1
+       ext.w     D1
+       ext.l     D1
+       move.l    D1,-(A7)
+       jsr       _Get7HexDigitsForMemTest
+       add.w     #28,A7
+       move.l    D0,D2
+; while (end_val < 0x8020000 || end_val > 0x8030000 || strlen(end_addr) > 7) { // end address must be 7 chars and within bounds
+MemoryTest_16:
+       cmp.l     #134348800,D2
+       blt.s     MemoryTest_19
+       cmp.l     #134414336,D2
+       bgt.s     MemoryTest_19
+       move.l    A2,-(A7)
+       jsr       _strlen
+       addq.w    #4,A7
+       cmp.l     #7,D0
+       ble       MemoryTest_18
+MemoryTest_19:
+; printf("\r\nEnding address out of bounds.. try again");
+       pea       @m68kde~2_158.L
+       jsr       (A3)
+       addq.w    #4,A7
+; printf("\r\nEnter ending address(8020000 - 8030000 inclusive): ");
+       pea       @m68kde~2_157.L
+       jsr       (A3)
+       addq.w    #4,A7
+; scanf("%s", &end_addr);
+       move.l    A2,-(A7)
+       pea       @m68kde~2_47.L
+       jsr       (A5)
+       addq.w    #8,A7
+; end_val = Get7HexDigitsForMemTest(end_addr[0], end_addr[1], end_addr[2], end_addr[3], end_addr[4], end_addr[5], end_addr[6]);
+       move.b    6(A2),D1
+       ext.w     D1
+       ext.l     D1
+       move.l    D1,-(A7)
+       move.b    5(A2),D1
+       ext.w     D1
+       ext.l     D1
+       move.l    D1,-(A7)
+       move.b    4(A2),D1
+       ext.w     D1
+       ext.l     D1
+       move.l    D1,-(A7)
+       move.b    3(A2),D1
+       ext.w     D1
+       ext.l     D1
+       move.l    D1,-(A7)
+       move.b    2(A2),D1
+       ext.w     D1
+       ext.l     D1
+       move.l    D1,-(A7)
+       move.b    1(A2),D1
+       ext.w     D1
+       ext.l     D1
+       move.l    D1,-(A7)
+       move.b    (A2),D1
+       ext.w     D1
+       ext.l     D1
+       move.l    D1,-(A7)
+       jsr       _Get7HexDigitsForMemTest
+       add.w     #28,A7
+       move.l    D0,D2
+       bra       MemoryTest_16
+MemoryTest_18:
+; }
+; while (end_val < start_val) {
+MemoryTest_20:
+       cmp.l     D3,D2
+       bge       MemoryTest_22
+; printf("\r\nInvalid ending address.. try again");
+       pea       @m68kde~2_159.L
+       jsr       (A3)
+       addq.w    #4,A7
+; printf("\r\nEnter ending address(8020000 - 8030000 inclusive): ");
+       pea       @m68kde~2_157.L
+       jsr       (A3)
+       addq.w    #4,A7
+; scanf("%s", &end_addr);
+       move.l    A2,-(A7)
+       pea       @m68kde~2_47.L
+       jsr       (A5)
+       addq.w    #8,A7
+; end_val = Get7HexDigitsForMemTest(end_addr[0], end_addr[1], end_addr[2], end_addr[3], end_addr[4], end_addr[5], end_addr[6]);
+       move.b    6(A2),D1
+       ext.w     D1
+       ext.l     D1
+       move.l    D1,-(A7)
+       move.b    5(A2),D1
+       ext.w     D1
+       ext.l     D1
+       move.l    D1,-(A7)
+       move.b    4(A2),D1
+       ext.w     D1
+       ext.l     D1
+       move.l    D1,-(A7)
+       move.b    3(A2),D1
+       ext.w     D1
+       ext.l     D1
+       move.l    D1,-(A7)
+       move.b    2(A2),D1
+       ext.w     D1
+       ext.l     D1
+       move.l    D1,-(A7)
+       move.b    1(A2),D1
+       ext.w     D1
+       ext.l     D1
+       move.l    D1,-(A7)
+       move.b    (A2),D1
+       ext.w     D1
+       ext.l     D1
+       move.l    D1,-(A7)
+       jsr       _Get7HexDigitsForMemTest
+       add.w     #28,A7
+       move.l    D0,D2
+       bra       MemoryTest_20
+MemoryTest_22:
+; }
+; // When writing words, the given address range should be a multiple of 2 bytes (size of a word)
+; while ((end_val - start_val + 1) % 2 != 0  && test_config == 2) {
+MemoryTest_23:
+       move.l    D2,D0
+       sub.l     D3,D0
+       addq.l    #1,D0
+       move.l    D0,-(A7)
+       pea       2
+       jsr       LDIV
+       move.l    4(A7),D0
+       addq.w    #8,A7
+       tst.l     D0
+       beq       MemoryTest_25
+       move.l    -24(A6),D0
+       cmp.l     #2,D0
+       bne       MemoryTest_25
+; printf("\r\nInvalid address range is too small.. try again");
+       pea       @m68kde~2_160.L
+       jsr       (A3)
+       addq.w    #4,A7
+; printf("\r\nEnter ending address(8020000 - 8030000 inclusive): ");
+       pea       @m68kde~2_157.L
+       jsr       (A3)
+       addq.w    #4,A7
+; scanf("%s", &end_addr);
+       move.l    A2,-(A7)
+       pea       @m68kde~2_47.L
+       jsr       (A5)
+       addq.w    #8,A7
+; end_val = Get7HexDigitsForMemTest(end_addr[0], end_addr[1], end_addr[2], end_addr[3], end_addr[4], end_addr[5], end_addr[6]);
+       move.b    6(A2),D1
+       ext.w     D1
+       ext.l     D1
+       move.l    D1,-(A7)
+       move.b    5(A2),D1
+       ext.w     D1
+       ext.l     D1
+       move.l    D1,-(A7)
+       move.b    4(A2),D1
+       ext.w     D1
+       ext.l     D1
+       move.l    D1,-(A7)
+       move.b    3(A2),D1
+       ext.w     D1
+       ext.l     D1
+       move.l    D1,-(A7)
+       move.b    2(A2),D1
+       ext.w     D1
+       ext.l     D1
+       move.l    D1,-(A7)
+       move.b    1(A2),D1
+       ext.w     D1
+       ext.l     D1
+       move.l    D1,-(A7)
+       move.b    (A2),D1
+       ext.w     D1
+       ext.l     D1
+       move.l    D1,-(A7)
+       jsr       _Get7HexDigitsForMemTest
+       add.w     #28,A7
+       move.l    D0,D2
+       bra       MemoryTest_23
+MemoryTest_25:
+; }
+; // When writing long words, the given address range should be a multiple of 4 bytes (size of a long word)
+; while ((end_val - start_val + 1) % 4 != 0 && test_config == 3) {
+MemoryTest_26:
+       move.l    D2,D0
+       sub.l     D3,D0
+       addq.l    #1,D0
+       move.l    D0,-(A7)
+       pea       4
+       jsr       LDIV
+       move.l    4(A7),D0
+       addq.w    #8,A7
+       tst.l     D0
+       beq       MemoryTest_28
+       move.l    -24(A6),D0
+       cmp.l     #3,D0
+       bne       MemoryTest_28
+; printf("\r\nInvalid range is too small.. try again");
+       pea       @m68kde~2_161.L
+       jsr       (A3)
+       addq.w    #4,A7
+; printf("\r\nEnter ending address(8020000 - 8030000 inclusive): ");
+       pea       @m68kde~2_157.L
+       jsr       (A3)
+       addq.w    #4,A7
+; scanf("%s", &end_addr);
+       move.l    A2,-(A7)
+       pea       @m68kde~2_47.L
+       jsr       (A5)
+       addq.w    #8,A7
+; end_val = Get7HexDigitsForMemTest(end_addr[0], end_addr[1], end_addr[2], end_addr[3], end_addr[4], end_addr[5], end_addr[6]);
+       move.b    6(A2),D1
+       ext.w     D1
+       ext.l     D1
+       move.l    D1,-(A7)
+       move.b    5(A2),D1
+       ext.w     D1
+       ext.l     D1
+       move.l    D1,-(A7)
+       move.b    4(A2),D1
+       ext.w     D1
+       ext.l     D1
+       move.l    D1,-(A7)
+       move.b    3(A2),D1
+       ext.w     D1
+       ext.l     D1
+       move.l    D1,-(A7)
+       move.b    2(A2),D1
+       ext.w     D1
+       ext.l     D1
+       move.l    D1,-(A7)
+       move.b    1(A2),D1
+       ext.w     D1
+       ext.l     D1
+       move.l    D1,-(A7)
+       move.b    (A2),D1
+       ext.w     D1
+       ext.l     D1
+       move.l    D1,-(A7)
+       jsr       _Get7HexDigitsForMemTest
+       add.w     #28,A7
+       move.l    D0,D2
+       bra       MemoryTest_26
+MemoryTest_28:
+; }
+; printf("\r\nWriting to SRAM ...");
+       pea       @m68kde~2_162.L
+       jsr       (A3)
+       addq.w    #4,A7
+; printf("\r\n............................................................................................................");
+       pea       @m68kde~2_163.L
+       jsr       (A3)
+       addq.w    #4,A7
+; printf("\r\n............................................................................................................");
+       pea       @m68kde~2_163.L
+       jsr       (A3)
+       addq.w    #4,A7
+; printf("\r\n............................................................................................................");
+       pea       @m68kde~2_163.L
+       jsr       (A3)
+       addq.w    #4,A7
+; switch (test_pattern) {
+       move.l    -20(A6),D0
+       subq.l    #1,D0
+       blo       MemoryTest_29
+       cmp.l     #4,D0
+       bhs.s     MemoryTest_29
+       asl.l     #1,D0
+       move.w    MemoryTest_31(PC,D0.L),D0
+       jmp       MemoryTest_31(PC,D0.W)
+MemoryTest_31:
+       dc.w      MemoryTest_32-MemoryTest_31
+       dc.w      MemoryTest_33-MemoryTest_31
+       dc.w      MemoryTest_34-MemoryTest_31
+       dc.w      MemoryTest_35-MemoryTest_31
+MemoryTest_32:
+; case 1: digit = '5';
+       moveq     #53,D4
+; break;
+       bra.s     MemoryTest_30
+MemoryTest_33:
+; case 2: digit = 'A';
+       moveq     #65,D4
+; break;
+       bra.s     MemoryTest_30
+MemoryTest_34:
+; case 3: digit = 'F';
+       moveq     #70,D4
+; break;
+       bra.s     MemoryTest_30
+MemoryTest_35:
+; case 4: digit = '0';
+       moveq     #48,D4
+; break;
+       bra.s     MemoryTest_30
+MemoryTest_29:
+; default: digit = '5';
+       moveq     #53,D4
+MemoryTest_30:
+; }
+; switch (test_config) {
+       move.l    -24(A6),D0
+       cmp.l     #2,D0
+       beq       MemoryTest_40
+       bgt.s     MemoryTest_43
+       cmp.l     #1,D0
+       beq.s     MemoryTest_39
+       bra       MemoryTest_37
+MemoryTest_43:
+       cmp.l     #3,D0
+       beq       MemoryTest_41
+       bra       MemoryTest_37
+MemoryTest_39:
+; case 1: FillMemoryForMemTest(start_val, end_val, Get2HexDigitsForMemTest(digit), 1);
+       pea       1
+       move.l    D0,-(A7)
+       ext.w     D4
+       ext.l     D4
+       move.l    D4,-(A7)
+       jsr       _Get2HexDigitsForMemTest
+       addq.w    #4,A7
+       move.l    D0,D1
+       move.l    (A7)+,D0
+       and.l     #255,D1
+       move.l    D1,-(A7)
+       move.l    D2,-(A7)
+       move.l    D3,-(A7)
+       jsr       _FillMemoryForMemTest
+       add.w     #16,A7
+; break;
+       bra       MemoryTest_38
+MemoryTest_40:
+; case 2: FillMemoryForMemTest(start_val, end_val, Get4HexDigitsForMemTest(digit), 2);
+       pea       2
+       move.l    D0,-(A7)
+       ext.w     D4
+       ext.l     D4
+       move.l    D4,-(A7)
+       jsr       _Get4HexDigitsForMemTest
+       addq.w    #4,A7
+       move.l    D0,D1
+       move.l    (A7)+,D0
+       and.l     #255,D1
+       move.l    D1,-(A7)
+       move.l    D2,-(A7)
+       move.l    D3,-(A7)
+       jsr       _FillMemoryForMemTest
+       add.w     #16,A7
+; break;
+       bra       MemoryTest_38
+MemoryTest_41:
+; case 3: FillMemoryForMemTest(start_val, end_val, Get8HexDigitsForMemTest(digit), 3);
+       pea       3
+       move.l    D0,-(A7)
+       ext.w     D4
+       ext.l     D4
+       move.l    D4,-(A7)
+       jsr       _Get8HexDigitsForMemTest
+       addq.w    #4,A7
+       move.l    D0,D1
+       move.l    (A7)+,D0
+       and.l     #255,D1
+       move.l    D1,-(A7)
+       move.l    D2,-(A7)
+       move.l    D3,-(A7)
+       jsr       _FillMemoryForMemTest
+       add.w     #16,A7
+; break;
+       bra.s     MemoryTest_38
+MemoryTest_37:
+; default: FillMemoryForMemTest(start_val, end_val, Get2HexDigitsForMemTest(digit), 1);;
+       pea       1
+       move.l    D0,-(A7)
+       ext.w     D4
+       ext.l     D4
+       move.l    D4,-(A7)
+       jsr       _Get2HexDigitsForMemTest
+       addq.w    #4,A7
+       move.l    D0,D1
+       move.l    (A7)+,D0
+       and.l     #255,D1
+       move.l    D1,-(A7)
+       move.l    D2,-(A7)
+       move.l    D3,-(A7)
+       jsr       _FillMemoryForMemTest
+       add.w     #16,A7
+MemoryTest_38:
+; }
+; printf("\r\nFinished writing to SRAM .");
+       pea       @m68kde~2_164.L
+       jsr       (A3)
+       addq.w    #4,A7
+; printf("\r\nCheck SRAM content");
+       pea       @m68kde~2_165.L
+       jsr       (A3)
+       addq.w    #4,A7
+; printf("\r\nReading from SRAM ...");
+       pea       @m68kde~2_166.L
+       jsr       (A3)
+       addq.w    #4,A7
+; printf("\r\nPrinting out every 10k location from SRAM ...");
+       pea       @m68kde~2_167.L
+       jsr       (A3)
+       addq.w    #4,A7
+; printf("\r\n............................................................................................................");
+       pea       @m68kde~2_163.L
+       jsr       (A3)
+       addq.w    #4,A7
+; printf("\r\n............................................................................................................");
+       pea       @m68kde~2_163.L
+       jsr       (A3)
+       addq.w    #4,A7
+; printf("\r\n............................................................................................................");
+       pea       @m68kde~2_163.L
+       jsr       (A3)
+       addq.w    #4,A7
+; printf("\r\n....................... begin reading");
+       pea       @m68kde~2_168.L
+       jsr       (A3)
+       addq.w    #4,A7
+; switch (test_config) {
+       move.l    -24(A6),D0
+       cmp.l     #2,D0
+       beq       MemoryTest_47
+       bgt.s     MemoryTest_50
+       cmp.l     #1,D0
+       beq.s     MemoryTest_46
+       bra       MemoryTest_44
+MemoryTest_50:
+       cmp.l     #3,D0
+       beq       MemoryTest_48
+       bra       MemoryTest_44
+MemoryTest_46:
+; case 1: ReadMemoryForMemTest(start_val, end_val, Get2HexDigitsForMemTest(digit), 1);
+       pea       1
+       move.l    D0,-(A7)
+       ext.w     D4
+       ext.l     D4
+       move.l    D4,-(A7)
+       jsr       _Get2HexDigitsForMemTest
+       addq.w    #4,A7
+       move.l    D0,D1
+       move.l    (A7)+,D0
+       and.l     #255,D1
+       move.l    D1,-(A7)
+       move.l    D2,-(A7)
+       move.l    D3,-(A7)
+       jsr       _ReadMemoryForMemTest
+       add.w     #16,A7
+; break;
+       bra       MemoryTest_45
+MemoryTest_47:
+; case 2: ReadMemoryForMemTest(start_val, end_val, Get4HexDigitsForMemTest(digit), 2);
+       pea       2
+       move.l    D0,-(A7)
+       ext.w     D4
+       ext.l     D4
+       move.l    D4,-(A7)
+       jsr       _Get4HexDigitsForMemTest
+       addq.w    #4,A7
+       move.l    D0,D1
+       move.l    (A7)+,D0
+       and.l     #255,D1
+       move.l    D1,-(A7)
+       move.l    D2,-(A7)
+       move.l    D3,-(A7)
+       jsr       _ReadMemoryForMemTest
+       add.w     #16,A7
+; break;
+       bra       MemoryTest_45
+MemoryTest_48:
+; case 3: ReadMemoryForMemTest(start_val, end_val, Get8HexDigitsForMemTest(digit), 3);
+       pea       3
+       move.l    D0,-(A7)
+       ext.w     D4
+       ext.l     D4
+       move.l    D4,-(A7)
+       jsr       _Get8HexDigitsForMemTest
+       addq.w    #4,A7
+       move.l    D0,D1
+       move.l    (A7)+,D0
+       and.l     #255,D1
+       move.l    D1,-(A7)
+       move.l    D2,-(A7)
+       move.l    D3,-(A7)
+       jsr       _ReadMemoryForMemTest
+       add.w     #16,A7
+; break;
+       bra.s     MemoryTest_45
+MemoryTest_44:
+; default: ReadMemoryForMemTest(start_val, end_val, Get2HexDigitsForMemTest(digit), 1);;
+       pea       1
+       move.l    D0,-(A7)
+       ext.w     D4
+       ext.l     D4
+       move.l    D4,-(A7)
+       jsr       _Get2HexDigitsForMemTest
+       addq.w    #4,A7
+       move.l    D0,D1
+       move.l    (A7)+,D0
+       and.l     #255,D1
+       move.l    D1,-(A7)
+       move.l    D2,-(A7)
+       move.l    D3,-(A7)
+       jsr       _ReadMemoryForMemTest
+       add.w     #16,A7
+MemoryTest_45:
+; }
+; printf("\r\nFinished reading from SRAM ...");
+       pea       @m68kde~2_169.L
+       jsr       (A3)
+       addq.w    #4,A7
+; printf("\r\nend of program ...");
+       pea       @m68kde~2_170.L
+       jsr       (A3)
+       addq.w    #4,A7
+; printf("\r\n............................................................................................................");
+       pea       @m68kde~2_163.L
+       jsr       (A3)
+       addq.w    #4,A7
+; printf("\r\n............................................................................................................");
+       pea       @m68kde~2_163.L
+       jsr       (A3)
+       addq.w    #4,A7
+       movem.l   (A7)+,D2/D3/D4/A2/A3/A4/A5
        unlk      A6
        rts
 ; // TODO
@@ -4031,10 +5240,10 @@ _main:
 ; char c ;
 ; int i, j ;
 ; char *BugMessage = "DE1-68k Bug V1.77";
-       lea       @m68kde~1_164.L,A0
+       lea       @m68kde~2_171.L,A0
        move.l    A0,D3
 ; char *CopyrightMessage = "Copyright (C) PJ Davies 2016";
-       lea       @m68kde~1_165.L,A0
+       lea       @m68kde~2_172.L,A0
        move.l    A0,-4(A6)
 ; KillAllBreakPoints() ;
        jsr       _KillAllBreakPoints
@@ -4233,11 +5442,11 @@ main_7:
 ; LoadFromFlashChip();
        jsr       _LoadFromFlashChip
 ; printf("\r\nRunning.....") ;
-       pea       @m68kde~1_166.L
+       pea       @m68kde~2_173.L
        jsr       (A3)
        addq.w    #4,A7
 ; Oline1("Running.....") ;
-       pea       @m68kde~1_167.L
+       pea       @m68kde~2_174.L
        jsr       _Oline1
        addq.w    #4,A7
 ; GoFlag = 1;
@@ -4253,17 +5462,17 @@ main_9:
        jsr       _Oline0
        addq.w    #4,A7
 ; Oline1("By: PJ Davies") ;
-       pea       @m68kde~1_168.L
+       pea       @m68kde~2_175.L
        jsr       _Oline1
        addq.w    #4,A7
 ; printf("\r\n%s", BugMessage) ;
        move.l    D3,-(A7)
-       pea       @m68kde~1_169.L
+       pea       @m68kde~2_176.L
        jsr       (A3)
        addq.w    #8,A7
 ; printf("\r\n%s", CopyrightMessage) ;
        move.l    -4(A6),-(A7)
-       pea       @m68kde~1_170.L
+       pea       @m68kde~2_176.L
        jsr       (A3)
        addq.w    #8,A7
 ; menu();
@@ -4384,7 +5593,7 @@ _Decode2BitOperandSize:
        tst.w     D3
        bne.s     Decode2BitOperandSize_1
 ; strcatInstruction(".B ") ;
-       pea       @m68kde~1_171.L
+       pea       @m68kde~2_177.L
        jsr       (A2)
        addq.w    #4,A7
 ; DataSize = 1 ;
@@ -4396,7 +5605,7 @@ Decode2BitOperandSize_1:
        cmp.w     #1,D3
        bne.s     Decode2BitOperandSize_3
 ; strcatInstruction(".W ") ;
-       pea       @m68kde~1_172.L
+       pea       @m68kde~2_178.L
        jsr       (A2)
        addq.w    #4,A7
 ; DataSize = 1 ;
@@ -4406,7 +5615,7 @@ Decode2BitOperandSize_3:
 ; }
 ; else {
 ; strcatInstruction(".L ") ;
-       pea       @m68kde~1_173.L
+       pea       @m68kde~2_179.L
        jsr       (A2)
        addq.w    #4,A7
 ; DataSize = 2 ;
@@ -4502,7 +5711,7 @@ _DecodeBWLDataAfterOpCodeForMove:
        move.w    2(A0),D1
        and.l     #65535,D1
        move.l    D1,-(A7)
-       pea       @m68kde~1_174.L
+       pea       @m68kde~2_180.L
        move.l    A2,-(A7)
        jsr       (A3)
        add.w     #12,A7
@@ -4516,7 +5725,7 @@ DecodeBWLDataAfterOpCodeForMove_1:
        move.w    2(A0),D1
        and.l     #65535,D1
        move.l    D1,-(A7)
-       pea       @m68kde~1_175.L
+       pea       @m68kde~2_180.L
        move.l    A2,-(A7)
        jsr       (A3)
        add.w     #12,A7
@@ -4538,7 +5747,7 @@ DecodeBWLDataAfterOpCodeForMove_3:
        or.l      D0,D1
        move.l    (A7)+,D0
        move.l    D1,-(A7)
-       pea       @m68kde~1_176.L
+       pea       @m68kde~2_180.L
        move.l    A2,-(A7)
        jsr       (A3)
        add.w     #12,A7
@@ -4587,7 +5796,7 @@ DecodeBWLDataAfterOpCode_3:
        move.w    2(A0),D1
        and.l     #65535,D1
        move.l    D1,-(A7)
-       pea       @m68kde~1_177.L
+       pea       @m68kde~2_180.L
        move.l    A2,-(A7)
        jsr       (A3)
        add.w     #12,A7
@@ -4609,7 +5818,7 @@ DecodeBWLDataAfterOpCode_6:
        move.w    2(A0),D1
        and.l     #65535,D1
        move.l    D1,-(A7)
-       pea       @m68kde~1_178.L
+       pea       @m68kde~2_180.L
        move.l    A2,-(A7)
        jsr       (A3)
        add.w     #12,A7
@@ -4636,7 +5845,7 @@ DecodeBWLDataAfterOpCode_9:
        or.l      D0,D1
        move.l    (A7)+,D0
        move.l    D1,-(A7)
-       pea       @m68kde~1_179.L
+       pea       @m68kde~2_180.L
        move.l    A2,-(A7)
        jsr       (A3)
        add.w     #12,A7
@@ -4659,7 +5868,7 @@ DecodeBWLDataAfterOpCode_7:
        move.w    2(A0),D1
        and.l     #65535,D1
        move.l    D1,-(A7)
-       pea       @m68kde~1_180.L
+       pea       @m68kde~2_180.L
        move.l    A2,-(A7)
        jsr       (A3)
        add.w     #12,A7
@@ -4840,7 +6049,7 @@ Decode6BitEA_11:
        cmp.b     #2,D5
        bne.s     Decode6BitEA_13
 ; strcatInstruction("(") ;
-       pea       @m68kde~1_181.L
+       pea       @m68kde~2_181.L
        jsr       (A2)
        addq.w    #4,A7
 ; Decode3BitAddressRegister(OperandRegister) ;
@@ -4850,7 +6059,7 @@ Decode6BitEA_11:
        jsr       _Decode3BitAddressRegister
        addq.w    #4,A7
 ; strcatInstruction(")") ;
-       pea       @m68kde~1_182.L
+       pea       @m68kde~2_182.L
        jsr       (A2)
        addq.w    #4,A7
        bra       Decode6BitEA_44
@@ -4860,7 +6069,7 @@ Decode6BitEA_13:
        cmp.b     #3,D5
        bne.s     Decode6BitEA_15
 ; strcatInstruction("(") ;
-       pea       @m68kde~1_183.L
+       pea       @m68kde~2_181.L
        jsr       (A2)
        addq.w    #4,A7
 ; Decode3BitAddressRegister(OperandRegister) ;
@@ -4870,7 +6079,7 @@ Decode6BitEA_13:
        jsr       _Decode3BitAddressRegister
        addq.w    #4,A7
 ; strcatInstruction(")+") ;
-       pea       @m68kde~1_184.L
+       pea       @m68kde~2_183.L
        jsr       (A2)
        addq.w    #4,A7
        bra       Decode6BitEA_44
@@ -4880,7 +6089,7 @@ Decode6BitEA_15:
        cmp.b     #4,D5
        bne.s     Decode6BitEA_17
 ; strcatInstruction("-(") ;
-       pea       @m68kde~1_185.L
+       pea       @m68kde~2_184.L
        jsr       (A2)
        addq.w    #4,A7
 ; Decode3BitAddressRegister(OperandRegister) ;
@@ -4890,7 +6099,7 @@ Decode6BitEA_15:
        jsr       _Decode3BitAddressRegister
        addq.w    #4,A7
 ; strcatInstruction(")") ;
-       pea       @m68kde~1_186.L
+       pea       @m68kde~2_182.L
        jsr       (A2)
        addq.w    #4,A7
        bra       Decode6BitEA_44
@@ -4904,7 +6113,7 @@ Decode6BitEA_17:
        move.l    D3,-(A7)
        ext.l     D2
        move.l    D2,-(A7)
-       pea       @m68kde~1_187.L
+       pea       @m68kde~2_185.L
        move.l    A3,-(A7)
        jsr       (A4)
        add.w     #16,A7
@@ -4931,7 +6140,7 @@ Decode6BitEA_19:
        ext.w     D1
        ext.l     D1
        move.l    D1,-(A7)
-       pea       @m68kde~1_188.L
+       pea       @m68kde~2_186.L
        move.l    A3,-(A7)
        jsr       (A4)
        add.w     #16,A7
@@ -4947,14 +6156,14 @@ Decode6BitEA_19:
        and.w     #32768,D0
        bne.s     Decode6BitEA_23
 ; strcatInstruction("D") ;
-       pea       @m68kde~1_189.L
+       pea       @m68kde~2_187.L
        jsr       (A2)
        addq.w    #4,A7
        bra.s     Decode6BitEA_24
 Decode6BitEA_23:
 ; else
 ; strcatInstruction("A") ;
-       pea       @m68kde~1_190.L
+       pea       @m68kde~2_188.L
        jsr       (A2)
        addq.w    #4,A7
 Decode6BitEA_24:
@@ -4968,7 +6177,7 @@ Decode6BitEA_24:
        move.w    -2(A6),D1
        and.l     #65535,D1
        move.l    D1,-(A7)
-       pea       @m68kde~1_191.L
+       pea       @m68kde~2_150.L
        move.l    A3,-(A7)
        jsr       (A4)
        add.w     #12,A7
@@ -4986,14 +6195,14 @@ Decode6BitEA_24:
        tst.w     D7
        bne.s     Decode6BitEA_25
 ; strcatInstruction(".W)") ;
-       pea       @m68kde~1_192.L
+       pea       @m68kde~2_189.L
        jsr       (A2)
        addq.w    #4,A7
        bra.s     Decode6BitEA_26
 Decode6BitEA_25:
 ; else
 ; strcatInstruction(".L)") ;
-       pea       @m68kde~1_193.L
+       pea       @m68kde~2_190.L
        jsr       (A2)
        addq.w    #4,A7
 Decode6BitEA_26:
@@ -5009,7 +6218,7 @@ Decode6BitEA_21:
 ; sprintf(TempString, "$%X", ExWord1) ;
        ext.l     D2
        move.l    D2,-(A7)
-       pea       @m68kde~1_194.L
+       pea       @m68kde~2_191.L
        move.l    A3,-(A7)
        jsr       (A4)
        add.w     #12,A7
@@ -5036,7 +6245,7 @@ Decode6BitEA_29:
        or.l      D0,D1
        move.l    (A7)+,D0
        move.l    D1,-(A7)
-       pea       @m68kde~1_195.L
+       pea       @m68kde~2_191.L
        move.l    A3,-(A7)
        jsr       (A4)
        add.w     #12,A7
@@ -5076,7 +6285,7 @@ Decode6BitEA_33:
 ; sprintf(TempString, "%d(PC)", ExWord1) ;
        ext.l     D2
        move.l    D2,-(A7)
-       pea       @m68kde~1_196.L
+       pea       @m68kde~2_192.L
        move.l    A3,-(A7)
        jsr       (A4)
        add.w     #12,A7
@@ -5101,7 +6310,7 @@ Decode6BitEA_37:
        ext.w     D1
        ext.l     D1
        move.l    D1,-(A7)
-       pea       @m68kde~1_197.L
+       pea       @m68kde~2_193.L
        move.l    A3,-(A7)
        jsr       (A4)
        add.w     #12,A7
@@ -5117,14 +6326,14 @@ Decode6BitEA_37:
        and.w     #32768,D0
        bne.s     Decode6BitEA_41
 ; strcatInstruction("D") ;
-       pea       @m68kde~1_198.L
+       pea       @m68kde~2_187.L
        jsr       (A2)
        addq.w    #4,A7
        bra.s     Decode6BitEA_42
 Decode6BitEA_41:
 ; else
 ; strcatInstruction("A") ;
-       pea       @m68kde~1_199.L
+       pea       @m68kde~2_188.L
        jsr       (A2)
        addq.w    #4,A7
 Decode6BitEA_42:
@@ -5138,7 +6347,7 @@ Decode6BitEA_42:
        move.w    -2(A6),D1
        and.l     #65535,D1
        move.l    D1,-(A7)
-       pea       @m68kde~1_200.L
+       pea       @m68kde~2_150.L
        move.l    A3,-(A7)
        jsr       (A4)
        add.w     #12,A7
@@ -5156,14 +6365,14 @@ Decode6BitEA_42:
        tst.w     D7
        bne.s     Decode6BitEA_43
 ; strcatInstruction(".W)") ;
-       pea       @m68kde~1_201.L
+       pea       @m68kde~2_189.L
        jsr       (A2)
        addq.w    #4,A7
        bra.s     Decode6BitEA_44
 Decode6BitEA_43:
 ; else
 ; strcatInstruction(".L)") ;
-       pea       @m68kde~1_202.L
+       pea       @m68kde~2_190.L
        jsr       (A2)
        addq.w    #4,A7
 Decode6BitEA_44:
@@ -5205,7 +6414,7 @@ _Decode3BitOperandMode:
        jsr       _Decode6BitEA
        add.w     #16,A7
 ; strcatInstruction(",") ;
-       pea       @m68kde~1_203.L
+       pea       @m68kde~2_194.L
        jsr       _strcatInstruction
        addq.w    #4,A7
 ; Decode3BitDataRegister(*OpCode) ;
@@ -5227,7 +6436,7 @@ Decode3BitOperandMode_1:
        jsr       _Decode3BitDataRegister
        addq.w    #4,A7
 ; strcatInstruction(",") ;
-       pea       @m68kde~1_204.L
+       pea       @m68kde~2_194.L
        jsr       _strcatInstruction
        addq.w    #4,A7
 ; Decode6BitEA(OpCode,0,0,0) ;
@@ -5256,7 +6465,7 @@ _DecodeBranchCondition:
        cmp.w     #4,D2
        bne.s     DecodeBranchCondition_1
 ; strcatInstruction("CC") ;
-       pea       @m68kde~1_205.L
+       pea       @m68kde~2_195.L
        jsr       (A2)
        addq.w    #4,A7
        bra       DecodeBranchCondition_30
@@ -5265,7 +6474,7 @@ DecodeBranchCondition_1:
        cmp.w     #5,D2
        bne.s     DecodeBranchCondition_3
 ; strcatInstruction("CS") ;
-       pea       @m68kde~1_206.L
+       pea       @m68kde~2_196.L
        jsr       (A2)
        addq.w    #4,A7
        bra       DecodeBranchCondition_30
@@ -5274,7 +6483,7 @@ DecodeBranchCondition_3:
        cmp.w     #7,D2
        bne.s     DecodeBranchCondition_5
 ; strcatInstruction("EQ") ;
-       pea       @m68kde~1_207.L
+       pea       @m68kde~2_197.L
        jsr       (A2)
        addq.w    #4,A7
        bra       DecodeBranchCondition_30
@@ -5283,7 +6492,7 @@ DecodeBranchCondition_5:
        cmp.w     #12,D2
        bne.s     DecodeBranchCondition_7
 ; strcatInstruction("GE") ;
-       pea       @m68kde~1_208.L
+       pea       @m68kde~2_198.L
        jsr       (A2)
        addq.w    #4,A7
        bra       DecodeBranchCondition_30
@@ -5292,7 +6501,7 @@ DecodeBranchCondition_7:
        cmp.w     #14,D2
        bne.s     DecodeBranchCondition_9
 ; strcatInstruction("GT") ;
-       pea       @m68kde~1_209.L
+       pea       @m68kde~2_199.L
        jsr       (A2)
        addq.w    #4,A7
        bra       DecodeBranchCondition_30
@@ -5301,7 +6510,7 @@ DecodeBranchCondition_9:
        cmp.w     #2,D2
        bne.s     DecodeBranchCondition_11
 ; strcatInstruction("HI") ;
-       pea       @m68kde~1_210.L
+       pea       @m68kde~2_200.L
        jsr       (A2)
        addq.w    #4,A7
        bra       DecodeBranchCondition_30
@@ -5310,7 +6519,7 @@ DecodeBranchCondition_11:
        cmp.w     #15,D2
        bne.s     DecodeBranchCondition_13
 ; strcatInstruction("LE") ;
-       pea       @m68kde~1_211.L
+       pea       @m68kde~2_201.L
        jsr       (A2)
        addq.w    #4,A7
        bra       DecodeBranchCondition_30
@@ -5319,7 +6528,7 @@ DecodeBranchCondition_13:
        cmp.w     #3,D2
        bne.s     DecodeBranchCondition_15
 ; strcatInstruction("LS") ;
-       pea       @m68kde~1_212.L
+       pea       @m68kde~2_202.L
        jsr       (A2)
        addq.w    #4,A7
        bra       DecodeBranchCondition_30
@@ -5328,7 +6537,7 @@ DecodeBranchCondition_15:
        cmp.w     #13,D2
        bne.s     DecodeBranchCondition_17
 ; strcatInstruction("LT") ;
-       pea       @m68kde~1_213.L
+       pea       @m68kde~2_203.L
        jsr       (A2)
        addq.w    #4,A7
        bra       DecodeBranchCondition_30
@@ -5337,7 +6546,7 @@ DecodeBranchCondition_17:
        cmp.w     #11,D2
        bne.s     DecodeBranchCondition_19
 ; strcatInstruction("MI") ;
-       pea       @m68kde~1_214.L
+       pea       @m68kde~2_204.L
        jsr       (A2)
        addq.w    #4,A7
        bra       DecodeBranchCondition_30
@@ -5346,7 +6555,7 @@ DecodeBranchCondition_19:
        cmp.w     #6,D2
        bne.s     DecodeBranchCondition_21
 ; strcatInstruction("NE") ;
-       pea       @m68kde~1_215.L
+       pea       @m68kde~2_205.L
        jsr       (A2)
        addq.w    #4,A7
        bra       DecodeBranchCondition_30
@@ -5355,7 +6564,7 @@ DecodeBranchCondition_21:
        cmp.w     #10,D2
        bne.s     DecodeBranchCondition_23
 ; strcatInstruction("PL") ;
-       pea       @m68kde~1_216.L
+       pea       @m68kde~2_206.L
        jsr       (A2)
        addq.w    #4,A7
        bra       DecodeBranchCondition_30
@@ -5364,7 +6573,7 @@ DecodeBranchCondition_23:
        cmp.w     #9,D2
        bne.s     DecodeBranchCondition_25
 ; strcatInstruction("VS") ;
-       pea       @m68kde~1_217.L
+       pea       @m68kde~2_207.L
        jsr       (A2)
        addq.w    #4,A7
        bra.s     DecodeBranchCondition_30
@@ -5373,7 +6582,7 @@ DecodeBranchCondition_25:
        cmp.w     #8,D2
        bne.s     DecodeBranchCondition_27
 ; strcatInstruction("VC") ;
-       pea       @m68kde~1_218.L
+       pea       @m68kde~2_208.L
        jsr       (A2)
        addq.w    #4,A7
        bra.s     DecodeBranchCondition_30
@@ -5382,19 +6591,19 @@ DecodeBranchCondition_27:
        tst.w     D2
        bne.s     DecodeBranchCondition_29
 ; strcatInstruction("RA") ;
-       pea       @m68kde~1_219.L
+       pea       @m68kde~2_209.L
        jsr       (A2)
        addq.w    #4,A7
        bra.s     DecodeBranchCondition_30
 DecodeBranchCondition_29:
 ; else
 ; strcatInstruction("SR");
-       pea       @m68kde~1_220.L
+       pea       @m68kde~2_210.L
        jsr       (A2)
        addq.w    #4,A7
 DecodeBranchCondition_30:
 ; strcatInstruction(" ") ;
-       pea       @m68kde~1_221.L
+       pea       @m68kde~2_30.L
        jsr       (A2)
        addq.w    #4,A7
        movem.l   (A7)+,D2/A2
@@ -5432,7 +6641,7 @@ _DisassembleInstruction:
 ; short int Mask, DoneSlash;
 ; int i;
 ; strcpyInstruction("Unknown") ;
-       pea       @m68kde~1_222.L
+       pea       @m68kde~2_211.L
        jsr       (A3)
        addq.w    #4,A7
 ; /////////////////////////////////////////////////////////////////////////////////
@@ -5473,7 +6682,7 @@ _DisassembleInstruction:
        move.w    -34(A6),D1
        and.l     #65535,D1
        move.l    D1,-(A7)
-       pea       @m68kde~1_223.L
+       pea       @m68kde~2_212.L
        pea       _Instruction.L
        jsr       (A5)
        add.w     #16,A7
@@ -5487,7 +6696,7 @@ DisassembleInstruction_3:
        move.w    -34(A6),D1
        and.l     #65535,D1
        move.l    D1,-(A7)
-       pea       @m68kde~1_224.L
+       pea       @m68kde~2_213.L
        pea       _Instruction.L
        jsr       (A5)
        add.w     #16,A7
@@ -5521,14 +6730,14 @@ DisassembleInstruction_9:
        cmp.w     #3,D3
        bne.s     DisassembleInstruction_10
 ; strcpyInstruction("ADDA.W ") ;
-       pea       @m68kde~1_225.L
+       pea       @m68kde~2_214.L
        jsr       (A3)
        addq.w    #4,A7
        bra.s     DisassembleInstruction_11
 DisassembleInstruction_10:
 ; else
 ; strcpyInstruction("ADDA.L ") ;
-       pea       @m68kde~1_226.L
+       pea       @m68kde~2_215.L
        jsr       (A3)
        addq.w    #4,A7
 DisassembleInstruction_11:
@@ -5547,7 +6756,7 @@ DisassembleInstruction_11:
        and.w     #7,D1
        and.l     #65535,D1
        move.l    D1,-(A7)
-       pea       @m68kde~1_227.L
+       pea       @m68kde~2_216.L
        move.l    A4,-(A7)
        jsr       (A5)
        add.w     #12,A7
@@ -5560,7 +6769,7 @@ DisassembleInstruction_7:
 ; }
 ; else {
 ; strcpyInstruction("ADD") ;
-       pea       @m68kde~1_228.L
+       pea       @m68kde~2_217.L
        jsr       (A3)
        addq.w    #4,A7
 ; Decode3BitOperandMode(OpCode) ;
@@ -5654,7 +6863,7 @@ DisassembleInstruction_25:
        cmp.w     #1536,D0
        bne.s     DisassembleInstruction_26
 ; strcpyInstruction("ADDI") ;
-       pea       @m68kde~1_229.L
+       pea       @m68kde~2_218.L
        jsr       (A3)
        addq.w    #4,A7
        bra       DisassembleInstruction_36
@@ -5666,7 +6875,7 @@ DisassembleInstruction_26:
        cmp.w     #512,D0
        bne.s     DisassembleInstruction_28
 ; strcpyInstruction("ANDI") ;
-       pea       @m68kde~1_230.L
+       pea       @m68kde~2_219.L
        jsr       (A3)
        addq.w    #4,A7
        bra       DisassembleInstruction_36
@@ -5678,7 +6887,7 @@ DisassembleInstruction_28:
        cmp.w     #3072,D0
        bne.s     DisassembleInstruction_30
 ; strcpyInstruction("CMPI") ;
-       pea       @m68kde~1_231.L
+       pea       @m68kde~2_220.L
        jsr       (A3)
        addq.w    #4,A7
        bra       DisassembleInstruction_36
@@ -5690,7 +6899,7 @@ DisassembleInstruction_30:
        cmp.w     #2560,D0
        bne.s     DisassembleInstruction_32
 ; strcpyInstruction("EORI") ;
-       pea       @m68kde~1_232.L
+       pea       @m68kde~2_221.L
        jsr       (A3)
        addq.w    #4,A7
        bra       DisassembleInstruction_36
@@ -5701,7 +6910,7 @@ DisassembleInstruction_32:
        and.w     #65280,D0
        bne.s     DisassembleInstruction_34
 ; strcpyInstruction("ORI") ;
-       pea       @m68kde~1_233.L
+       pea       @m68kde~2_222.L
        jsr       (A3)
        addq.w    #4,A7
        bra.s     DisassembleInstruction_36
@@ -5713,7 +6922,7 @@ DisassembleInstruction_34:
        cmp.w     #1024,D0
        bne.s     DisassembleInstruction_36
 ; strcpyInstruction("SUBI") ;
-       pea       @m68kde~1_234.L
+       pea       @m68kde~2_223.L
        jsr       (A3)
        addq.w    #4,A7
 DisassembleInstruction_36:
@@ -5730,7 +6939,7 @@ DisassembleInstruction_36:
        jsr       _DecodeBWLDataAfterOpCode
        addq.w    #4,A7
 ; strcatInstruction(",") ;
-       pea       @m68kde~1_235.L
+       pea       @m68kde~2_194.L
        jsr       _strcatInstruction
        addq.w    #4,A7
 ; Decode6BitEA(OpCode,0,DataSize,0) ;                                         // decode EA
@@ -5758,7 +6967,7 @@ DisassembleInstruction_12:
        move.w    2(A0),D1
        ext.l     D1
        move.l    D1,-(A7)
-       pea       @m68kde~1_236.L
+       pea       @m68kde~2_224.L
        pea       _Instruction.L
        jsr       (A5)
        add.w     #12,A7
@@ -5776,7 +6985,7 @@ DisassembleInstruction_38:
 ; InstructionSize = 1;
        move.l    #1,(A2)
 ; strcpyInstruction("ADDQ") ;
-       pea       @m68kde~1_237.L
+       pea       @m68kde~2_225.L
        jsr       (A3)
        addq.w    #4,A7
 ; Decode2BitOperandSize(*OpCode);                                  // add .b, .w, .l size indicator to instruction string
@@ -5794,7 +7003,7 @@ DisassembleInstruction_38:
        and.w     #7,D1
        and.l     #65535,D1
        move.l    D1,-(A7)
-       pea       @m68kde~1_238.L
+       pea       @m68kde~2_226.L
        move.l    A4,-(A7)
        jsr       (A5)
        add.w     #12,A7
@@ -5833,7 +7042,7 @@ DisassembleInstruction_40:
        beq       DisassembleInstruction_44
 ; {
 ; strcpyInstruction("ADDX") ;
-       pea       @m68kde~1_239.L
+       pea       @m68kde~2_227.L
        jsr       (A3)
        addq.w    #4,A7
 ; Decode2BitOperandSize(*OpCode);                                  // add .b, .w, .l size indicator to instruction string
@@ -5861,7 +7070,7 @@ DisassembleInstruction_40:
        and.w     #7,D1
        ext.l     D1
        move.l    D1,-(A7)
-       pea       @m68kde~1_240.L
+       pea       @m68kde~2_228.L
        move.l    A4,-(A7)
        jsr       (A5)
        add.w     #16,A7
@@ -5881,7 +7090,7 @@ DisassembleInstruction_46:
        and.w     #7,D1
        ext.l     D1
        move.l    D1,-(A7)
-       pea       @m68kde~1_241.L
+       pea       @m68kde~2_229.L
        move.l    A4,-(A7)
        jsr       (A5)
        add.w     #16,A7
@@ -5915,7 +7124,7 @@ DisassembleInstruction_44:
        cmp.w     #16,D3
        beq.s     DisassembleInstruction_50
 ; strcpyInstruction("AND") ;
-       pea       @m68kde~1_242.L
+       pea       @m68kde~2_230.L
        jsr       (A3)
        addq.w    #4,A7
 ; Decode3BitOperandMode(OpCode) ;
@@ -5939,7 +7148,7 @@ DisassembleInstruction_50:
        and.w     #255,D1
        and.l     #65535,D1
        move.l    D1,-(A7)
-       pea       @m68kde~1_243.L
+       pea       @m68kde~2_231.L
        pea       _Instruction.L
        jsr       (A5)
        add.w     #12,A7
@@ -6071,14 +7280,14 @@ DisassembleInstruction_71:
        cmp.w     #256,D0
        bne.s     DisassembleInstruction_76
 ; strcpyInstruction("ASL") ;
-       pea       @m68kde~1_244.L
+       pea       @m68kde~2_232.L
        jsr       (A3)
        addq.w    #4,A7
        bra.s     DisassembleInstruction_77
 DisassembleInstruction_76:
 ; else
 ; strcpyInstruction("ASR") ;
-       pea       @m68kde~1_245.L
+       pea       @m68kde~2_233.L
        jsr       (A3)
        addq.w    #4,A7
 DisassembleInstruction_77:
@@ -6096,14 +7305,14 @@ DisassembleInstruction_77:
        cmp.w     #256,D0
        bne.s     DisassembleInstruction_80
 ; strcpyInstruction("LSL") ;
-       pea       @m68kde~1_246.L
+       pea       @m68kde~2_234.L
        jsr       (A3)
        addq.w    #4,A7
        bra.s     DisassembleInstruction_81
 DisassembleInstruction_80:
 ; else
 ; strcpyInstruction("LSR") ;
-       pea       @m68kde~1_247.L
+       pea       @m68kde~2_235.L
        jsr       (A3)
        addq.w    #4,A7
 DisassembleInstruction_81:
@@ -6121,14 +7330,14 @@ DisassembleInstruction_81:
        cmp.w     #256,D0
        bne.s     DisassembleInstruction_84
 ; strcpyInstruction("ROL") ;
-       pea       @m68kde~1_248.L
+       pea       @m68kde~2_236.L
        jsr       (A3)
        addq.w    #4,A7
        bra.s     DisassembleInstruction_85
 DisassembleInstruction_84:
 ; else
 ; strcpyInstruction("ROR") ;
-       pea       @m68kde~1_249.L
+       pea       @m68kde~2_237.L
        jsr       (A3)
        addq.w    #4,A7
 DisassembleInstruction_85:
@@ -6146,19 +7355,19 @@ DisassembleInstruction_85:
        cmp.w     #256,D0
        bne.s     DisassembleInstruction_88
 ; strcpyInstruction("ROXL") ;
-       pea       @m68kde~1_250.L
+       pea       @m68kde~2_238.L
        jsr       (A3)
        addq.w    #4,A7
        bra.s     DisassembleInstruction_89
 DisassembleInstruction_88:
 ; else
 ; strcpyInstruction("ROXR") ;
-       pea       @m68kde~1_251.L
+       pea       @m68kde~2_239.L
        jsr       (A3)
        addq.w    #4,A7
 DisassembleInstruction_89:
 ; strcatInstruction("  ") ;
-       pea       @m68kde~1_252.L
+       pea       @m68kde~2_15.L
        jsr       _strcatInstruction
        addq.w    #4,A7
 ; Decode6BitEA(OpCode,0, 0,0) ;
@@ -6187,14 +7396,14 @@ DisassembleInstruction_72:
        cmp.w     #256,D0
        bne.s     DisassembleInstruction_92
 ; strcpyInstruction("ASL") ;
-       pea       @m68kde~1_253.L
+       pea       @m68kde~2_232.L
        jsr       (A3)
        addq.w    #4,A7
        bra.s     DisassembleInstruction_93
 DisassembleInstruction_92:
 ; else
 ; strcpyInstruction("ASR") ;
-       pea       @m68kde~1_254.L
+       pea       @m68kde~2_233.L
        jsr       (A3)
        addq.w    #4,A7
 DisassembleInstruction_93:
@@ -6212,14 +7421,14 @@ DisassembleInstruction_93:
        cmp.w     #256,D0
        bne.s     DisassembleInstruction_96
 ; strcpyInstruction("LSL") ;
-       pea       @m68kde~1_255.L
+       pea       @m68kde~2_234.L
        jsr       (A3)
        addq.w    #4,A7
        bra.s     DisassembleInstruction_97
 DisassembleInstruction_96:
 ; else
 ; strcpyInstruction("LSR") ;
-       pea       @m68kde~1_256.L
+       pea       @m68kde~2_235.L
        jsr       (A3)
        addq.w    #4,A7
 DisassembleInstruction_97:
@@ -6237,14 +7446,14 @@ DisassembleInstruction_97:
        cmp.w     #256,D0
        bne.s     DisassembleInstruction_100
 ; strcpyInstruction("ROL") ;
-       pea       @m68kde~1_257.L
+       pea       @m68kde~2_236.L
        jsr       (A3)
        addq.w    #4,A7
        bra.s     DisassembleInstruction_101
 DisassembleInstruction_100:
 ; else
 ; strcpyInstruction("ROR") ;
-       pea       @m68kde~1_258.L
+       pea       @m68kde~2_237.L
        jsr       (A3)
        addq.w    #4,A7
 DisassembleInstruction_101:
@@ -6262,14 +7471,14 @@ DisassembleInstruction_101:
        cmp.w     #256,D0
        bne.s     DisassembleInstruction_104
 ; strcpyInstruction("ROXL") ;
-       pea       @m68kde~1_259.L
+       pea       @m68kde~2_238.L
        jsr       (A3)
        addq.w    #4,A7
        bra.s     DisassembleInstruction_105
 DisassembleInstruction_104:
 ; else
 ; strcpyInstruction("ROXR") ;
-       pea       @m68kde~1_260.L
+       pea       @m68kde~2_239.L
        jsr       (A3)
        addq.w    #4,A7
 DisassembleInstruction_105:
@@ -6298,7 +7507,7 @@ DisassembleInstruction_105:
        and.w     #7,D1
        and.l     #65535,D1
        move.l    D1,-(A7)
-       pea       @m68kde~1_261.L
+       pea       @m68kde~2_240.L
        move.l    A4,-(A7)
        jsr       (A5)
        add.w     #16,A7
@@ -6321,7 +7530,7 @@ DisassembleInstruction_106:
        and.w     #7,D1
        and.l     #65535,D1
        move.l    D1,-(A7)
-       pea       @m68kde~1_262.L
+       pea       @m68kde~2_228.L
        move.l    A4,-(A7)
        jsr       (A5)
        add.w     #16,A7
@@ -6355,7 +7564,7 @@ DisassembleInstruction_73:
        and.w     #15,D0
        move.b    D0,-23(A6)
 ; strcpyInstruction("B") ;
-       pea       @m68kde~1_263.L
+       pea       @m68kde~2_241.L
        jsr       (A3)
        addq.w    #4,A7
 ; DecodeBranchCondition(Condition) ;
@@ -6385,7 +7594,7 @@ DisassembleInstruction_73:
        move.l    (A7)+,D0
        addq.l    #2,D1
        move.l    D1,-(A7)
-       pea       @m68kde~1_264.L
+       pea       @m68kde~2_191.L
        move.l    A4,-(A7)
        jsr       (A5)
        add.w     #12,A7
@@ -6405,7 +7614,7 @@ DisassembleInstruction_110:
        move.l    (A7)+,D0
        addq.l    #2,D1
        move.l    D1,-(A7)
-       pea       @m68kde~1_265.L
+       pea       @m68kde~2_191.L
        move.l    A4,-(A7)
        jsr       (A5)
        add.w     #12,A7
@@ -6428,7 +7637,7 @@ DisassembleInstruction_108:
 ; InstructionSize = 1;
        move.l    #1,(A2)
 ; strcpyInstruction("BCHG ") ;
-       pea       @m68kde~1_266.L
+       pea       @m68kde~2_242.L
        jsr       (A3)
        addq.w    #4,A7
 ; sprintf(TempString, "D%d,", (*OpCode >> 9) & (unsigned short int)(0x0007)) ;
@@ -6439,7 +7648,7 @@ DisassembleInstruction_108:
        and.w     #7,D1
        and.l     #65535,D1
        move.l    D1,-(A7)
-       pea       @m68kde~1_267.L
+       pea       @m68kde~2_243.L
        move.l    A4,-(A7)
        jsr       (A5)
        add.w     #12,A7
@@ -6466,7 +7675,7 @@ DisassembleInstruction_112:
        cmp.w     #2112,D0
        bne       DisassembleInstruction_114
 ; strcpyInstruction("BCHG ") ;
-       pea       @m68kde~1_268.L
+       pea       @m68kde~2_242.L
        jsr       (A3)
        addq.w    #4,A7
 ; sprintf(TempString, "#$%X,", OpCode[1]) ;
@@ -6474,7 +7683,7 @@ DisassembleInstruction_112:
        move.w    2(A0),D1
        ext.l     D1
        move.l    D1,-(A7)
-       pea       @m68kde~1_269.L
+       pea       @m68kde~2_244.L
        move.l    A4,-(A7)
        jsr       (A5)
        add.w     #12,A7
@@ -6505,7 +7714,7 @@ DisassembleInstruction_114:
 ; InstructionSize = 1;
        move.l    #1,(A2)
 ; strcpyInstruction("BCLR ") ;
-       pea       @m68kde~1_270.L
+       pea       @m68kde~2_245.L
        jsr       (A3)
        addq.w    #4,A7
 ; sprintf(TempString, "D%d,", (*OpCode >> 9) & (unsigned short int)(0x0007)) ;
@@ -6516,7 +7725,7 @@ DisassembleInstruction_114:
        and.w     #7,D1
        and.l     #65535,D1
        move.l    D1,-(A7)
-       pea       @m68kde~1_271.L
+       pea       @m68kde~2_243.L
        move.l    A4,-(A7)
        jsr       (A5)
        add.w     #12,A7
@@ -6543,7 +7752,7 @@ DisassembleInstruction_116:
        cmp.w     #2176,D0
        bne       DisassembleInstruction_118
 ; strcpyInstruction("BCLR ") ;
-       pea       @m68kde~1_272.L
+       pea       @m68kde~2_245.L
        jsr       (A3)
        addq.w    #4,A7
 ; sprintf(TempString, "#$%X,", OpCode[1]) ;
@@ -6551,7 +7760,7 @@ DisassembleInstruction_116:
        move.w    2(A0),D1
        ext.l     D1
        move.l    D1,-(A7)
-       pea       @m68kde~1_273.L
+       pea       @m68kde~2_244.L
        move.l    A4,-(A7)
        jsr       (A5)
        add.w     #12,A7
@@ -6582,7 +7791,7 @@ DisassembleInstruction_118:
 ; InstructionSize = 1;
        move.l    #1,(A2)
 ; strcpyInstruction("BSET ") ;
-       pea       @m68kde~1_274.L
+       pea       @m68kde~2_246.L
        jsr       (A3)
        addq.w    #4,A7
 ; sprintf(TempString, "D%d,", (*OpCode >> 9) & (unsigned short int)(0x0007)) ;
@@ -6593,7 +7802,7 @@ DisassembleInstruction_118:
        and.w     #7,D1
        and.l     #65535,D1
        move.l    D1,-(A7)
-       pea       @m68kde~1_275.L
+       pea       @m68kde~2_243.L
        move.l    A4,-(A7)
        jsr       (A5)
        add.w     #12,A7
@@ -6620,7 +7829,7 @@ DisassembleInstruction_120:
        cmp.w     #2240,D0
        bne       DisassembleInstruction_122
 ; strcpyInstruction("BSET ") ;
-       pea       @m68kde~1_276.L
+       pea       @m68kde~2_246.L
        jsr       (A3)
        addq.w    #4,A7
 ; sprintf(TempString, "#$%X,", OpCode[1]) ;
@@ -6628,7 +7837,7 @@ DisassembleInstruction_120:
        move.w    2(A0),D1
        ext.l     D1
        move.l    D1,-(A7)
-       pea       @m68kde~1_277.L
+       pea       @m68kde~2_244.L
        move.l    A4,-(A7)
        jsr       (A5)
        add.w     #12,A7
@@ -6659,7 +7868,7 @@ DisassembleInstruction_122:
 ; InstructionSize = 1;
        move.l    #1,(A2)
 ; strcpyInstruction("BTST ") ;
-       pea       @m68kde~1_278.L
+       pea       @m68kde~2_247.L
        jsr       (A3)
        addq.w    #4,A7
 ; sprintf(TempString, "D%d,", (*OpCode >> 9) & (unsigned short int)(0x0007)) ;
@@ -6670,7 +7879,7 @@ DisassembleInstruction_122:
        and.w     #7,D1
        and.l     #65535,D1
        move.l    D1,-(A7)
-       pea       @m68kde~1_279.L
+       pea       @m68kde~2_243.L
        move.l    A4,-(A7)
        jsr       (A5)
        add.w     #12,A7
@@ -6697,7 +7906,7 @@ DisassembleInstruction_124:
        cmp.w     #2048,D0
        bne       DisassembleInstruction_126
 ; strcpyInstruction("BTST ") ;
-       pea       @m68kde~1_280.L
+       pea       @m68kde~2_247.L
        jsr       (A3)
        addq.w    #4,A7
 ; sprintf(TempString, "#$%X,", OpCode[1]) ;
@@ -6705,7 +7914,7 @@ DisassembleInstruction_124:
        move.w    2(A0),D1
        ext.l     D1
        move.l    D1,-(A7)
-       pea       @m68kde~1_281.L
+       pea       @m68kde~2_244.L
        move.l    A4,-(A7)
        jsr       (A5)
        add.w     #12,A7
@@ -6736,7 +7945,7 @@ DisassembleInstruction_126:
 ; InstructionSize = 1;
        move.l    #1,(A2)
 ; strcpyInstruction("CHK ") ;
-       pea       @m68kde~1_282.L
+       pea       @m68kde~2_248.L
        jsr       (A3)
        addq.w    #4,A7
 ; Decode6BitEA(OpCode,0,0,0) ;
@@ -6754,7 +7963,7 @@ DisassembleInstruction_126:
        and.w     #7,D1
        and.l     #65535,D1
        move.l    D1,-(A7)
-       pea       @m68kde~1_283.L
+       pea       @m68kde~2_249.L
        move.l    A4,-(A7)
        jsr       (A5)
        add.w     #12,A7
@@ -6776,7 +7985,7 @@ DisassembleInstruction_128:
 ; InstructionSize = 1;
        move.l    #1,(A2)
 ; strcpyInstruction("CLR") ;
-       pea       @m68kde~1_284.L
+       pea       @m68kde~2_250.L
        jsr       (A3)
        addq.w    #4,A7
 ; Decode2BitOperandSize(*OpCode) ;
@@ -6823,14 +8032,14 @@ DisassembleInstruction_136:
        cmp.w     #3,D3
        bne.s     DisassembleInstruction_137
 ; strcpyInstruction("CMPA.W ") ;
-       pea       @m68kde~1_285.L
+       pea       @m68kde~2_251.L
        jsr       (A3)
        addq.w    #4,A7
        bra.s     DisassembleInstruction_138
 DisassembleInstruction_137:
 ; else
 ; strcpyInstruction("CMPA.L ") ;
-       pea       @m68kde~1_286.L
+       pea       @m68kde~2_252.L
        jsr       (A3)
        addq.w    #4,A7
 DisassembleInstruction_138:
@@ -6849,7 +8058,7 @@ DisassembleInstruction_138:
        and.w     #7,D1
        and.l     #65535,D1
        move.l    D1,-(A7)
-       pea       @m68kde~1_287.L
+       pea       @m68kde~2_253.L
        move.l    A4,-(A7)
        jsr       (A5)
        add.w     #12,A7
@@ -6862,7 +8071,7 @@ DisassembleInstruction_134:
 ; }
 ; else {
 ; strcpyInstruction("CMP") ;
-       pea       @m68kde~1_288.L
+       pea       @m68kde~2_254.L
        jsr       (A3)
        addq.w    #4,A7
 ; Decode3BitOperandMode(OpCode) ;
@@ -6897,7 +8106,7 @@ DisassembleInstruction_135:
 ; InstructionSize = 1;
        move.l    #1,(A2)
 ; strcpyInstruction("CMPM") ;
-       pea       @m68kde~1_289.L
+       pea       @m68kde~2_255.L
        jsr       (A3)
        addq.w    #4,A7
 ; Decode2BitOperandSize(*OpCode) ;
@@ -6920,7 +8129,7 @@ DisassembleInstruction_135:
        and.w     #7,D1
        and.l     #65535,D1
        move.l    D1,-(A7)
-       pea       @m68kde~1_290.L
+       pea       @m68kde~2_256.L
        move.l    A4,-(A7)
        jsr       (A5)
        add.w     #16,A7
@@ -6944,7 +8153,7 @@ DisassembleInstruction_141:
 ; InstructionSize = 2;
        move.l    #2,(A2)
 ; strcpy(Instruction,"DB") ;
-       pea       @m68kde~1_291.L
+       pea       @m68kde~2_257.L
        pea       _Instruction.L
        jsr       _strcpy
        addq.w    #8,A7
@@ -6980,7 +8189,7 @@ DisassembleInstruction_141:
        and.w     #7,D1
        and.l     #65535,D1
        move.l    D1,-(A7)
-       pea       @m68kde~1_292.L
+       pea       @m68kde~2_258.L
        move.l    A4,-(A7)
        jsr       (A5)
        add.w     #20,A7
@@ -7003,7 +8212,7 @@ DisassembleInstruction_143:
 ; InstructionSize = 1;
        move.l    #1,(A2)
 ; strcpy(Instruction,"DIVS ") ;
-       pea       @m68kde~1_293.L
+       pea       @m68kde~2_259.L
        pea       _Instruction.L
        jsr       _strcpy
        addq.w    #8,A7
@@ -7015,7 +8224,7 @@ DisassembleInstruction_143:
        jsr       _Decode6BitEA
        add.w     #16,A7
 ; strcatInstruction(",") ;
-       pea       @m68kde~1_294.L
+       pea       @m68kde~2_194.L
        jsr       _strcatInstruction
        addq.w    #4,A7
 ; Decode3BitDataRegister(*OpCode) ;
@@ -7040,7 +8249,7 @@ DisassembleInstruction_145:
 ; InstructionSize = 1;
        move.l    #1,(A2)
 ; strcpy(Instruction,"DIVU ") ;
-       pea       @m68kde~1_295.L
+       pea       @m68kde~2_260.L
        pea       _Instruction.L
        jsr       _strcpy
        addq.w    #8,A7
@@ -7052,7 +8261,7 @@ DisassembleInstruction_145:
        jsr       _Decode6BitEA
        add.w     #16,A7
 ; strcatInstruction(",") ;
-       pea       @m68kde~1_296.L
+       pea       @m68kde~2_194.L
        jsr       _strcatInstruction
        addq.w    #4,A7
 ; Decode3BitDataRegister(*OpCode) ;
@@ -7099,7 +8308,7 @@ DisassembleInstruction_147:
 ; InstructionSize = 1;
        move.l    #1,(A2)
 ; strcpyInstruction("EOR") ;
-       pea       @m68kde~1_297.L
+       pea       @m68kde~2_261.L
        jsr       (A3)
        addq.w    #4,A7
 ; Decode3BitOperandMode(OpCode);
@@ -7125,7 +8334,7 @@ DisassembleInstruction_151:
        and.w     #255,D1
        and.l     #65535,D1
        move.l    D1,-(A7)
-       pea       @m68kde~1_298.L
+       pea       @m68kde~2_262.L
        pea       _Instruction.L
        jsr       (A5)
        add.w     #12,A7
@@ -7148,7 +8357,7 @@ DisassembleInstruction_153:
        move.w    2(A0),D1
        ext.l     D1
        move.l    D1,-(A7)
-       pea       @m68kde~1_299.L
+       pea       @m68kde~2_263.L
        pea       _Instruction.L
        jsr       (A5)
        add.w     #12,A7
@@ -7194,7 +8403,7 @@ DisassembleInstruction_155:
        move.w    -16(A6),D1
        and.l     #65535,D1
        move.l    D1,-(A7)
-       pea       @m68kde~1_300.L
+       pea       @m68kde~2_264.L
        pea       _Instruction.L
        jsr       (A5)
        add.w     #16,A7
@@ -7214,7 +8423,7 @@ DisassembleInstruction_159:
        move.w    -16(A6),D1
        and.l     #65535,D1
        move.l    D1,-(A7)
-       pea       @m68kde~1_301.L
+       pea       @m68kde~2_265.L
        pea       _Instruction.L
        jsr       (A5)
        add.w     #16,A7
@@ -7234,7 +8443,7 @@ DisassembleInstruction_161:
        move.w    -16(A6),D1
        and.l     #65535,D1
        move.l    D1,-(A7)
-       pea       @m68kde~1_302.L
+       pea       @m68kde~2_266.L
        pea       _Instruction.L
        jsr       (A5)
        add.w     #16,A7
@@ -7254,7 +8463,7 @@ DisassembleInstruction_163:
 ; InstructionSize = 1;
        move.l    #1,(A2)
 ; strcpy(Instruction,"EXT") ;
-       pea       @m68kde~1_303.L
+       pea       @m68kde~2_267.L
        pea       _Instruction.L
        jsr       _strcpy
        addq.w    #8,A7
@@ -7265,14 +8474,14 @@ DisassembleInstruction_163:
        cmp.w     #192,D0
        bne.s     DisassembleInstruction_167
 ; strcatInstruction(".L ") ;
-       pea       @m68kde~1_304.L
+       pea       @m68kde~2_179.L
        jsr       _strcatInstruction
        addq.w    #4,A7
        bra.s     DisassembleInstruction_168
 DisassembleInstruction_167:
 ; else
 ; strcatInstruction(".W ") ;
-       pea       @m68kde~1_305.L
+       pea       @m68kde~2_178.L
        jsr       _strcatInstruction
        addq.w    #4,A7
 DisassembleInstruction_168:
@@ -7296,7 +8505,7 @@ DisassembleInstruction_165:
 ; InstructionSize = 1;
        move.l    #1,(A2)
 ; strcpy(Instruction,"ILLEGAL ($4AFC)") ;
-       pea       @m68kde~1_306.L
+       pea       @m68kde~2_268.L
        pea       _Instruction.L
        jsr       _strcpy
        addq.w    #8,A7
@@ -7315,7 +8524,7 @@ DisassembleInstruction_169:
 ; InstructionSize = 1;
        move.l    #1,(A2)
 ; strcpy(Instruction,"JMP ") ;
-       pea       @m68kde~1_307.L
+       pea       @m68kde~2_269.L
        pea       _Instruction.L
        jsr       _strcpy
        addq.w    #8,A7
@@ -7341,7 +8550,7 @@ DisassembleInstruction_171:
 ; InstructionSize = 1;
        move.l    #1,(A2)
 ; strcpy(Instruction,"JSR ") ;
-       pea       @m68kde~1_308.L
+       pea       @m68kde~2_270.L
        pea       _Instruction.L
        jsr       _strcpy
        addq.w    #8,A7
@@ -7367,7 +8576,7 @@ DisassembleInstruction_173:
 ; InstructionSize = 1;
        move.l    #1,(A2)
 ; strcpy(Instruction,"LEA ") ;
-       pea       @m68kde~1_309.L
+       pea       @m68kde~2_271.L
        pea       _Instruction.L
        jsr       _strcpy
        addq.w    #8,A7
@@ -7386,7 +8595,7 @@ DisassembleInstruction_173:
        and.w     #7,D1
        and.l     #65535,D1
        move.l    D1,-(A7)
-       pea       @m68kde~1_310.L
+       pea       @m68kde~2_253.L
        move.l    A4,-(A7)
        jsr       (A5)
        add.w     #12,A7
@@ -7409,7 +8618,7 @@ DisassembleInstruction_175:
 ; InstructionSize = 1;
        move.l    #1,(A2)
 ; strcpy(Instruction,"LINK ") ;
-       pea       @m68kde~1_311.L
+       pea       @m68kde~2_272.L
        pea       _Instruction.L
        jsr       _strcpy
        addq.w    #8,A7
@@ -7423,7 +8632,7 @@ DisassembleInstruction_175:
        and.w     #7,D1
        and.l     #65535,D1
        move.l    D1,-(A7)
-       pea       @m68kde~1_312.L
+       pea       @m68kde~2_273.L
        move.l    A4,-(A7)
        jsr       (A5)
        add.w     #16,A7
@@ -7526,7 +8735,7 @@ DisassembleInstruction_191:
        cmp.w     #1,D0
        bne.s     DisassembleInstruction_195
 ; strcpyInstruction("MOVE.B ") ;
-       pea       @m68kde~1_313.L
+       pea       @m68kde~2_274.L
        jsr       (A3)
        addq.w    #4,A7
        bra.s     DisassembleInstruction_198
@@ -7536,14 +8745,14 @@ DisassembleInstruction_195:
        cmp.w     #2,D0
        bne.s     DisassembleInstruction_197
 ; strcpyInstruction("MOVE.L ") ;
-       pea       @m68kde~1_314.L
+       pea       @m68kde~2_275.L
        jsr       (A3)
        addq.w    #4,A7
        bra.s     DisassembleInstruction_198
 DisassembleInstruction_197:
 ; else
 ; strcpyInstruction("MOVE.W ") ;
-       pea       @m68kde~1_315.L
+       pea       @m68kde~2_276.L
        jsr       (A3)
        addq.w    #4,A7
 DisassembleInstruction_198:
@@ -7555,7 +8764,7 @@ DisassembleInstruction_198:
        jsr       _Decode6BitEA
        add.w     #16,A7
 ; strcatInstruction(",") ;
-       pea       @m68kde~1_316.L
+       pea       @m68kde~2_194.L
        jsr       _strcatInstruction
        addq.w    #4,A7
 ; // tell next function how many words lie between opcode and destination, could be 1 or 2 e.g. with # addressing move.bwl #$data,<EA>
@@ -7584,7 +8793,7 @@ DisassembleInstruction_193:
 ; InstructionSize = 1;
        move.l    #1,(A2)
 ; strcpy(Instruction,"MOVE ") ;
-       pea       @m68kde~1_317.L
+       pea       @m68kde~2_277.L
        pea       _Instruction.L
        jsr       _strcpy
        addq.w    #8,A7
@@ -7596,7 +8805,7 @@ DisassembleInstruction_193:
        jsr       _Decode6BitEA
        add.w     #16,A7
 ; strcatInstruction(",CCR") ;
-       pea       @m68kde~1_318.L
+       pea       @m68kde~2_278.L
        jsr       _strcatInstruction
        addq.w    #4,A7
 DisassembleInstruction_199:
@@ -7614,7 +8823,7 @@ DisassembleInstruction_199:
 ; InstructionSize = 1;
        move.l    #1,(A2)
 ; strcpy(Instruction,"MOVE SR,") ;
-       pea       @m68kde~1_319.L
+       pea       @m68kde~2_279.L
        pea       _Instruction.L
        jsr       _strcpy
        addq.w    #8,A7
@@ -7640,7 +8849,7 @@ DisassembleInstruction_201:
 ; InstructionSize = 1;
        move.l    #1,(A2)
 ; strcpy(Instruction,"MOVE ") ;
-       pea       @m68kde~1_320.L
+       pea       @m68kde~2_277.L
        pea       _Instruction.L
        jsr       _strcpy
        addq.w    #8,A7
@@ -7652,7 +8861,7 @@ DisassembleInstruction_201:
        jsr       _Decode6BitEA
        add.w     #16,A7
 ; strcatInstruction(",SR") ;
-       pea       @m68kde~1_321.L
+       pea       @m68kde~2_280.L
        jsr       _strcatInstruction
        addq.w    #4,A7
 DisassembleInstruction_203:
@@ -7684,7 +8893,7 @@ DisassembleInstruction_203:
        move.w    -22(A6),D1
        and.l     #65535,D1
        move.l    D1,-(A7)
-       pea       @m68kde~1_322.L
+       pea       @m68kde~2_281.L
        pea       _Instruction.L
        jsr       (A5)
        add.w     #12,A7
@@ -7695,7 +8904,7 @@ DisassembleInstruction_207:
        move.w    -22(A6),D1
        and.l     #65535,D1
        move.l    D1,-(A7)
-       pea       @m68kde~1_323.L
+       pea       @m68kde~2_282.L
        pea       _Instruction.L
        jsr       (A5)
        add.w     #12,A7
@@ -7730,7 +8939,7 @@ DisassembleInstruction_208:
 ; InstructionSize = 1;
        move.l    #1,(A2)
 ; strcpy(Instruction,"MOVEM") ;
-       pea       @m68kde~1_324.L
+       pea       @m68kde~2_283.L
        pea       _Instruction.L
        jsr       _strcpy
        addq.w    #8,A7
@@ -7742,14 +8951,14 @@ DisassembleInstruction_208:
        and.w     #64,D0
        bne.s     DisassembleInstruction_213
 ; strcatInstruction(".W ") ;
-       pea       @m68kde~1_325.L
+       pea       @m68kde~2_178.L
        jsr       _strcatInstruction
        addq.w    #4,A7
        bra.s     DisassembleInstruction_214
 DisassembleInstruction_213:
 ; else
 ; strcatInstruction(".L ") ;
-       pea       @m68kde~1_326.L
+       pea       @m68kde~2_179.L
        jsr       _strcatInstruction
        addq.w    #4,A7
 DisassembleInstruction_214:
@@ -7770,7 +8979,7 @@ DisassembleInstruction_217:
        cmp.l     #16,D4
        bge       DisassembleInstruction_219
 ; printf("") ;    // fixes bug otherwise the address registers doen't get printed (don't know why), something to do with sprintf I guess
-       pea       @m68kde~1_327.L
+       pea       @m68kde~2_33.L
        jsr       _printf
        addq.w    #4,A7
 ; if((OpCode[1] & Mask) == Mask)    {
@@ -7787,7 +8996,7 @@ DisassembleInstruction_217:
        bne.s     DisassembleInstruction_224
 ; sprintf(TempString, "D%d", i) ;
        move.l    D4,-(A7)
-       pea       @m68kde~1_328.L
+       pea       @m68kde~2_284.L
        move.l    A4,-(A7)
        jsr       (A5)
        add.w     #12,A7
@@ -7799,7 +9008,7 @@ DisassembleInstruction_224:
 ; else
 ; sprintf(TempString, "/D%d", i) ;
        move.l    D4,-(A7)
-       pea       @m68kde~1_329.L
+       pea       @m68kde~2_285.L
        move.l    A4,-(A7)
        jsr       (A5)
        add.w     #12,A7
@@ -7815,7 +9024,7 @@ DisassembleInstruction_222:
        move.l    D4,D1
        subq.l    #8,D1
        move.l    D1,-(A7)
-       pea       @m68kde~1_330.L
+       pea       @m68kde~2_286.L
        move.l    A4,-(A7)
        jsr       (A5)
        add.w     #12,A7
@@ -7829,7 +9038,7 @@ DisassembleInstruction_226:
        move.l    D4,D1
        subq.l    #8,D1
        move.l    D1,-(A7)
-       pea       @m68kde~1_331.L
+       pea       @m68kde~2_287.L
        move.l    A4,-(A7)
        jsr       (A5)
        add.w     #12,A7
@@ -7850,7 +9059,7 @@ DisassembleInstruction_220:
 DisassembleInstruction_219:
 ; }
 ; strcatInstruction(",") ;
-       pea       @m68kde~1_332.L
+       pea       @m68kde~2_194.L
        jsr       _strcatInstruction
        addq.w    #4,A7
 ; Decode6BitEA(OpCode,0,0,0) ;
@@ -7873,7 +9082,7 @@ DisassembleInstruction_215:
        jsr       _Decode6BitEA
        add.w     #16,A7
 ; strcatInstruction(",") ;
-       pea       @m68kde~1_333.L
+       pea       @m68kde~2_194.L
        jsr       _strcatInstruction
        addq.w    #4,A7
 ; Mask = 0x0001 ;                     // bit 0 = 1
@@ -7899,7 +9108,7 @@ DisassembleInstruction_228:
        bne.s     DisassembleInstruction_235
 ; sprintf(TempString, "D%d", i) ;
        move.l    D4,-(A7)
-       pea       @m68kde~1_334.L
+       pea       @m68kde~2_284.L
        move.l    A4,-(A7)
        jsr       (A5)
        add.w     #12,A7
@@ -7911,7 +9120,7 @@ DisassembleInstruction_235:
 ; else
 ; sprintf(TempString, "/D%d", i) ;
        move.l    D4,-(A7)
-       pea       @m68kde~1_335.L
+       pea       @m68kde~2_285.L
        move.l    A4,-(A7)
        jsr       (A5)
        add.w     #12,A7
@@ -7927,7 +9136,7 @@ DisassembleInstruction_233:
        move.l    D4,D1
        subq.l    #8,D1
        move.l    D1,-(A7)
-       pea       @m68kde~1_336.L
+       pea       @m68kde~2_286.L
        move.l    A4,-(A7)
        jsr       (A5)
        add.w     #12,A7
@@ -7941,7 +9150,7 @@ DisassembleInstruction_237:
        move.l    D4,D1
        subq.l    #8,D1
        move.l    D1,-(A7)
-       pea       @m68kde~1_337.L
+       pea       @m68kde~2_287.L
        move.l    A4,-(A7)
        jsr       (A5)
        add.w     #12,A7
@@ -8009,7 +9218,7 @@ DisassembleInstruction_230:
        move.w    2(A0),D1
        ext.l     D1
        move.l    D1,-(A7)
-       pea       @m68kde~1_338.L
+       pea       @m68kde~2_288.L
        pea       _Instruction.L
        jsr       (A5)
        add.w     #20,A7
@@ -8028,7 +9237,7 @@ DisassembleInstruction_241:
        move.w    2(A0),D1
        ext.l     D1
        move.l    D1,-(A7)
-       pea       @m68kde~1_339.L
+       pea       @m68kde~2_289.L
        pea       _Instruction.L
        jsr       (A5)
        add.w     #20,A7
@@ -8047,7 +9256,7 @@ DisassembleInstruction_243:
        move.l    D1,-(A7)
        and.l     #65535,D5
        move.l    D5,-(A7)
-       pea       @m68kde~1_340.L
+       pea       @m68kde~2_290.L
        pea       _Instruction.L
        jsr       (A5)
        add.w     #20,A7
@@ -8066,7 +9275,7 @@ DisassembleInstruction_245:
        move.l    D1,-(A7)
        and.l     #65535,D5
        move.l    D5,-(A7)
-       pea       @m68kde~1_341.L
+       pea       @m68kde~2_291.L
        pea       _Instruction.L
        jsr       (A5)
        add.w     #20,A7
@@ -8099,7 +9308,7 @@ DisassembleInstruction_247:
        and.w     #255,D1
        and.l     #65535,D1
        move.l    D1,-(A7)
-       pea       @m68kde~1_342.L
+       pea       @m68kde~2_292.L
        pea       _Instruction.L
        jsr       (A5)
        add.w     #16,A7
@@ -8125,7 +9334,7 @@ DisassembleInstruction_249:
        and.w     #7,D0
        move.w    D0,D5
 ; strcpyInstruction("MULS ");
-       pea       @m68kde~1_343.L
+       pea       @m68kde~2_293.L
        jsr       (A3)
        addq.w    #4,A7
 ; Decode6BitEA(OpCode,0,0,0) ;
@@ -8138,7 +9347,7 @@ DisassembleInstruction_249:
 ; sprintf(TempString, ",D%d", DataRegister) ;
        and.l     #65535,D5
        move.l    D5,-(A7)
-       pea       @m68kde~1_344.L
+       pea       @m68kde~2_249.L
        move.l    A4,-(A7)
        jsr       (A5)
        add.w     #12,A7
@@ -8168,7 +9377,7 @@ DisassembleInstruction_251:
        and.w     #7,D0
        move.w    D0,D5
 ; strcpyInstruction("MULU ");
-       pea       @m68kde~1_345.L
+       pea       @m68kde~2_294.L
        jsr       (A3)
        addq.w    #4,A7
 ; Decode6BitEA(OpCode,0,0,0) ;
@@ -8181,7 +9390,7 @@ DisassembleInstruction_251:
 ; sprintf(TempString, ",D%d", DataRegister) ;
        and.l     #65535,D5
        move.l    D5,-(A7)
-       pea       @m68kde~1_346.L
+       pea       @m68kde~2_249.L
        move.l    A4,-(A7)
        jsr       (A5)
        add.w     #12,A7
@@ -8204,7 +9413,7 @@ DisassembleInstruction_253:
 ; InstructionSize = 1;
        move.l    #1,(A2)
 ; strcpyInstruction("NBCD ");
-       pea       @m68kde~1_347.L
+       pea       @m68kde~2_295.L
        jsr       (A3)
        addq.w    #4,A7
 ; Decode6BitEA(OpCode,0,0,0);
@@ -8237,7 +9446,7 @@ DisassembleInstruction_255:
 ; InstructionSize = 1;
        move.l    #1,(A2)
 ; strcpyInstruction("NEG");
-       pea       @m68kde~1_348.L
+       pea       @m68kde~2_296.L
        jsr       (A3)
        addq.w    #4,A7
 ; Decode2BitOperandSize(*OpCode) ;
@@ -8278,7 +9487,7 @@ DisassembleInstruction_259:
 ; InstructionSize = 1;
        move.l    #1,(A2)
 ; strcpyInstruction("NEGX");
-       pea       @m68kde~1_349.L
+       pea       @m68kde~2_297.L
        jsr       (A3)
        addq.w    #4,A7
 ; Decode2BitOperandSize(*OpCode) ;
@@ -8310,7 +9519,7 @@ DisassembleInstruction_263:
 ; InstructionSize = 1;
        move.l    #1,(A2)
 ; strcpyInstruction("NOP");
-       pea       @m68kde~1_350.L
+       pea       @m68kde~2_298.L
        jsr       (A3)
        addq.w    #4,A7
 DisassembleInstruction_265:
@@ -8336,7 +9545,7 @@ DisassembleInstruction_265:
 ; InstructionSize = 1;
        move.l    #1,(A2)
 ; strcpyInstruction("NOT");
-       pea       @m68kde~1_351.L
+       pea       @m68kde~2_299.L
        jsr       (A3)
        addq.w    #4,A7
 ; Decode2BitOperandSize(*OpCode) ;
@@ -8385,7 +9594,7 @@ DisassembleInstruction_275:
 ; InstructionSize = 1;
        move.l    #1,(A2)
 ; strcpyInstruction("OR") ;
-       pea       @m68kde~1_352.L
+       pea       @m68kde~2_300.L
        jsr       (A3)
        addq.w    #4,A7
 ; Decode3BitOperandMode(OpCode) ;
@@ -8409,7 +9618,7 @@ DisassembleInstruction_273:
        and.w     #255,D1
        and.l     #65535,D1
        move.l    D1,-(A7)
-       pea       @m68kde~1_353.L
+       pea       @m68kde~2_301.L
        pea       _Instruction.L
        jsr       (A5)
        add.w     #12,A7
@@ -8433,7 +9642,7 @@ DisassembleInstruction_276:
        move.w    2(A0),D1
        ext.l     D1
        move.l    D1,-(A7)
-       pea       @m68kde~1_354.L
+       pea       @m68kde~2_302.L
        pea       _Instruction.L
        jsr       (A5)
        add.w     #12,A7
@@ -8452,7 +9661,7 @@ DisassembleInstruction_278:
 ; InstructionSize = 1;
        move.l    #1,(A2)
 ; strcpyInstruction("PEA ");
-       pea       @m68kde~1_355.L
+       pea       @m68kde~2_303.L
        jsr       (A3)
        addq.w    #4,A7
 ; Decode6BitEA(OpCode,0,0,0);
@@ -8476,7 +9685,7 @@ DisassembleInstruction_280:
 ; InstructionSize = 1;
        move.l    #1,(A2)
 ; sprintf(Instruction, "RESET");
-       pea       @m68kde~1_356.L
+       pea       @m68kde~2_304.L
        pea       _Instruction.L
        jsr       (A5)
        addq.w    #8,A7
@@ -8494,7 +9703,7 @@ DisassembleInstruction_282:
 ; InstructionSize = 1;
        move.l    #1,(A2)
 ; sprintf(Instruction, "RTE");
-       pea       @m68kde~1_357.L
+       pea       @m68kde~2_305.L
        pea       _Instruction.L
        jsr       (A5)
        addq.w    #8,A7
@@ -8512,7 +9721,7 @@ DisassembleInstruction_284:
 ; InstructionSize = 1;
        move.l    #1,(A2)
 ; strcpyInstruction("RTR");
-       pea       @m68kde~1_358.L
+       pea       @m68kde~2_306.L
        jsr       (A3)
        addq.w    #4,A7
 DisassembleInstruction_286:
@@ -8529,7 +9738,7 @@ DisassembleInstruction_286:
 ; InstructionSize = 1;
        move.l    #1,(A2)
 ; strcpyInstruction("RTS");
-       pea       @m68kde~1_359.L
+       pea       @m68kde~2_307.L
        jsr       (A3)
        addq.w    #4,A7
 DisassembleInstruction_288:
@@ -8550,7 +9759,7 @@ DisassembleInstruction_288:
        move.w    2(A0),D1
        ext.l     D1
        move.l    D1,-(A7)
-       pea       @m68kde~1_360.L
+       pea       @m68kde~2_308.L
        pea       _Instruction.L
        jsr       (A5)
        add.w     #12,A7
@@ -8597,7 +9806,7 @@ DisassembleInstruction_290:
        move.w    -34(A6),D1
        and.l     #65535,D1
        move.l    D1,-(A7)
-       pea       @m68kde~1_361.L
+       pea       @m68kde~2_309.L
        pea       _Instruction.L
        jsr       (A5)
        add.w     #16,A7
@@ -8611,7 +9820,7 @@ DisassembleInstruction_294:
        move.w    -34(A6),D1
        and.l     #65535,D1
        move.l    D1,-(A7)
-       pea       @m68kde~1_362.L
+       pea       @m68kde~2_310.L
        pea       _Instruction.L
        jsr       (A5)
        add.w     #16,A7
@@ -8647,7 +9856,7 @@ DisassembleInstruction_295:
        and.w     #15,D0
        move.b    D0,-23(A6)
 ; strcpyInstruction("S") ;
-       pea       @m68kde~1_363.L
+       pea       @m68kde~2_311.L
        jsr       (A3)
        addq.w    #4,A7
 ; DecodeBranchCondition(Condition) ;
@@ -8695,14 +9904,14 @@ DisassembleInstruction_304:
        cmp.w     #3,D3
        bne.s     DisassembleInstruction_305
 ; strcpyInstruction("SUBA.W ") ;
-       pea       @m68kde~1_364.L
+       pea       @m68kde~2_312.L
        jsr       (A3)
        addq.w    #4,A7
        bra.s     DisassembleInstruction_306
 DisassembleInstruction_305:
 ; else
 ; strcpyInstruction("SUBA.L ") ;
-       pea       @m68kde~1_365.L
+       pea       @m68kde~2_313.L
        jsr       (A3)
        addq.w    #4,A7
 DisassembleInstruction_306:
@@ -8721,7 +9930,7 @@ DisassembleInstruction_306:
        and.w     #7,D1
        and.l     #65535,D1
        move.l    D1,-(A7)
-       pea       @m68kde~1_366.L
+       pea       @m68kde~2_216.L
        move.l    A4,-(A7)
        jsr       (A5)
        add.w     #12,A7
@@ -8734,7 +9943,7 @@ DisassembleInstruction_302:
 ; }
 ; else {
 ; strcpyInstruction("SUB") ;
-       pea       @m68kde~1_367.L
+       pea       @m68kde~2_314.L
        jsr       (A3)
        addq.w    #4,A7
 ; Decode3BitOperandMode(OpCode) ;
@@ -8767,7 +9976,7 @@ DisassembleInstruction_303:
 ; InstructionSize = 1;
        move.l    #1,(A2)
 ; strcpyInstruction("SUBQ") ;
-       pea       @m68kde~1_368.L
+       pea       @m68kde~2_315.L
        jsr       (A3)
        addq.w    #4,A7
 ; Decode2BitOperandSize(*OpCode);                                  // add .b, .w, .l size indicator to instruction string
@@ -8785,7 +9994,7 @@ DisassembleInstruction_303:
        and.w     #7,D1
        and.l     #65535,D1
        move.l    D1,-(A7)
-       pea       @m68kde~1_369.L
+       pea       @m68kde~2_226.L
        move.l    A4,-(A7)
        jsr       (A5)
        add.w     #12,A7
@@ -8826,7 +10035,7 @@ DisassembleInstruction_309:
        beq       DisassembleInstruction_313
 ; {
 ; strcpyInstruction("SUBX") ;
-       pea       @m68kde~1_370.L
+       pea       @m68kde~2_316.L
        jsr       (A3)
        addq.w    #4,A7
 ; Decode2BitOperandSize(*OpCode);                                  // add .b, .w, .l size indicator to instruction string
@@ -8854,7 +10063,7 @@ DisassembleInstruction_309:
        and.w     #7,D1
        ext.l     D1
        move.l    D1,-(A7)
-       pea       @m68kde~1_371.L
+       pea       @m68kde~2_317.L
        move.l    A4,-(A7)
        jsr       (A5)
        add.w     #16,A7
@@ -8874,7 +10083,7 @@ DisassembleInstruction_315:
        and.w     #7,D1
        ext.l     D1
        move.l    D1,-(A7)
-       pea       @m68kde~1_372.L
+       pea       @m68kde~2_318.L
        move.l    A4,-(A7)
        jsr       (A5)
        add.w     #16,A7
@@ -8906,7 +10115,7 @@ DisassembleInstruction_313:
 ; sprintf(Instruction, "SWAP D%d", DataRegister) ;
        and.l     #65535,D5
        move.l    D5,-(A7)
-       pea       @m68kde~1_373.L
+       pea       @m68kde~2_319.L
        pea       _Instruction.L
        jsr       (A5)
        add.w     #12,A7
@@ -8931,7 +10140,7 @@ DisassembleInstruction_317:
 ; InstructionSize = 1;
        move.l    #1,(A2)
 ; strcpyInstruction("TAS ") ;
-       pea       @m68kde~1_374.L
+       pea       @m68kde~2_320.L
        jsr       (A3)
        addq.w    #4,A7
 ; Decode6BitEA(OpCode,0,0,0) ;
@@ -8959,7 +10168,7 @@ DisassembleInstruction_321:
        and.w     #15,D1
        and.l     #65535,D1
        move.l    D1,-(A7)
-       pea       @m68kde~1_375.L
+       pea       @m68kde~2_321.L
        pea       _Instruction.L
        jsr       (A5)
        add.w     #12,A7
@@ -8977,7 +10186,7 @@ DisassembleInstruction_323:
 ; InstructionSize = 1;
        move.l    #1,(A2)
 ; strcpyInstruction("TRAPV") ;
-       pea       @m68kde~1_376.L
+       pea       @m68kde~2_322.L
        jsr       (A3)
        addq.w    #4,A7
 DisassembleInstruction_325:
@@ -9009,7 +10218,7 @@ DisassembleInstruction_325:
 ; InstructionSize = 1;
        move.l    #1,(A2)
 ; strcpyInstruction("TST") ;
-       pea       @m68kde~1_377.L
+       pea       @m68kde~2_323.L
        jsr       (A3)
        addq.w    #4,A7
 ; Decode2BitOperandSize(*OpCode) ;
@@ -9047,7 +10256,7 @@ DisassembleInstruction_329:
        and.w     #7,D1
        and.l     #65535,D1
        move.l    D1,-(A7)
-       pea       @m68kde~1_378.L
+       pea       @m68kde~2_324.L
        pea       _Instruction.L
        jsr       (A5)
        add.w     #12,A7
@@ -9060,1034 +10269,983 @@ DisassembleInstruction_331:
        rts
 ; }
        section   const
-@m68kde~1_1:
+@m68kde~2_1:
        dc.b      13,10,0
-@m68kde~1_2:
+@m68kde~2_2:
        dc.b      13,83,119,105,116,99,104,101,115,32,83,87,91
        dc.b      55,45,48,93,32,61,32,0
-@m68kde~1_3:
+@m68kde~2_3:
        dc.b      48,0
-@m68kde~1_4:
+@m68kde~2_4:
        dc.b      49,0
-@m68kde~1_5:
+@m68kde~2_5:
        dc.b      13,10,69,110,116,101,114,32,83,116,97,114,116
        dc.b      32,65,100,100,114,101,115,115,58,32,0
-@m68kde~1_6:
+@m68kde~2_6:
        dc.b      13,10,60,69,83,67,62,32,61,32,65,98,111,114
        dc.b      116,44,32,83,80,65,67,69,32,116,111,32,67,111
        dc.b      110,116,105,110,117,101,0
-@m68kde~1_7:
+@m68kde~2_7:
        dc.b      13,10,37,48,56,88,32,32,37,48,52,88,32,32,32
        dc.b      32,32,32,32,32,32,32,32,32,32,32,32,32,32,32
        dc.b      32,32,32,32,32,32,37,115,0
-@m68kde~1_8:
+@m68kde~2_8:
        dc.b      13,10,37,48,56,88,32,32,37,48,52,88,32,37,48
        dc.b      52,88,32,32,32,32,32,32,32,32,32,32,32,32,32
        dc.b      32,32,32,32,32,32,37,115,0
-@m68kde~1_9:
+@m68kde~2_9:
        dc.b      13,10,37,48,56,88,32,32,37,48,52,88,32,37,48
        dc.b      52,88,32,37,48,52,88,32,32,32,32,32,32,32,32
        dc.b      32,32,32,32,32,32,37,115,0
-@m68kde~1_10:
+@m68kde~2_10:
        dc.b      13,10,37,48,56,88,32,32,37,48,52,88,32,37,48
        dc.b      52,88,32,37,48,52,88,32,37,48,52,88,32,32,32
        dc.b      32,32,32,32,32,32,37,115,0
-@m68kde~1_11:
+@m68kde~2_11:
        dc.b      13,10,37,48,56,88,32,32,37,48,52,88,32,37,48
        dc.b      52,88,32,37,48,52,88,32,37,48,52,88,32,37,48
        dc.b      52,88,32,32,32,32,37,115,0
-@m68kde~1_12:
+@m68kde~2_12:
        dc.b      13,10,68,117,109,112,32,77,101,109,111,114,121
        dc.b      32,66,108,111,99,107,58,32,60,69,83,67,62,32
        dc.b      116,111,32,65,98,111,114,116,44,32,60,83,80
        dc.b      65,67,69,62,32,116,111,32,67,111,110,116,105
        dc.b      110,117,101,0
-@m68kde~1_13:
-       dc.b      13,10,69,110,116,101,114,32,83,116,97,114,116
-       dc.b      32,65,100,100,114,101,115,115,58,32,0
-@m68kde~1_14:
+@m68kde~2_13:
        dc.b      13,10,37,48,56,120,32,0
-@m68kde~1_15:
+@m68kde~2_14:
        dc.b      37,48,50,88,0
-@m68kde~1_16:
+@m68kde~2_15:
        dc.b      32,32,0
-@m68kde~1_17:
-       dc.b      13,10,0
-@m68kde~1_18:
+@m68kde~2_16:
        dc.b      13,10,70,105,108,108,32,77,101,109,111,114,121
        dc.b      32,66,108,111,99,107,0
-@m68kde~1_19:
-       dc.b      13,10,69,110,116,101,114,32,83,116,97,114,116
-       dc.b      32,65,100,100,114,101,115,115,58,32,0
-@m68kde~1_20:
+@m68kde~2_17:
        dc.b      13,10,69,110,116,101,114,32,69,110,100,32,65
        dc.b      100,100,114,101,115,115,58,32,0
-@m68kde~1_21:
+@m68kde~2_18:
        dc.b      13,10,69,110,116,101,114,32,70,105,108,108,32
        dc.b      68,97,116,97,58,32,0
-@m68kde~1_22:
+@m68kde~2_19:
        dc.b      13,10,70,105,108,108,105,110,103,32,65,100,100
        dc.b      114,101,115,115,101,115,32,91,36,37,48,56,88
        dc.b      32,45,32,36,37,48,56,88,93,32,119,105,116,104
        dc.b      32,36,37,48,50,88,0
-@m68kde~1_23:
+@m68kde~2_20:
        dc.b      13,10,85,115,101,32,72,121,112,101,114,84,101
        dc.b      114,109,105,110,97,108,32,116,111,32,83,101
        dc.b      110,100,32,84,101,120,116,32,70,105,108,101
        dc.b      32,40,46,104,101,120,41,13,10,0
-@m68kde~1_24:
+@m68kde~2_21:
        dc.b      13,10,76,111,97,100,32,70,97,105,108,101,100
        dc.b      32,97,116,32,65,100,100,114,101,115,115,32,61
        dc.b      32,91,36,37,48,56,88,93,13,10,0
-@m68kde~1_25:
+@m68kde~2_22:
        dc.b      13,10,83,117,99,99,101,115,115,58,32,68,111
        dc.b      119,110,108,111,97,100,101,100,32,37,100,32
        dc.b      98,121,116,101,115,13,10,0
-@m68kde~1_26:
+@m68kde~2_23:
        dc.b      13,10,69,120,97,109,105,110,101,32,97,110,100
        dc.b      32,67,104,97,110,103,101,32,77,101,109,111,114
        dc.b      121,0
-@m68kde~1_27:
+@m68kde~2_24:
        dc.b      13,10,60,69,83,67,62,32,116,111,32,83,116,111
        dc.b      112,44,32,60,83,80,65,67,69,62,32,116,111,32
        dc.b      65,100,118,97,110,99,101,44,32,39,45,39,32,116
        dc.b      111,32,71,111,32,66,97,99,107,44,32,60,68,65
        dc.b      84,65,62,32,116,111,32,99,104,97,110,103,101
        dc.b      0
-@m68kde~1_28:
+@m68kde~2_25:
        dc.b      13,10,69,110,116,101,114,32,65,100,100,114,101
        dc.b      115,115,58,32,0
-@m68kde~1_29:
+@m68kde~2_26:
        dc.b      13,10,91,37,48,56,120,93,32,58,32,37,48,50,120
        dc.b      32,32,0
-@m68kde~1_30:
+@m68kde~2_27:
        dc.b      13,10,87,97,114,110,105,110,103,32,67,104,97
        dc.b      110,103,101,32,70,97,105,108,101,100,58,32,87
        dc.b      114,111,116,101,32,91,37,48,50,120,93,44,32
        dc.b      82,101,97,100,32,91,37,48,50,120,93,0
-@m68kde~1_31:
+@m68kde~2_28:
        dc.b      13,10,76,111,97,100,105,110,103,32,80,114,111
        dc.b      103,114,97,109,32,70,114,111,109,32,83,80,73
        dc.b      32,70,108,97,115,104,46,46,46,46,0
-@m68kde~1_32:
+@m68kde~2_29:
        dc.b      36,37,48,56,88,32,32,0
-@m68kde~1_33:
-       dc.b      37,48,50,88,0
-@m68kde~1_34:
+@m68kde~2_30:
        dc.b      32,0
-@m68kde~1_35:
-       dc.b      32,32,0
-@m68kde~1_36:
+@m68kde~2_31:
        dc.b      46,0
-@m68kde~1_37:
+@m68kde~2_32:
        dc.b      37,99,0
-@m68kde~1_38:
+@m68kde~2_33:
        dc.b      0
-@m68kde~1_39:
+@m68kde~2_34:
        dc.b      13,10,13,10,32,68,48,32,61,32,36,37,48,56,88
        dc.b      32,32,65,48,32,61,32,36,37,48,56,88,0
-@m68kde~1_40:
+@m68kde~2_35:
        dc.b      13,10,32,68,49,32,61,32,36,37,48,56,88,32,32
        dc.b      65,49,32,61,32,36,37,48,56,88,0
-@m68kde~1_41:
+@m68kde~2_36:
        dc.b      13,10,32,68,50,32,61,32,36,37,48,56,88,32,32
        dc.b      65,50,32,61,32,36,37,48,56,88,0
-@m68kde~1_42:
+@m68kde~2_37:
        dc.b      13,10,32,68,51,32,61,32,36,37,48,56,88,32,32
        dc.b      65,51,32,61,32,36,37,48,56,88,0
-@m68kde~1_43:
+@m68kde~2_38:
        dc.b      13,10,32,68,52,32,61,32,36,37,48,56,88,32,32
        dc.b      65,52,32,61,32,36,37,48,56,88,0
-@m68kde~1_44:
+@m68kde~2_39:
        dc.b      13,10,32,68,53,32,61,32,36,37,48,56,88,32,32
        dc.b      65,53,32,61,32,36,37,48,56,88,0
-@m68kde~1_45:
+@m68kde~2_40:
        dc.b      13,10,32,68,54,32,61,32,36,37,48,56,88,32,32
        dc.b      65,54,32,61,32,36,37,48,56,88,0
-@m68kde~1_46:
+@m68kde~2_41:
        dc.b      13,10,32,68,55,32,61,32,36,37,48,56,88,32,32
        dc.b      65,55,32,61,32,36,37,48,56,88,0
-@m68kde~1_47:
+@m68kde~2_42:
        dc.b      13,10,13,10,85,83,80,32,61,32,36,37,48,56,88
        dc.b      32,32,40,65,55,41,32,85,115,101,114,32,83,80
        dc.b      0
-@m68kde~1_48:
+@m68kde~2_43:
        dc.b      13,10,83,83,80,32,61,32,36,37,48,56,88,32,32
        dc.b      40,65,55,41,32,83,117,112,101,114,118,105,115
        dc.b      111,114,32,83,80,0
-@m68kde~1_49:
+@m68kde~2_44:
        dc.b      13,10,32,83,82,32,61,32,36,37,48,52,88,32,32
        dc.b      32,0
-@m68kde~1_50:
+@m68kde~2_45:
        dc.b      32,32,32,91,0
-@m68kde~1_51:
+@m68kde~2_46:
        dc.b      13,10,32,80,67,32,61,32,36,37,48,56,88,32,32
        dc.b      0
-@m68kde~1_52:
+@m68kde~2_47:
        dc.b      37,115,0
-@m68kde~1_53:
+@m68kde~2_48:
        dc.b      91,66,82,69,65,75,80,79,73,78,84,93,0
-@m68kde~1_54:
-       dc.b      13,10,0
-@m68kde~1_55:
+@m68kde~2_49:
        dc.b      13,10,87,80,37,100,32,61,32,37,115,0
-@m68kde~1_56:
+@m68kde~2_50:
        dc.b      13,10,13,10,13,10,13,10,13,10,13,10,83,105,110
        dc.b      103,108,101,32,83,116,101,112,32,32,58,91,79
        dc.b      78,93,0
-@m68kde~1_57:
+@m68kde~2_51:
        dc.b      13,10,66,114,101,97,107,32,80,111,105,110,116
        dc.b      115,32,58,91,68,105,115,97,98,108,101,100,93
        dc.b      0
-@m68kde~1_58:
+@m68kde~2_52:
        dc.b      13,10,80,114,101,115,115,32,60,83,80,65,67,69
        dc.b      62,32,116,111,32,69,120,101,99,117,116,101,32
        dc.b      78,101,120,116,32,73,110,115,116,114,117,99
        dc.b      116,105,111,110,0
-@m68kde~1_59:
+@m68kde~2_53:
        dc.b      13,10,80,114,101,115,115,32,60,69,83,67,62,32
        dc.b      116,111,32,82,101,115,117,109,101,32,80,114
        dc.b      111,103,114,97,109,0
-@m68kde~1_60:
+@m68kde~2_54:
        dc.b      13,10,73,108,108,101,103,97,108,32,68,97,116
        dc.b      97,32,82,101,103,105,115,116,101,114,32,58,32
        dc.b      85,115,101,32,68,48,45,68,55,46,46,46,46,46
        dc.b      13,10,0
-@m68kde~1_61:
+@m68kde~2_55:
        dc.b      13,10,68,37,99,32,61,32,0
-@m68kde~1_62:
+@m68kde~2_56:
        dc.b      13,10,73,108,108,101,103,97,108,32,65,100,100
        dc.b      114,101,115,115,32,82,101,103,105,115,116,101
        dc.b      114,32,58,32,85,115,101,32,65,48,45,65,55,46
        dc.b      46,46,46,46,13,10,0
-@m68kde~1_63:
+@m68kde~2_57:
        dc.b      13,10,65,37,99,32,61,32,0
-@m68kde~1_64:
+@m68kde~2_58:
        dc.b      13,10,85,115,101,114,32,83,80,32,61,32,0
-@m68kde~1_65:
+@m68kde~2_59:
        dc.b      13,10,73,108,108,101,103,97,108,32,82,101,103
        dc.b      105,115,116,101,114,46,46,46,46,0
-@m68kde~1_66:
+@m68kde~2_60:
        dc.b      13,10,83,121,115,116,101,109,32,83,80,32,61
        dc.b      32,0
-@m68kde~1_67:
-       dc.b      13,10,73,108,108,101,103,97,108,32,82,101,103
-       dc.b      105,115,116,101,114,46,46,46,46,0
-@m68kde~1_68:
+@m68kde~2_61:
        dc.b      13,10,80,67,32,61,32,0
-@m68kde~1_69:
+@m68kde~2_62:
        dc.b      13,10,83,82,32,61,32,0
-@m68kde~1_70:
+@m68kde~2_63:
        dc.b      13,10,73,108,108,101,103,97,108,32,82,101,103
        dc.b      105,115,116,101,114,58,32,85,115,101,32,65,48
        dc.b      45,65,55,44,32,68,48,45,68,55,44,32,83,83,80
        dc.b      44,32,85,83,80,44,32,80,67,32,111,114,32,83
        dc.b      82,13,10,0
-@m68kde~1_71:
+@m68kde~2_64:
        dc.b      13,10,13,10,78,117,109,32,32,32,32,32,65,100
        dc.b      100,114,101,115,115,32,32,32,32,32,32,73,110
        dc.b      115,116,114,117,99,116,105,111,110,0
-@m68kde~1_72:
+@m68kde~2_65:
        dc.b      13,10,45,45,45,32,32,32,32,32,45,45,45,45,45
        dc.b      45,45,45,45,32,32,32,32,45,45,45,45,45,45,45
        dc.b      45,45,45,45,0
-@m68kde~1_73:
+@m68kde~2_66:
        dc.b      13,10,78,111,32,66,114,101,97,107,80,111,105
        dc.b      110,116,115,32,83,101,116,0
-@m68kde~1_74:
+@m68kde~2_67:
        dc.b      13,10,37,51,100,32,32,32,32,32,36,37,48,56,120
        dc.b      0
-@m68kde~1_75:
+@m68kde~2_68:
        dc.b      32,32,32,32,37,115,0
-@m68kde~1_76:
-       dc.b      13,10,0
-@m68kde~1_77:
+@m68kde~2_69:
        dc.b      13,10,78,117,109,32,32,32,32,32,65,100,100,114
        dc.b      101,115,115,0
-@m68kde~1_78:
+@m68kde~2_70:
        dc.b      13,10,45,45,45,32,32,32,32,32,45,45,45,45,45
        dc.b      45,45,45,45,0
-@m68kde~1_79:
+@m68kde~2_71:
        dc.b      13,10,78,111,32,87,97,116,99,104,80,111,105
        dc.b      110,116,115,32,83,101,116,0
-@m68kde~1_80:
-       dc.b      13,10,37,51,100,32,32,32,32,32,36,37,48,56,120
-       dc.b      0
-@m68kde~1_81:
-       dc.b      13,10,0
-@m68kde~1_82:
+@m68kde~2_72:
        dc.b      13,10,69,110,116,101,114,32,66,114,101,97,107
        dc.b      32,80,111,105,110,116,32,78,117,109,98,101,114
        dc.b      58,32,0
-@m68kde~1_83:
+@m68kde~2_73:
        dc.b      13,10,73,108,108,101,103,97,108,32,82,97,110
        dc.b      103,101,32,58,32,85,115,101,32,48,32,45,32,55
        dc.b      0
-@m68kde~1_84:
+@m68kde~2_74:
        dc.b      13,10,66,114,101,97,107,32,80,111,105,110,116
        dc.b      32,67,108,101,97,114,101,100,46,46,46,46,46
        dc.b      13,10,0
-@m68kde~1_85:
+@m68kde~2_75:
        dc.b      13,10,66,114,101,97,107,32,80,111,105,110,116
        dc.b      32,119,97,115,110,39,116,32,83,101,116,46,46
        dc.b      46,46,46,0
-@m68kde~1_86:
+@m68kde~2_76:
        dc.b      13,10,69,110,116,101,114,32,87,97,116,99,104
        dc.b      32,80,111,105,110,116,32,78,117,109,98,101,114
        dc.b      58,32,0
-@m68kde~1_87:
-       dc.b      13,10,73,108,108,101,103,97,108,32,82,97,110
-       dc.b      103,101,32,58,32,85,115,101,32,48,32,45,32,55
-       dc.b      0
-@m68kde~1_88:
+@m68kde~2_77:
        dc.b      13,10,87,97,116,99,104,32,80,111,105,110,116
        dc.b      32,67,108,101,97,114,101,100,46,46,46,46,46
        dc.b      13,10,0
-@m68kde~1_89:
+@m68kde~2_78:
        dc.b      13,10,87,97,116,99,104,32,80,111,105,110,116
        dc.b      32,87,97,115,32,110,111,116,32,83,101,116,46
        dc.b      46,46,46,46,0
-@m68kde~1_90:
+@m68kde~2_79:
        dc.b      13,10,78,111,32,70,82,69,69,32,66,114,101,97
        dc.b      107,32,80,111,105,110,116,115,46,46,46,46,46
        dc.b      0
-@m68kde~1_91:
+@m68kde~2_80:
        dc.b      13,10,66,114,101,97,107,32,80,111,105,110,116
        dc.b      32,65,100,100,114,101,115,115,58,32,0
-@m68kde~1_92:
+@m68kde~2_81:
        dc.b      13,10,69,114,114,111,114,32,58,32,66,114,101
        dc.b      97,107,32,80,111,105,110,116,115,32,67,65,78
        dc.b      78,79,84,32,98,101,32,115,101,116,32,97,116
        dc.b      32,79,68,68,32,97,100,100,114,101,115,115,101
        dc.b      115,0
-@m68kde~1_93:
+@m68kde~2_82:
        dc.b      13,10,69,114,114,111,114,32,58,32,66,114,101
        dc.b      97,107,32,80,111,105,110,116,115,32,67,65,78
        dc.b      78,79,84,32,98,101,32,115,101,116,32,102,111
        dc.b      114,32,82,79,77,32,105,110,32,82,97,110,103
        dc.b      101,32,58,32,91,36,48,45,36,48,48,48,48,55,70
        dc.b      70,70,93,0
-@m68kde~1_94:
+@m68kde~2_83:
        dc.b      13,10,69,114,114,111,114,58,32,66,114,101,97
        dc.b      107,32,80,111,105,110,116,32,65,108,114,101
        dc.b      97,100,121,32,69,120,105,115,116,115,32,97,116
        dc.b      32,65,100,100,114,101,115,115,32,58,32,37,48
        dc.b      56,120,13,10,0
-@m68kde~1_95:
+@m68kde~2_84:
        dc.b      13,10,66,114,101,97,107,32,80,111,105,110,116
        dc.b      32,83,101,116,32,97,116,32,65,100,100,114,101
        dc.b      115,115,58,32,91,36,37,48,56,120,93,44,32,73
        dc.b      110,115,116,114,117,99,116,105,111,110,32,61
        dc.b      32,37,115,0
-@m68kde~1_96:
-       dc.b      13,10,0
-@m68kde~1_97:
+@m68kde~2_85:
        dc.b      13,10,78,111,32,70,82,69,69,32,87,97,116,99
        dc.b      104,32,80,111,105,110,116,115,46,46,46,46,46
        dc.b      0
-@m68kde~1_98:
+@m68kde~2_86:
        dc.b      13,10,87,97,116,99,104,32,80,111,105,110,116
        dc.b      32,65,100,100,114,101,115,115,58,32,0
-@m68kde~1_99:
+@m68kde~2_87:
        dc.b      13,10,69,114,114,111,114,58,32,87,97,116,99
        dc.b      104,32,80,111,105,110,116,32,65,108,114,101
        dc.b      97,100,121,32,83,101,116,32,97,116,32,65,100
        dc.b      100,114,101,115,115,32,58,32,37,48,56,120,13
        dc.b      10,0
-@m68kde~1_100:
+@m68kde~2_88:
        dc.b      13,10,87,97,116,99,104,32,80,111,105,110,116
        dc.b      32,83,101,116,32,97,116,32,65,100,100,114,101
        dc.b      115,115,58,32,91,36,37,48,56,120,93,0
-@m68kde~1_101:
-       dc.b      13,10,0
-@m68kde~1_102:
+@m68kde~2_89:
        dc.b      13,10,13,10,13,10,13,10,64,66,82,69,65,75,80
        dc.b      79,73,78,84,0
-@m68kde~1_103:
+@m68kde~2_90:
        dc.b      13,10,83,105,110,103,108,101,32,83,116,101,112
        dc.b      32,58,32,91,79,78,93,0
-@m68kde~1_104:
+@m68kde~2_91:
        dc.b      13,10,66,114,101,97,107,80,111,105,110,116,115
        dc.b      32,58,32,91,69,110,97,98,108,101,100,93,0
-@m68kde~1_105:
-       dc.b      13,10,80,114,101,115,115,32,60,83,80,65,67,69
-       dc.b      62,32,116,111,32,69,120,101,99,117,116,101,32
-       dc.b      78,101,120,116,32,73,110,115,116,114,117,99
-       dc.b      116,105,111,110,0
-@m68kde~1_106:
+@m68kde~2_92:
        dc.b      13,10,80,114,101,115,115,32,60,69,83,67,62,32
        dc.b      116,111,32,82,101,115,117,109,101,32,85,115
        dc.b      101,114,32,80,114,111,103,114,97,109,13,10,0
-@m68kde~1_107:
+@m68kde~2_93:
        dc.b      13,10,85,110,107,110,111,119,110,32,67,111,109
        dc.b      109,97,110,100,46,46,46,46,46,13,10,0
-@m68kde~1_108:
+@m68kde~2_94:
        dc.b      13,10,80,114,111,103,114,97,109,32,69,110,100
        dc.b      101,100,32,40,84,82,65,80,32,35,49,53,41,46
        dc.b      46,46,46,0
-@m68kde~1_109:
+@m68kde~2_95:
        dc.b      13,10,75,105,108,108,32,65,108,108,32,66,114
        dc.b      101,97,107,32,80,111,105,110,116,115,46,46,46
        dc.b      40,121,47,110,41,63,0
-@m68kde~1_110:
+@m68kde~2_96:
        dc.b      13,10,75,105,108,108,32,65,108,108,32,87,97
        dc.b      116,99,104,32,80,111,105,110,116,115,46,46,46
        dc.b      40,121,47,110,41,63,0
-@m68kde~1_111:
+@m68kde~2_97:
        dc.b      13,10,45,45,45,45,45,45,45,45,45,45,45,45,45
        dc.b      45,45,45,45,45,45,45,45,45,45,45,45,45,45,45
        dc.b      45,45,45,45,45,45,45,45,45,45,45,45,45,45,45
        dc.b      45,45,45,45,45,45,45,45,45,45,45,45,45,45,45
        dc.b      45,45,45,45,45,45,0
-@m68kde~1_112:
+@m68kde~2_98:
        dc.b      13,10,32,32,68,101,98,117,103,103,101,114,32
        dc.b      67,111,109,109,97,110,100,32,83,117,109,109
        dc.b      97,114,121,0
-@m68kde~1_113:
+@m68kde~2_99:
        dc.b      13,10,32,32,46,40,114,101,103,41,32,32,32,32
        dc.b      32,32,32,45,32,67,104,97,110,103,101,32,82,101
        dc.b      103,105,115,116,101,114,115,58,32,101,46,103
        dc.b      32,65,48,45,65,55,44,68,48,45,68,55,44,80,67
        dc.b      44,83,83,80,44,85,83,80,44,83,82,0
-@m68kde~1_114:
+@m68kde~2_100:
        dc.b      13,10,32,32,66,68,47,66,83,47,66,67,47,66,75
        dc.b      32,32,45,32,66,114,101,97,107,32,80,111,105
        dc.b      110,116,58,32,68,105,115,112,108,97,121,47,83
        dc.b      101,116,47,67,108,101,97,114,47,75,105,108,108
        dc.b      0
-@m68kde~1_115:
+@m68kde~2_101:
        dc.b      13,10,32,32,67,32,32,32,32,32,32,32,32,32,32
        dc.b      32,32,45,32,67,111,112,121,32,80,114,111,103
        dc.b      114,97,109,32,102,114,111,109,32,70,108,97,115
        dc.b      104,32,116,111,32,77,97,105,110,32,77,101,109
        dc.b      111,114,121,0
-@m68kde~1_116:
+@m68kde~2_102:
        dc.b      13,10,32,32,68,73,32,32,32,32,32,32,32,32,32
        dc.b      32,32,45,32,68,105,115,97,115,115,101,109,98
        dc.b      108,101,32,80,114,111,103,114,97,109,0
-@m68kde~1_117:
+@m68kde~2_103:
        dc.b      13,10,32,32,68,85,32,32,32,32,32,32,32,32,32
        dc.b      32,32,45,32,68,117,109,112,32,77,101,109,111
        dc.b      114,121,32,67,111,110,116,101,110,116,115,32
        dc.b      116,111,32,83,99,114,101,101,110,0
-@m68kde~1_118:
+@m68kde~2_104:
        dc.b      13,10,32,32,69,32,32,32,32,32,32,32,32,32,32
        dc.b      32,32,45,32,69,110,116,101,114,32,83,116,114
        dc.b      105,110,103,32,105,110,116,111,32,77,101,109
        dc.b      111,114,121,0
-@m68kde~1_119:
+@m68kde~2_105:
        dc.b      13,10,32,32,70,32,32,32,32,32,32,32,32,32,32
        dc.b      32,32,45,32,70,105,108,108,32,77,101,109,111
        dc.b      114,121,32,119,105,116,104,32,68,97,116,97,0
-@m68kde~1_120:
+@m68kde~2_106:
        dc.b      13,10,32,32,71,32,32,32,32,32,32,32,32,32,32
        dc.b      32,32,45,32,71,111,32,80,114,111,103,114,97
        dc.b      109,32,83,116,97,114,116,105,110,103,32,97,116
        dc.b      32,65,100,100,114,101,115,115,58,32,36,37,48
        dc.b      56,88,0
-@m68kde~1_121:
+@m68kde~2_107:
        dc.b      13,10,32,32,76,32,32,32,32,32,32,32,32,32,32
        dc.b      32,32,45,32,76,111,97,100,32,80,114,111,103
        dc.b      114,97,109,32,40,46,72,69,88,32,102,105,108
        dc.b      101,41,32,102,114,111,109,32,76,97,112,116,111
        dc.b      112,0
-@m68kde~1_122:
+@m68kde~2_108:
        dc.b      13,10,32,32,77,32,32,32,32,32,32,32,32,32,32
        dc.b      32,32,45,32,77,101,109,111,114,121,32,69,120
        dc.b      97,109,105,110,101,32,97,110,100,32,67,104,97
        dc.b      110,103,101,0
-@m68kde~1_123:
+@m68kde~2_109:
        dc.b      13,10,32,32,80,32,32,32,32,32,32,32,32,32,32
        dc.b      32,32,45,32,80,114,111,103,114,97,109,32,70
        dc.b      108,97,115,104,32,77,101,109,111,114,121,32
        dc.b      119,105,116,104,32,85,115,101,114,32,80,114
        dc.b      111,103,114,97,109,0
-@m68kde~1_124:
+@m68kde~2_110:
        dc.b      13,10,32,32,82,32,32,32,32,32,32,32,32,32,32
        dc.b      32,32,45,32,68,105,115,112,108,97,121,32,54
        dc.b      56,48,48,48,32,82,101,103,105,115,116,101,114
        dc.b      115,0
-@m68kde~1_125:
+@m68kde~2_111:
        dc.b      13,10,32,32,83,32,32,32,32,32,32,32,32,32,32
        dc.b      32,32,45,32,84,111,103,103,108,101,32,79,78
        dc.b      47,79,70,70,32,83,105,110,103,108,101,32,83
        dc.b      116,101,112,32,77,111,100,101,0
-@m68kde~1_126:
+@m68kde~2_112:
        dc.b      13,10,32,32,84,77,32,32,32,32,32,32,32,32,32
        dc.b      32,32,45,32,84,101,115,116,32,77,101,109,111
        dc.b      114,121,0
-@m68kde~1_127:
+@m68kde~2_113:
        dc.b      13,10,32,32,84,83,32,32,32,32,32,32,32,32,32
        dc.b      32,32,45,32,84,101,115,116,32,83,119,105,116
        dc.b      99,104,101,115,58,32,83,87,55,45,48,0
-@m68kde~1_128:
+@m68kde~2_114:
        dc.b      13,10,32,32,84,68,32,32,32,32,32,32,32,32,32
        dc.b      32,32,45,32,84,101,115,116,32,68,105,115,112
        dc.b      108,97,121,115,58,32,76,69,68,115,32,97,110
        dc.b      100,32,55,45,83,101,103,109,101,110,116,0
-@m68kde~1_129:
+@m68kde~2_115:
        dc.b      13,10,32,32,87,68,47,87,83,47,87,67,47,87,75
        dc.b      32,32,45,32,87,97,116,99,104,32,80,111,105,110
        dc.b      116,58,32,68,105,115,112,108,97,121,47,83,101
        dc.b      116,47,67,108,101,97,114,47,75,105,108,108,0
-@m68kde~1_130:
+@m68kde~2_116:
        dc.b      13,10,35,0
-@m68kde~1_131:
+@m68kde~2_117:
        dc.b      13,10,80,114,111,103,114,97,109,32,82,117,110
        dc.b      110,105,110,103,46,46,46,46,46,0
-@m68kde~1_132:
+@m68kde~2_118:
        dc.b      13,10,80,114,101,115,115,32,60,82,69,83,69,84
        dc.b      62,32,98,117,116,116,111,110,32,60,75,101,121
        dc.b      48,62,32,111,110,32,68,69,49,32,116,111,32,115
        dc.b      116,111,112,0
-@m68kde~1_133:
+@m68kde~2_119:
        dc.b      13,10,69,114,114,111,114,58,32,80,114,101,115
        dc.b      115,32,39,71,39,32,102,105,114,115,116,32,116
        dc.b      111,32,115,116,97,114,116,32,112,114,111,103
        dc.b      114,97,109,0
-@m68kde~1_134:
+@m68kde~2_120:
        dc.b      13,10,83,105,110,103,108,101,32,83,116,101,112
        dc.b      32,32,58,91,79,78,93,0
-@m68kde~1_135:
-       dc.b      13,10,66,114,101,97,107,32,80,111,105,110,116
-       dc.b      115,32,58,91,68,105,115,97,98,108,101,100,93
-       dc.b      0
-@m68kde~1_136:
+@m68kde~2_121:
        dc.b      13,10,80,114,101,115,115,32,39,71,39,32,116
        dc.b      111,32,84,114,97,99,101,32,80,114,111,103,114
        dc.b      97,109,32,102,114,111,109,32,97,100,100,114
        dc.b      101,115,115,32,36,37,88,46,46,46,46,46,0
-@m68kde~1_137:
+@m68kde~2_122:
        dc.b      13,10,80,117,115,104,32,60,82,69,83,69,84,32
        dc.b      66,117,116,116,111,110,62,32,116,111,32,83,116
        dc.b      111,112,46,46,46,46,46,0
-@m68kde~1_138:
+@m68kde~2_123:
        dc.b      13,10,83,105,110,103,108,101,32,83,116,101,112
        dc.b      32,58,32,91,79,70,70,93,0
-@m68kde~1_139:
+@m68kde~2_124:
        dc.b      13,10,66,114,101,97,107,32,80,111,105,110,116
        dc.b      115,32,58,91,69,110,97,98,108,101,100,93,0
-@m68kde~1_140:
+@m68kde~2_125:
        dc.b      13,10,80,114,101,115,115,32,60,69,83,67,62,32
        dc.b      116,111,32,82,101,115,117,109,101,32,85,115
        dc.b      101,114,32,80,114,111,103,114,97,109,46,46,46
        dc.b      46,46,0
-@m68kde~1_141:
+@m68kde~2_126:
        dc.b      13,10,83,105,110,103,108,101,32,83,116,101,112
        dc.b      32,32,58,91,79,70,70,93,0
-@m68kde~1_142:
-       dc.b      13,10,66,114,101,97,107,32,80,111,105,110,116
-       dc.b      115,32,58,91,69,110,97,98,108,101,100,93,0
-@m68kde~1_143:
-       dc.b      13,10,80,114,111,103,114,97,109,32,82,117,110
-       dc.b      110,105,110,103,46,46,46,46,46,0
-@m68kde~1_144:
-       dc.b      13,10,80,114,101,115,115,32,60,82,69,83,69,84
-       dc.b      62,32,98,117,116,116,111,110,32,60,75,101,121
-       dc.b      48,62,32,111,110,32,68,69,49,32,116,111,32,115
-       dc.b      116,111,112,0
-@m68kde~1_145:
+@m68kde~2_127:
        dc.b      13,10,13,10,80,114,111,103,114,97,109,32,65
        dc.b      66,79,82,84,32,33,33,33,33,33,33,13,10,0
-@m68kde~1_146:
+@m68kde~2_128:
        dc.b      37,115,13,10,0
-@m68kde~1_147:
+@m68kde~2_129:
        dc.b      13,10,13,10,80,114,111,103,114,97,109,32,65
        dc.b      66,79,82,84,32,33,33,33,33,33,0
-@m68kde~1_148:
+@m68kde~2_130:
        dc.b      13,10,85,110,104,97,110,100,108,101,100,32,73
        dc.b      110,116,101,114,114,117,112,116,58,32,73,82
        dc.b      81,37,100,32,33,33,33,33,33,0
-@m68kde~1_149:
+@m68kde~2_131:
        dc.b      65,68,68,82,69,83,83,32,69,82,82,79,82,58,32
        dc.b      49,54,32,111,114,32,51,50,32,66,105,116,32,84
        dc.b      114,97,110,115,102,101,114,32,116,111,47,102
        dc.b      114,111,109,32,97,110,32,79,68,68,32,65,100
        dc.b      100,114,101,115,115,46,46,46,46,0
-@m68kde~1_150:
+@m68kde~2_132:
        dc.b      85,110,104,97,110,100,108,101,100,32,84,114
        dc.b      97,112,32,33,33,33,33,33,0
-@m68kde~1_151:
+@m68kde~2_133:
        dc.b      66,85,83,32,69,114,114,111,114,33,0
-@m68kde~1_152:
+@m68kde~2_134:
        dc.b      65,68,68,82,69,83,83,32,69,114,114,111,114,33
        dc.b      0
-@m68kde~1_153:
+@m68kde~2_135:
        dc.b      73,76,76,69,71,65,76,32,73,78,83,84,82,85,67
        dc.b      84,73,79,78,0
-@m68kde~1_154:
+@m68kde~2_136:
        dc.b      68,73,86,73,68,69,32,66,89,32,90,69,82,79,0
-@m68kde~1_155:
+@m68kde~2_137:
        dc.b      39,67,72,75,39,32,73,78,83,84,82,85,67,84,73
        dc.b      79,78,0
-@m68kde~1_156:
+@m68kde~2_138:
        dc.b      84,82,65,80,86,32,73,78,83,84,82,85,67,84,73
        dc.b      79,78,0
-@m68kde~1_157:
+@m68kde~2_139:
        dc.b      80,82,73,86,73,76,69,71,69,32,86,73,79,76,65
        dc.b      84,73,79,78,0
-@m68kde~1_158:
+@m68kde~2_140:
        dc.b      85,78,73,78,73,84,73,65,76,73,83,69,68,32,73
        dc.b      82,81,0
-@m68kde~1_159:
+@m68kde~2_141:
        dc.b      83,80,85,82,73,79,85,83,32,73,82,81,0
-@m68kde~1_160:
+@m68kde~2_142:
        dc.b      13,10,83,116,97,114,116,32,65,100,100,114,101
        dc.b      115,115,32,105,110,32,77,101,109,111,114,121
        dc.b      58,32,0
-@m68kde~1_161:
+@m68kde~2_143:
        dc.b      13,10,69,110,116,101,114,32,83,116,114,105,110
        dc.b      103,32,40,69,83,67,32,116,111,32,101,110,100
        dc.b      41,32,58,0
-@m68kde~1_162:
-       dc.b      13,10,83,116,97,114,116,32,65,100,100,114,101
-       dc.b      115,115,58,32,0
-@m68kde~1_163:
-       dc.b      13,10,69,110,100,32,65,100,100,114,101,115,115
+@m68kde~2_144:
+       dc.b      13,10,82,101,97,100,105,110,103,32,65,100,100
+       dc.b      114,101,115,115,101,115,32,91,36,37,48,56,88
+       dc.b      32,45,32,36,37,48,56,88,93,32,102,111,114,32
+       dc.b      36,37,48,50,88,0
+@m68kde~2_145:
+       dc.b      13,10,86,97,108,117,101,32,105,110,99,111,114
+       dc.b      114,101,99,116,32,97,116,32,97,100,100,114,101
+       dc.b      115,115,101,115,32,36,37,48,56,88,32,46,46,46
+       dc.b      32,115,104,111,117,108,100,32,98,101,32,36,37
+       dc.b      48,50,88,32,98,117,116,32,102,111,117,110,100
+       dc.b      32,36,37,48,50,88,0
+@m68kde~2_146:
+       dc.b      13,10,86,97,108,117,101,58,32,36,37,48,50,88
+       dc.b      32,102,111,117,110,100,32,97,116,32,65,100,100
+       dc.b      114,101,115,115,58,32,36,37,48,56,88,0
+@m68kde~2_147:
+       dc.b      13,10,86,97,108,117,101,58,32,36,37,48,50,88
+       dc.b      32,36,37,48,50,88,32,102,111,117,110,100,32
+       dc.b      97,116,32,65,100,100,114,101,115,115,58,32,36
+       dc.b      37,48,56,88,32,45,32,36,37,48,56,88,0
+@m68kde~2_148:
+       dc.b      13,10,86,97,108,117,101,58,32,36,37,48,50,88
+       dc.b      32,36,37,48,50,88,32,36,37,48,50,88,32,36,37
+       dc.b      48,50,88,32,102,111,117,110,100,32,97,116,32
+       dc.b      65,100,100,114,101,115,115,58,32,36,37,48,56
+       dc.b      88,32,45,32,36,37,48,56,88,0
+@m68kde~2_149:
+       dc.b      13,10,69,110,116,101,114,32,109,101,109,111
+       dc.b      114,121,32,116,101,115,116,32,99,111,110,102
+       dc.b      105,103,117,114,97,116,105,111,110,40,49,32
+       dc.b      45,32,98,121,116,101,115,44,32,50,32,45,32,119
+       dc.b      111,114,100,115,44,32,51,32,45,32,108,111,110
+       dc.b      103,32,119,111,114,100,115,41,58,32,0
+@m68kde~2_150:
+       dc.b      37,100,0
+@m68kde~2_151:
+       dc.b      13,10,67,111,110,102,105,103,117,114,97,116
+       dc.b      105,111,110,32,105,110,118,97,108,105,100,44
+       dc.b      32,116,114,121,32,97,103,97,105,110,0
+@m68kde~2_152:
+       dc.b      13,10,67,104,111,111,115,101,32,98,101,116,119
+       dc.b      101,101,110,32,100,105,102,102,101,114,101,110
+       dc.b      116,32,109,101,109,111,114,121,32,116,101,115
+       dc.b      116,32,112,97,116,116,101,114,110,115,40,49
+       dc.b      32,45,32,53,44,32,50,32,45,32,65,44,32,51,32
+       dc.b      45,32,70,44,32,52,32,45,32,48,41,58,32,0
+@m68kde~2_153:
+       dc.b      13,10,80,97,116,116,101,114,110,32,105,110,118
+       dc.b      97,108,105,100,44,32,116,114,121,32,97,103,97
+       dc.b      105,110,0
+@m68kde~2_154:
+       dc.b      13,10,69,110,116,101,114,32,115,116,97,114,116
+       dc.b      105,110,103,32,97,100,100,114,101,115,115,40
+       dc.b      56,48,50,48,48,48,48,32,45,32,56,48,51,48,48
+       dc.b      48,48,32,105,110,99,108,117,115,105,118,101
+       dc.b      41,58,32,0
+@m68kde~2_155:
+       dc.b      13,10,83,116,97,114,116,105,110,103,32,97,100
+       dc.b      100,114,101,115,115,32,111,117,116,32,111,102
+       dc.b      32,98,111,117,110,100,115,46,46,32,116,114,121
+       dc.b      32,97,103,97,105,110,0
+@m68kde~2_156:
+       dc.b      13,10,79,100,100,32,115,116,97,114,116,105,110
+       dc.b      103,32,97,100,100,114,101,115,115,46,46,32,116
+       dc.b      114,121,32,97,103,97,105,110,0
+@m68kde~2_157:
+       dc.b      13,10,69,110,116,101,114,32,101,110,100,105
+       dc.b      110,103,32,97,100,100,114,101,115,115,40,56
+       dc.b      48,50,48,48,48,48,32,45,32,56,48,51,48,48,48
+       dc.b      48,32,105,110,99,108,117,115,105,118,101,41
        dc.b      58,32,0
-@m68kde~1_164:
+@m68kde~2_158:
+       dc.b      13,10,69,110,100,105,110,103,32,97,100,100,114
+       dc.b      101,115,115,32,111,117,116,32,111,102,32,98
+       dc.b      111,117,110,100,115,46,46,32,116,114,121,32
+       dc.b      97,103,97,105,110,0
+@m68kde~2_159:
+       dc.b      13,10,73,110,118,97,108,105,100,32,101,110,100
+       dc.b      105,110,103,32,97,100,100,114,101,115,115,46
+       dc.b      46,32,116,114,121,32,97,103,97,105,110,0
+@m68kde~2_160:
+       dc.b      13,10,73,110,118,97,108,105,100,32,97,100,100
+       dc.b      114,101,115,115,32,114,97,110,103,101,32,105
+       dc.b      115,32,116,111,111,32,115,109,97,108,108,46
+       dc.b      46,32,116,114,121,32,97,103,97,105,110,0
+@m68kde~2_161:
+       dc.b      13,10,73,110,118,97,108,105,100,32,114,97,110
+       dc.b      103,101,32,105,115,32,116,111,111,32,115,109
+       dc.b      97,108,108,46,46,32,116,114,121,32,97,103,97
+       dc.b      105,110,0
+@m68kde~2_162:
+       dc.b      13,10,87,114,105,116,105,110,103,32,116,111
+       dc.b      32,83,82,65,77,32,46,46,46,0
+@m68kde~2_163:
+       dc.b      13,10,46,46,46,46,46,46,46,46,46,46,46,46,46
+       dc.b      46,46,46,46,46,46,46,46,46,46,46,46,46,46,46
+       dc.b      46,46,46,46,46,46,46,46,46,46,46,46,46,46,46
+       dc.b      46,46,46,46,46,46,46,46,46,46,46,46,46,46,46
+       dc.b      46,46,46,46,46,46,46,46,46,46,46,46,46,46,46
+       dc.b      46,46,46,46,46,46,46,46,46,46,46,46,46,46,46
+       dc.b      46,46,46,46,46,46,46,46,46,46,46,46,46,46,46
+       dc.b      46,46,46,46,46,0
+@m68kde~2_164:
+       dc.b      13,10,70,105,110,105,115,104,101,100,32,119
+       dc.b      114,105,116,105,110,103,32,116,111,32,83,82
+       dc.b      65,77,32,46,0
+@m68kde~2_165:
+       dc.b      13,10,67,104,101,99,107,32,83,82,65,77,32,99
+       dc.b      111,110,116,101,110,116,0
+@m68kde~2_166:
+       dc.b      13,10,82,101,97,100,105,110,103,32,102,114,111
+       dc.b      109,32,83,82,65,77,32,46,46,46,0
+@m68kde~2_167:
+       dc.b      13,10,80,114,105,110,116,105,110,103,32,111
+       dc.b      117,116,32,101,118,101,114,121,32,49,48,107
+       dc.b      32,108,111,99,97,116,105,111,110,32,102,114
+       dc.b      111,109,32,83,82,65,77,32,46,46,46,0
+@m68kde~2_168:
+       dc.b      13,10,46,46,46,46,46,46,46,46,46,46,46,46,46
+       dc.b      46,46,46,46,46,46,46,46,46,46,32,98,101,103
+       dc.b      105,110,32,114,101,97,100,105,110,103,0
+@m68kde~2_169:
+       dc.b      13,10,70,105,110,105,115,104,101,100,32,114
+       dc.b      101,97,100,105,110,103,32,102,114,111,109,32
+       dc.b      83,82,65,77,32,46,46,46,0
+@m68kde~2_170:
+       dc.b      13,10,101,110,100,32,111,102,32,112,114,111
+       dc.b      103,114,97,109,32,46,46,46,0
+@m68kde~2_171:
        dc.b      68,69,49,45,54,56,107,32,66,117,103,32,86,49
        dc.b      46,55,55,0
-@m68kde~1_165:
+@m68kde~2_172:
        dc.b      67,111,112,121,114,105,103,104,116,32,40,67
        dc.b      41,32,80,74,32,68,97,118,105,101,115,32,50,48
        dc.b      49,54,0
-@m68kde~1_166:
+@m68kde~2_173:
        dc.b      13,10,82,117,110,110,105,110,103,46,46,46,46
        dc.b      46,0
-@m68kde~1_167:
+@m68kde~2_174:
        dc.b      82,117,110,110,105,110,103,46,46,46,46,46,0
-@m68kde~1_168:
+@m68kde~2_175:
        dc.b      66,121,58,32,80,74,32,68,97,118,105,101,115
        dc.b      0
-@m68kde~1_169:
+@m68kde~2_176:
        dc.b      13,10,37,115,0
-@m68kde~1_170:
-       dc.b      13,10,37,115,0
-@m68kde~1_171:
+@m68kde~2_177:
        dc.b      46,66,32,0
-@m68kde~1_172:
+@m68kde~2_178:
        dc.b      46,87,32,0
-@m68kde~1_173:
+@m68kde~2_179:
        dc.b      46,76,32,0
-@m68kde~1_174:
+@m68kde~2_180:
        dc.b      35,36,37,88,0
-@m68kde~1_175:
-       dc.b      35,36,37,88,0
-@m68kde~1_176:
-       dc.b      35,36,37,88,0
-@m68kde~1_177:
-       dc.b      35,36,37,88,0
-@m68kde~1_178:
-       dc.b      35,36,37,88,0
-@m68kde~1_179:
-       dc.b      35,36,37,88,0
-@m68kde~1_180:
-       dc.b      35,36,37,88,0
-@m68kde~1_181:
+@m68kde~2_181:
        dc.b      40,0
-@m68kde~1_182:
+@m68kde~2_182:
        dc.b      41,0
-@m68kde~1_183:
-       dc.b      40,0
-@m68kde~1_184:
+@m68kde~2_183:
        dc.b      41,43,0
-@m68kde~1_185:
+@m68kde~2_184:
        dc.b      45,40,0
-@m68kde~1_186:
-       dc.b      41,0
-@m68kde~1_187:
+@m68kde~2_185:
        dc.b      37,100,40,65,37,100,41,0
-@m68kde~1_188:
+@m68kde~2_186:
        dc.b      37,100,40,65,37,100,44,0
-@m68kde~1_189:
+@m68kde~2_187:
        dc.b      68,0
-@m68kde~1_190:
+@m68kde~2_188:
        dc.b      65,0
-@m68kde~1_191:
-       dc.b      37,100,0
-@m68kde~1_192:
+@m68kde~2_189:
        dc.b      46,87,41,0
-@m68kde~1_193:
+@m68kde~2_190:
        dc.b      46,76,41,0
-@m68kde~1_194:
+@m68kde~2_191:
        dc.b      36,37,88,0
-@m68kde~1_195:
-       dc.b      36,37,88,0
-@m68kde~1_196:
+@m68kde~2_192:
        dc.b      37,100,40,80,67,41,0
-@m68kde~1_197:
+@m68kde~2_193:
        dc.b      37,100,40,80,67,44,0
-@m68kde~1_198:
-       dc.b      68,0
-@m68kde~1_199:
-       dc.b      65,0
-@m68kde~1_200:
-       dc.b      37,100,0
-@m68kde~1_201:
-       dc.b      46,87,41,0
-@m68kde~1_202:
-       dc.b      46,76,41,0
-@m68kde~1_203:
+@m68kde~2_194:
        dc.b      44,0
-@m68kde~1_204:
-       dc.b      44,0
-@m68kde~1_205:
+@m68kde~2_195:
        dc.b      67,67,0
-@m68kde~1_206:
+@m68kde~2_196:
        dc.b      67,83,0
-@m68kde~1_207:
+@m68kde~2_197:
        dc.b      69,81,0
-@m68kde~1_208:
+@m68kde~2_198:
        dc.b      71,69,0
-@m68kde~1_209:
+@m68kde~2_199:
        dc.b      71,84,0
-@m68kde~1_210:
+@m68kde~2_200:
        dc.b      72,73,0
-@m68kde~1_211:
+@m68kde~2_201:
        dc.b      76,69,0
-@m68kde~1_212:
+@m68kde~2_202:
        dc.b      76,83,0
-@m68kde~1_213:
+@m68kde~2_203:
        dc.b      76,84,0
-@m68kde~1_214:
+@m68kde~2_204:
        dc.b      77,73,0
-@m68kde~1_215:
+@m68kde~2_205:
        dc.b      78,69,0
-@m68kde~1_216:
+@m68kde~2_206:
        dc.b      80,76,0
-@m68kde~1_217:
+@m68kde~2_207:
        dc.b      86,83,0
-@m68kde~1_218:
+@m68kde~2_208:
        dc.b      86,67,0
-@m68kde~1_219:
+@m68kde~2_209:
        dc.b      82,65,0
-@m68kde~1_220:
+@m68kde~2_210:
        dc.b      83,82,0
-@m68kde~1_221:
-       dc.b      32,0
-@m68kde~1_222:
+@m68kde~2_211:
        dc.b      85,110,107,110,111,119,110,0
-@m68kde~1_223:
+@m68kde~2_212:
        dc.b      65,66,67,68,32,68,37,100,44,68,37,100,0
-@m68kde~1_224:
+@m68kde~2_213:
        dc.b      65,66,67,68,32,45,40,65,37,100,41,44,45,40,65
        dc.b      37,100,41,0
-@m68kde~1_225:
+@m68kde~2_214:
        dc.b      65,68,68,65,46,87,32,0
-@m68kde~1_226:
+@m68kde~2_215:
        dc.b      65,68,68,65,46,76,32,0
-@m68kde~1_227:
+@m68kde~2_216:
        dc.b      44,65,37,88,0
-@m68kde~1_228:
+@m68kde~2_217:
        dc.b      65,68,68,0
-@m68kde~1_229:
+@m68kde~2_218:
        dc.b      65,68,68,73,0
-@m68kde~1_230:
+@m68kde~2_219:
        dc.b      65,78,68,73,0
-@m68kde~1_231:
+@m68kde~2_220:
        dc.b      67,77,80,73,0
-@m68kde~1_232:
+@m68kde~2_221:
        dc.b      69,79,82,73,0
-@m68kde~1_233:
+@m68kde~2_222:
        dc.b      79,82,73,0
-@m68kde~1_234:
+@m68kde~2_223:
        dc.b      83,85,66,73,0
-@m68kde~1_235:
-       dc.b      44,0
-@m68kde~1_236:
+@m68kde~2_224:
        dc.b      65,78,68,73,32,35,36,37,88,44,83,82,0
-@m68kde~1_237:
+@m68kde~2_225:
        dc.b      65,68,68,81,0
-@m68kde~1_238:
+@m68kde~2_226:
        dc.b      35,37,49,88,44,0
-@m68kde~1_239:
+@m68kde~2_227:
        dc.b      65,68,68,88,0
-@m68kde~1_240:
+@m68kde~2_228:
        dc.b      68,37,88,44,68,37,88,0
-@m68kde~1_241:
+@m68kde~2_229:
        dc.b      45,40,65,37,88,41,44,45,40,65,37,88,41,0
-@m68kde~1_242:
+@m68kde~2_230:
        dc.b      65,78,68,0
-@m68kde~1_243:
+@m68kde~2_231:
        dc.b      65,78,68,73,32,35,36,37,50,88,44,67,67,82,0
-@m68kde~1_244:
+@m68kde~2_232:
        dc.b      65,83,76,0
-@m68kde~1_245:
+@m68kde~2_233:
        dc.b      65,83,82,0
-@m68kde~1_246:
+@m68kde~2_234:
        dc.b      76,83,76,0
-@m68kde~1_247:
+@m68kde~2_235:
        dc.b      76,83,82,0
-@m68kde~1_248:
+@m68kde~2_236:
        dc.b      82,79,76,0
-@m68kde~1_249:
+@m68kde~2_237:
        dc.b      82,79,82,0
-@m68kde~1_250:
+@m68kde~2_238:
        dc.b      82,79,88,76,0
-@m68kde~1_251:
+@m68kde~2_239:
        dc.b      82,79,88,82,0
-@m68kde~1_252:
-       dc.b      32,32,0
-@m68kde~1_253:
-       dc.b      65,83,76,0
-@m68kde~1_254:
-       dc.b      65,83,82,0
-@m68kde~1_255:
-       dc.b      76,83,76,0
-@m68kde~1_256:
-       dc.b      76,83,82,0
-@m68kde~1_257:
-       dc.b      82,79,76,0
-@m68kde~1_258:
-       dc.b      82,79,82,0
-@m68kde~1_259:
-       dc.b      82,79,88,76,0
-@m68kde~1_260:
-       dc.b      82,79,88,82,0
-@m68kde~1_261:
+@m68kde~2_240:
        dc.b      35,36,37,88,44,68,37,88,0
-@m68kde~1_262:
-       dc.b      68,37,88,44,68,37,88,0
-@m68kde~1_263:
+@m68kde~2_241:
        dc.b      66,0
-@m68kde~1_264:
-       dc.b      36,37,88,0
-@m68kde~1_265:
-       dc.b      36,37,88,0
-@m68kde~1_266:
+@m68kde~2_242:
        dc.b      66,67,72,71,32,0
-@m68kde~1_267:
+@m68kde~2_243:
        dc.b      68,37,100,44,0
-@m68kde~1_268:
-       dc.b      66,67,72,71,32,0
-@m68kde~1_269:
+@m68kde~2_244:
        dc.b      35,36,37,88,44,0
-@m68kde~1_270:
+@m68kde~2_245:
        dc.b      66,67,76,82,32,0
-@m68kde~1_271:
-       dc.b      68,37,100,44,0
-@m68kde~1_272:
-       dc.b      66,67,76,82,32,0
-@m68kde~1_273:
-       dc.b      35,36,37,88,44,0
-@m68kde~1_274:
+@m68kde~2_246:
        dc.b      66,83,69,84,32,0
-@m68kde~1_275:
-       dc.b      68,37,100,44,0
-@m68kde~1_276:
-       dc.b      66,83,69,84,32,0
-@m68kde~1_277:
-       dc.b      35,36,37,88,44,0
-@m68kde~1_278:
+@m68kde~2_247:
        dc.b      66,84,83,84,32,0
-@m68kde~1_279:
-       dc.b      68,37,100,44,0
-@m68kde~1_280:
-       dc.b      66,84,83,84,32,0
-@m68kde~1_281:
-       dc.b      35,36,37,88,44,0
-@m68kde~1_282:
+@m68kde~2_248:
        dc.b      67,72,75,32,0
-@m68kde~1_283:
+@m68kde~2_249:
        dc.b      44,68,37,100,0
-@m68kde~1_284:
+@m68kde~2_250:
        dc.b      67,76,82,0
-@m68kde~1_285:
+@m68kde~2_251:
        dc.b      67,77,80,65,46,87,32,0
-@m68kde~1_286:
+@m68kde~2_252:
        dc.b      67,77,80,65,46,76,32,0
-@m68kde~1_287:
+@m68kde~2_253:
        dc.b      44,65,37,100,0
-@m68kde~1_288:
+@m68kde~2_254:
        dc.b      67,77,80,0
-@m68kde~1_289:
+@m68kde~2_255:
        dc.b      67,77,80,77,0
-@m68kde~1_290:
+@m68kde~2_256:
        dc.b      40,65,37,100,41,43,44,40,65,37,100,41,43,0
-@m68kde~1_291:
+@m68kde~2_257:
        dc.b      68,66,0
-@m68kde~1_292:
+@m68kde~2_258:
        dc.b      68,37,100,44,37,43,100,40,80,67,41,32,116,111
        dc.b      32,65,100,100,114,58,36,37,88,0
-@m68kde~1_293:
+@m68kde~2_259:
        dc.b      68,73,86,83,32,0
-@m68kde~1_294:
-       dc.b      44,0
-@m68kde~1_295:
+@m68kde~2_260:
        dc.b      68,73,86,85,32,0
-@m68kde~1_296:
-       dc.b      44,0
-@m68kde~1_297:
+@m68kde~2_261:
        dc.b      69,79,82,0
-@m68kde~1_298:
+@m68kde~2_262:
        dc.b      69,79,82,73,32,35,36,37,50,88,44,67,67,82,0
-@m68kde~1_299:
+@m68kde~2_263:
        dc.b      69,79,82,73,32,35,36,37,88,44,83,82,0
-@m68kde~1_300:
+@m68kde~2_264:
        dc.b      69,88,71,32,68,37,100,44,68,37,100,0
-@m68kde~1_301:
+@m68kde~2_265:
        dc.b      69,88,71,32,65,37,100,44,65,37,100,0
-@m68kde~1_302:
+@m68kde~2_266:
        dc.b      69,88,71,32,68,37,100,44,65,37,100,0
-@m68kde~1_303:
+@m68kde~2_267:
        dc.b      69,88,84,0
-@m68kde~1_304:
-       dc.b      46,76,32,0
-@m68kde~1_305:
-       dc.b      46,87,32,0
-@m68kde~1_306:
+@m68kde~2_268:
        dc.b      73,76,76,69,71,65,76,32,40,36,52,65,70,67,41
        dc.b      0
-@m68kde~1_307:
+@m68kde~2_269:
        dc.b      74,77,80,32,0
-@m68kde~1_308:
+@m68kde~2_270:
        dc.b      74,83,82,32,0
-@m68kde~1_309:
+@m68kde~2_271:
        dc.b      76,69,65,32,0
-@m68kde~1_310:
-       dc.b      44,65,37,100,0
-@m68kde~1_311:
+@m68kde~2_272:
        dc.b      76,73,78,75,32,0
-@m68kde~1_312:
+@m68kde~2_273:
        dc.b      65,37,100,44,35,37,100,0
-@m68kde~1_313:
+@m68kde~2_274:
        dc.b      77,79,86,69,46,66,32,0
-@m68kde~1_314:
+@m68kde~2_275:
        dc.b      77,79,86,69,46,76,32,0
-@m68kde~1_315:
+@m68kde~2_276:
        dc.b      77,79,86,69,46,87,32,0
-@m68kde~1_316:
-       dc.b      44,0
-@m68kde~1_317:
+@m68kde~2_277:
        dc.b      77,79,86,69,32,0
-@m68kde~1_318:
+@m68kde~2_278:
        dc.b      44,67,67,82,0
-@m68kde~1_319:
+@m68kde~2_279:
        dc.b      77,79,86,69,32,83,82,44,0
-@m68kde~1_320:
-       dc.b      77,79,86,69,32,0
-@m68kde~1_321:
+@m68kde~2_280:
        dc.b      44,83,82,0
-@m68kde~1_322:
+@m68kde~2_281:
        dc.b      77,79,86,69,32,85,83,80,44,65,37,100,0
-@m68kde~1_323:
+@m68kde~2_282:
        dc.b      77,79,86,69,32,65,37,100,44,85,83,80,0
-@m68kde~1_324:
+@m68kde~2_283:
        dc.b      77,79,86,69,77,0
-@m68kde~1_325:
-       dc.b      46,87,32,0
-@m68kde~1_326:
-       dc.b      46,76,32,0
-@m68kde~1_327:
-       dc.b      0
-@m68kde~1_328:
+@m68kde~2_284:
        dc.b      68,37,100,0
-@m68kde~1_329:
+@m68kde~2_285:
        dc.b      47,68,37,100,0
-@m68kde~1_330:
+@m68kde~2_286:
        dc.b      65,37,100,0
-@m68kde~1_331:
+@m68kde~2_287:
        dc.b      47,65,37,100,0
-@m68kde~1_332:
-       dc.b      44,0
-@m68kde~1_333:
-       dc.b      44,0
-@m68kde~1_334:
-       dc.b      68,37,100,0
-@m68kde~1_335:
-       dc.b      47,68,37,100,0
-@m68kde~1_336:
-       dc.b      65,37,100,0
-@m68kde~1_337:
-       dc.b      47,65,37,100,0
-@m68kde~1_338:
+@m68kde~2_288:
        dc.b      77,79,86,69,80,46,87,32,36,37,88,40,65,37,100
        dc.b      41,44,68,37,100,0
-@m68kde~1_339:
+@m68kde~2_289:
        dc.b      77,79,86,69,80,46,76,32,36,37,88,40,65,37,100
        dc.b      41,44,68,37,100,0
-@m68kde~1_340:
+@m68kde~2_290:
        dc.b      77,79,86,69,80,46,87,32,68,37,100,44,36,37,88
        dc.b      40,65,37,100,41,0
-@m68kde~1_341:
+@m68kde~2_291:
        dc.b      77,79,86,69,80,46,76,32,68,37,100,44,36,37,88
        dc.b      40,65,37,100,41,0
-@m68kde~1_342:
+@m68kde~2_292:
        dc.b      77,79,86,69,81,32,35,36,37,88,44,68,37,100,0
-@m68kde~1_343:
+@m68kde~2_293:
        dc.b      77,85,76,83,32,0
-@m68kde~1_344:
-       dc.b      44,68,37,100,0
-@m68kde~1_345:
+@m68kde~2_294:
        dc.b      77,85,76,85,32,0
-@m68kde~1_346:
-       dc.b      44,68,37,100,0
-@m68kde~1_347:
+@m68kde~2_295:
        dc.b      78,66,67,68,32,0
-@m68kde~1_348:
+@m68kde~2_296:
        dc.b      78,69,71,0
-@m68kde~1_349:
+@m68kde~2_297:
        dc.b      78,69,71,88,0
-@m68kde~1_350:
+@m68kde~2_298:
        dc.b      78,79,80,0
-@m68kde~1_351:
+@m68kde~2_299:
        dc.b      78,79,84,0
-@m68kde~1_352:
+@m68kde~2_300:
        dc.b      79,82,0
-@m68kde~1_353:
+@m68kde~2_301:
        dc.b      79,82,73,32,35,36,37,50,88,44,67,67,82,0
-@m68kde~1_354:
+@m68kde~2_302:
        dc.b      79,82,73,32,32,35,36,37,88,44,83,82,0
-@m68kde~1_355:
+@m68kde~2_303:
        dc.b      80,69,65,32,0
-@m68kde~1_356:
+@m68kde~2_304:
        dc.b      82,69,83,69,84,0
-@m68kde~1_357:
+@m68kde~2_305:
        dc.b      82,84,69,0
-@m68kde~1_358:
+@m68kde~2_306:
        dc.b      82,84,82,0
-@m68kde~1_359:
+@m68kde~2_307:
        dc.b      82,84,83,0
-@m68kde~1_360:
+@m68kde~2_308:
        dc.b      83,84,79,80,32,35,36,37,88,0
-@m68kde~1_361:
+@m68kde~2_309:
        dc.b      83,66,67,68,32,68,37,100,44,68,37,100,0
-@m68kde~1_362:
+@m68kde~2_310:
        dc.b      83,66,67,68,32,45,40,65,37,100,41,44,45,40,65
        dc.b      37,100,41,0
-@m68kde~1_363:
+@m68kde~2_311:
        dc.b      83,0
-@m68kde~1_364:
+@m68kde~2_312:
        dc.b      83,85,66,65,46,87,32,0
-@m68kde~1_365:
+@m68kde~2_313:
        dc.b      83,85,66,65,46,76,32,0
-@m68kde~1_366:
-       dc.b      44,65,37,88,0
-@m68kde~1_367:
+@m68kde~2_314:
        dc.b      83,85,66,0
-@m68kde~1_368:
+@m68kde~2_315:
        dc.b      83,85,66,81,0
-@m68kde~1_369:
-       dc.b      35,37,49,88,44,0
-@m68kde~1_370:
+@m68kde~2_316:
        dc.b      83,85,66,88,0
-@m68kde~1_371:
+@m68kde~2_317:
        dc.b      68,37,49,88,44,68,37,49,88,0
-@m68kde~1_372:
+@m68kde~2_318:
        dc.b      45,40,65,37,49,88,41,44,45,40,65,37,49,88,41
        dc.b      0
-@m68kde~1_373:
+@m68kde~2_319:
        dc.b      83,87,65,80,32,68,37,100,0
-@m68kde~1_374:
+@m68kde~2_320:
        dc.b      84,65,83,32,0
-@m68kde~1_375:
+@m68kde~2_321:
        dc.b      84,82,65,80,32,35,37,100,0
-@m68kde~1_376:
+@m68kde~2_322:
        dc.b      84,82,65,80,86,0
-@m68kde~1_377:
+@m68kde~2_323:
        dc.b      84,83,84,0
-@m68kde~1_378:
+@m68kde~2_324:
        dc.b      85,78,76,75,32,65,37,100,0
        section   bss
        xdef      _i
@@ -10201,10 +11359,12 @@ _TempString:
        xref      _strcpy
        xref      LDIV
        xref      _go
+       xref      _strlen
        xref      _putch
        xref      _getch
        xref      _tolower
        xref      _sprintf
        xref      _strcat
        xref      _toupper
+       xref      _scanf
        xref      _printf

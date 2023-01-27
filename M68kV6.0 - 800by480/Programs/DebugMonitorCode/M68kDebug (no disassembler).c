@@ -279,7 +279,8 @@ void DumpMemory(void)   // simple dump memory fn
 
     printf("\r\nDump Memory Block: <ESC> to Abort, <SPACE> to Continue") ;
     printf("\r\nEnter Start Address: ") ;
-    RamPtr = Get8HexDigits(0) ;
+    //RamPtr = Get8HexDigits(0) ;
+    RamPtr = Get7HexDigits();
 
     while(1)    {
         for(i = 0; i < 16; i ++)    {
@@ -1298,21 +1299,215 @@ void EnterString(void)
     *Start = 0x00;  // terminate with a null
 }
 
+// Memory test helper functions
+int Get2HexDigitsForMemTest(char pat)
+{
+    return (xtod(pat) << 4) | (xtod(pat));
+}
+
+int Get4HexDigitsForMemTest(char pat)
+{
+    return (xtod(pat) << 12) | (xtod(pat) << 8) |(Get2HexDigitsForMemTest(pat));
+}
+
+int Get8HexDigitsForMemTest(char pat)
+{
+    return  (xtod(pat) << 28) | (xtod(pat) << 24) | (xtod(pat) << 20) | (xtod(pat) << 16) |(Get4HexDigitsForMemTest(pat));
+}
+
+int Get7HexDigitsForMemTest(char one, char two, char three, char four, char five, char six, char seven)
+{
+    return (xtod(one) << 24) | (xtod(two) << 20) | (xtod(three) << 16) | (xtod(four) << 12) | (xtod(five) << 8) | (xtod(six) << 4) | (xtod(seven));
+
+}
+
+int Get7HexDigits(void)
+{
+    register int i = (xtod(_getch()) << 24) | (xtod(_getch()) << 20) | (xtod(_getch()) << 16) | (xtod(_getch()) << 12) | (xtod(_getch()) << 8) | (xtod(_getch()) << 4) | (xtod(_getch()));
+
+    return i;
+}
+
+void FillMemoryForMemTest(char* StartRamPtr, char* EndRamPtr, unsigned long FillData, int config)
+{
+    char* start = StartRamPtr;
+    printf("\r\nFilling Addresses [$%08X - $%08X] with $%08X", StartRamPtr, EndRamPtr, FillData);
+
+    if (config == 1) {
+        while (start <= EndRamPtr){
+            *start++ = FillData;
+            }
+    }
+
+    if (config == 2) {
+        while (start <= EndRamPtr) {
+            *start = FillData;
+            start += 1;
+        }
+    }
+
+    if (config == 3) {
+        while (start <= EndRamPtr) {
+            *start = FillData;
+            start += 1;
+        }
+    }
+
+
+}
+
+void ReadMemoryForMemTest(char* StartRamPtr, char* EndRamPtr, unsigned long FillData, int config)
+{
+    unsigned char* start = StartRamPtr;
+
+    printf("\r\nReading Addresses [$%08X - $%08X] for $%02X", StartRamPtr, EndRamPtr, FillData);
+
+    if (config == 1) {
+        while (start <= EndRamPtr) {
+            if (*start != FillData)
+                printf("\r\nValue incorrect at addresses $%08X ... should be $%02X but found $%02X", start, FillData, *start);
+            printf("\r\nValue: $%02X found at Address: $%08X", *start, start);
+            start++;
+        }
+    }
+
+    if (config == 2) {
+        while (start <= EndRamPtr) {
+            if(*start != FillData)
+                printf("\r\nValue incorrect at addresses $%08X ... should be $%02X but found $%02X", start, FillData, *start);
+            printf("\r\nValue: $%02X $%02X found at Address: $%08X and $%08X", *start, *(start + 1), start, (start + 1));
+            start += 2;
+        }
+    }
+
+    if (config == 3) {
+        while (start <= EndRamPtr) {
+            if (*start != FillData)
+                printf("\r\nValue incorrect at addresses $%08X ... should be $%02X but found $%02X", start, FillData, *start);
+             printf("\r\nValue: $%02X $%02X $%02X $%02X found at Address: $%08X - $%08X", *start, *(start + 1), *(start + 2), *(start + 3), start, (start + 1), (start + 2), (start + 3));
+             start += 4;
+        }
+    }
+
+
+}
+
 void MemoryTest(void)
 {
-    unsigned int *RamPtr, counter1=1 ;
-    register unsigned int i ;
-    unsigned int Start, End ;
-    char c ;
+    int test_config = 0;
+    int test_pattern = 0;
+    char start_addr[7];
+    int start_val = 0;
+    char end_addr[7];
+    int end_val = 0;
+    char digit;
 
-    printf("\r\nStart Address: ") ;
-    Start = Get8HexDigits(0) ;
-    printf("\r\nEnd Address: ") ;
-    End = Get8HexDigits(0) ;
+    scanflush();
 
-	// TODO
+    // Prompt the user to enter a test configuration
+    printf("\r\nEnter memory test configuration(1 - bytes, 2 - words, 3 - long words): ");
+    test_config = (int)(xtod(_getch()));
+    // Check for invalid configuration entry and re-prompt if needed
+    while (test_config > 3 || test_config < 1) {
+        printf("\r\nConfiguration invalid %d, try again", test_config);
+        printf("\r\nEnter memory test configuration(1 - bytes, 2 - words, 3 - long words): ");
+        test_config = (int)(xtod(_getch()));
+        //scanf("%d", &test_config);
+    }
 
-	// add your code to test memory here using 32 bit reads and writes of data between the start and end of memory
+    // Prompt the user to enter a test pattern
+    printf("\r\nChoose between different memory test patterns(1 - 5, 2 - A, 3 - F, 4 - 0): ");
+    test_pattern = (int)(xtod(_getch()));
+    // Check for invalid pattern entry and re-prompt if needed
+    while (test_pattern > 4 || test_pattern < 1) {
+        printf("\r\nPattern invalid, try again");
+        printf("\r\nChoose between different memory test patterns(1 - 5, 2 - A, 3 - F, 4 - 0): ");
+        //scanf("%d", &test_pattern);
+        test_pattern = (int)(xtod(_getch()));
+    }
+
+    // Prompt the user to enter a starting address
+    printf("\r\nEnter starting address(8020000 - 8030000 inclusive): ");
+    start_val = Get7HexDigits();
+    // Check for invalid start address and re-prompt if needed
+    // Check for illegal address, start address must be even if writing words or long words to memory
+    while (start_val < 0x8020000 || start_val > 0x8030000 || strlen(start_addr) > 7 || (start_val % 2 != 0 && test_config != 1)) { // start address must be 7 chars and within bounds
+        printf("\r\nInvalid starting address.. try again");
+        //printf("\r\nStarting address out of bounds.. try again");
+        printf("\r\nEnter starting address(8020000 - 8030000 inclusive): ");
+        start_val = Get7HexDigits();
+    }
+
+    // Prompt the user to enter an ending address
+    printf("\r\nEnter ending address(8020000 - 8030000 inclusive): ");
+    end_val = Get7HexDigits();
+    // When writing words, the given address range should be a multiple of 2 bytes (size of a word)
+    // When writing long words, the given address range should be a multiple of 4 bytes (size of a long word)
+    while (end_val < 0x8020000 || end_val > 0x8030000 || strlen(end_addr) > 7 ||
+        end_val < start_val || ((end_val - start_val + 1) % 2 != 0 && test_config == 2) ||
+        ((end_val - start_val + 1) % 4 != 0 && test_config == 3)) { // end address must be 7 chars and within bounds
+        printf("\r\nEnding address out of bounds.. try again");
+        printf("\r\nEnter ending address(8020000 - 8030000 inclusive): ");
+        end_val = Get7HexDigits();
+    }
+
+    printf("\r\nWriting to SRAM ...");
+    printf("\r\n here");
+    printf("\r\n............................................................................................................");
+    printf("\r\n............................................................................................................");
+    printf("\r\n............................................................................................................");
+
+    switch (test_pattern) {
+        case 1: digit = '5';
+                break;
+        case 2: digit = 'A';
+                break;
+        case 3: digit = 'F';
+                break;
+        case 4: digit = '0';
+                break;
+        default: digit = '5';
+    }
+
+
+    switch (test_config) {
+        case 1: FillMemoryForMemTest(start_val, end_val, Get2HexDigitsForMemTest(digit), 1);
+                break;
+        case 2: FillMemoryForMemTest(start_val, end_val, Get4HexDigitsForMemTest(digit), 2);
+                break;
+        case 3: FillMemoryForMemTest(start_val, end_val, Get8HexDigitsForMemTest(digit), 3);
+                break;
+        default: FillMemoryForMemTest(start_val, end_val, Get2HexDigitsForMemTest(digit), 1);;
+    }
+
+
+    printf("\r\nFinished writing to SRAM .");
+    printf("\r\nCheck SRAM content");
+
+    printf("\r\nReading from SRAM ...");
+    printf("\r\nPrinting out every 400th location from SRAM ...");
+    printf("\r\n............................................................................................................");
+    printf("\r\n............................................................................................................");
+    printf("\r\n............................................................................................................");
+    printf("\r\n....................... begin reading");
+
+
+    switch (test_config) {
+        case 1: ReadMemoryForMemTest(start_val, end_val, Get2HexDigitsForMemTest(digit), 1);
+                break;
+        case 2: ReadMemoryForMemTest(start_val, end_val, Get4HexDigitsForMemTest(digit), 2);
+                break;
+        case 3: ReadMemoryForMemTest(start_val, end_val, Get8HexDigitsForMemTest(digit), 3);
+                break;
+        default: ReadMemoryForMemTest(start_val, end_val, Get2HexDigitsForMemTest(digit), 1);;
+    }
+
+
+    printf("\r\nFinished reading from SRAM ...");
+    printf("\r\nend of program ...");
+    printf("\r\n............................................................................................................");
+    printf("\r\n............................................................................................................");
+
 }
 
 void main(void)
@@ -1397,8 +1592,7 @@ void main(void)
 
     printf("\r\n%s", BugMessage) ;
     printf("\r\n%s", CopyrightMessage) ;
+    printf("\r\nNancy Makar - 33464918 and Steven Chin - 40108540");
 
     menu();
 }
-
-

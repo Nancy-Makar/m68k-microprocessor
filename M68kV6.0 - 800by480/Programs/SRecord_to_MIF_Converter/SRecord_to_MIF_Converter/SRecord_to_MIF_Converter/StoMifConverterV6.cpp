@@ -15,15 +15,15 @@ int main(int argc, char *argv[])
   FILE *DestFilePtr;
 
     
-  if((SourceFilePtr =  fopen("G:\\Courses\\Elec 465\\M68k Systems\\DE1\\Verilog\\M68kV6.0 - 800by480 - (Verilog) For Students\\Programs\\DebugMonitorCode\\M68kdebugmonitor.hex", "r")) == NULL)	{
+  if((SourceFilePtr =  fopen("C:\\CPEN412\\Lab1\\M68kV6.0 - 800by480\\Programs\\DebugMonitorCode\\debugmonitorintegration.hex", "r")) == NULL)	{
 		fprintf(stderr, "Cannot Open S-Record File 'C:\\M68kV6.0 - 800by480\\M68kdebugmonitor.hex' for conversion to '.MIF' format\n") ;
 		fprintf(stderr, "Hit any key to exit.....") ;
 		getch() ;
 		return 0 ;
 	}
 	
-	if((DestFilePtr = fopen("G:\\Courses\\Elec 465\\M68k Systems\\DE1\\Verilog\\M68kV6.0 - 800by480 - (Verilog) For Students\\Programs\\DebugMonitorCode\\M68kdebugmonitor.mif","w")) == NULL)	{
-		fprintf(stderr, "Cannot Open/Create file 'C:\\M68kV6.0 - 800by480\\Programs\\M68kdebugmonitor.mif' to store output of file conversion\n") ;
+	if((DestFilePtr = fopen("C:\\CPEN412\\Lab1\\M68kV6.0 - 800by480\\Programs\\DebugMonitorCode\\debugmonitorintegration.mif","w")) == NULL)	{
+		fprintf(stderr, "C:\\CPEN412\\Lab1\\M68kV6.0 - 800by480\M68kDebugMonitor\\M68kdebugmonitor.mif' to store output of file conversion\n") ;
 		fprintf(stderr, "Hit any key to exit.....") ;
 		getch() ;
 		return 0 ;
