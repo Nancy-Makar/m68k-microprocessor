@@ -1,0 +1,163 @@
+Flow report for MC68K
+Wed Jan 25 23:18:10 2023
+Quartus Prime Version 18.1.0 Build 625 09/12/2018 SJ Lite Edition
+
+
+---------------------
+; Table of Contents ;
+---------------------
+  1. Legal Notice
+  2. Flow Summary
+  3. Flow Settings
+  4. Flow Non-Default Global Settings
+  5. Flow Elapsed Time
+  6. Flow OS Summary
+  7. Flow Log
+  8. Flow Messages
+  9. Flow Suppressed Messages
+
+
+
+----------------
+; Legal Notice ;
+----------------
+Copyright (C) 2018  Intel Corporation. All rights reserved.
+Your use of Intel Corporation's design tools, logic functions 
+and other software and tools, and its AMPP partner logic 
+functions, and any output files from any of the foregoing 
+(including device programming or simulation files), and any 
+associated documentation or information are expressly subject 
+to the terms and conditions of the Intel Program License 
+Subscription Agreement, the Intel Quartus Prime License Agreement,
+the Intel FPGA IP License Agreement, or other applicable license
+agreement, including, without limitation, that your use is for
+the sole purpose of programming logic devices manufactured by
+Intel and sold by Intel or its authorized distributors.  Please
+refer to the applicable agreement for further details.
+
+
+
++-------------------------------------------------------------------------------+
+; Flow Summary                                                                  ;
++---------------------------------+---------------------------------------------+
+; Flow Status                     ; Successful - Wed Jan 25 23:18:10 2023       ;
+; Quartus Prime Version           ; 18.1.0 Build 625 09/12/2018 SJ Lite Edition ;
+; Revision Name                   ; MC68K                                       ;
+; Top-level Entity Name           ; MC68K                                       ;
+; Family                          ; Cyclone V                                   ;
+; Device                          ; 5CSEMA5F31C6                                ;
+; Timing Models                   ; Final                                       ;
+; Logic utilization (in ALMs)     ; 2,469 / 32,070 ( 8 % )                      ;
+; Total registers                 ; 1212                                        ;
+; Total pins                      ; 238 / 457 ( 52 % )                          ;
+; Total virtual pins              ; 0                                           ;
+; Total block memory bits         ; 2,360,432 / 4,065,280 ( 58 % )              ;
+; Total DSP Blocks                ; 0 / 87 ( 0 % )                              ;
+; Total HSSI RX PCSs              ; 0                                           ;
+; Total HSSI PMA RX Deserializers ; 0                                           ;
+; Total HSSI TX PCSs              ; 0                                           ;
+; Total HSSI PMA TX Serializers   ; 0                                           ;
+; Total PLLs                      ; 1 / 6 ( 17 % )                              ;
+; Total DLLs                      ; 0 / 4 ( 0 % )                               ;
++---------------------------------+---------------------------------------------+
+
+
++-----------------------------------------+
+; Flow Settings                           ;
++-------------------+---------------------+
+; Option            ; Setting             ;
++-------------------+---------------------+
+; Start date & time ; 01/25/2023 23:05:57 ;
+; Main task         ; Compilation         ;
+; Revision Name     ; MC68K               ;
++-------------------+---------------------+
+
+
++-------------------------------------------------------------------------------------------------------------------------------------------+
+; Flow Non-Default Global Settings                                                                                                          ;
++---------------------------------------------------+----------------------------------------+---------------+-------------+----------------+
+; Assignment Name                                   ; Value                                  ; Default Value ; Entity Name ; Section Id     ;
++---------------------------------------------------+----------------------------------------+---------------+-------------+----------------+
+; ADV_NETLIST_OPT_SYNTH_WYSIWYG_REMAP               ; On                                     ; Off           ; --          ; --             ;
+; COMPILER_SIGNATURE_ID                             ; 127564576532112.167471675730940        ; --            ; --          ; --             ;
+; DO_COMBINED_ANALYSIS                              ; -- (Not supported for targeted family) ; Off           ; --          ; --             ;
+; EDA_GENERATE_FUNCTIONAL_NETLIST                   ; Off                                    ; --            ; --          ; eda_simulation ;
+; EDA_GENERATE_GATE_LEVEL_SIMULATION_COMMAND_SCRIPT ; Off                                    ; --            ; --          ; eda_simulation ;
+; EDA_GENERATE_RTL_SIMULATION_COMMAND_SCRIPT        ; Off                                    ; --            ; --          ; eda_simulation ;
+; EDA_OUTPUT_DATA_FORMAT                            ; Vhdl                                   ; --            ; --          ; eda_simulation ;
+; EDA_SIMULATION_TOOL                               ; ModelSim-Altera (VHDL)                 ; <None>        ; --          ; --             ;
+; EDA_TIME_SCALE                                    ; 1 ps                                   ; --            ; --          ; eda_simulation ;
+; FITTER_EFFORT                                     ; Fast Fit                               ; Auto Fit      ; --          ; --             ;
+; FMAX_REQUIREMENT                                  ; 25 MHz                                 ; --            ; --          ; --             ;
+; IGNORE_CLOCK_SETTINGS                             ; On                                     ; Off           ; --          ; --             ;
+; IGNORE_LCELL_BUFFERS                              ; On                                     ; Off           ; --          ; --             ;
+; MAX_CORE_JUNCTION_TEMP                            ; 85                                     ; --            ; --          ; --             ;
+; MIN_CORE_JUNCTION_TEMP                            ; 0                                      ; --            ; --          ; --             ;
+; MISC_FILE                                         ; lpm_bustri0.bsf                        ; --            ; --          ; --             ;
+; MISC_FILE                                         ; lpm_bustri0.cmp                        ; --            ; --          ; --             ;
+; MISC_FILE                                         ; lpm_bustri2.bsf                        ; --            ; --          ; --             ;
+; MISC_FILE                                         ; lpm_bustri2.cmp                        ; --            ; --          ; --             ;
+; MISC_FILE                                         ; SingleBitTriState.bsf                  ; --            ; --          ; --             ;
+; MISC_FILE                                         ; SingleBitTriState.cmp                  ; --            ; --          ; --             ;
+; MISC_FILE                                         ; ClockGen.cmp                           ; --            ; --          ; --             ;
+; MISC_FILE                                         ; ClockGen_sim/ClockGen.vho              ; --            ; --          ; --             ;
+; MISC_FILE                                         ; Ram32kByte.bsf                         ; --            ; --          ; --             ;
+; MISC_FILE                                         ; Ram32kByte.cmp                         ; --            ; --          ; --             ;
+; MISC_FILE                                         ; rom2/OnChipRom16KWord.bsf              ; --            ; --          ; --             ;
+; MISC_FILE                                         ; rom2/OnChipRom16KWord.cmp              ; --            ; --          ; --             ;
+; MUX_RESTRUCTURE                                   ; Off                                    ; Auto          ; --          ; --             ;
+; PARTITION_COLOR                                   ; -- (Not supported for targeted family) ; --            ; --          ; Top            ;
+; PARTITION_FITTER_PRESERVATION_LEVEL               ; -- (Not supported for targeted family) ; --            ; --          ; Top            ;
+; PARTITION_NETLIST_TYPE                            ; -- (Not supported for targeted family) ; --            ; --          ; Top            ;
+; PHYSICAL_SYNTHESIS_COMBO_LOGIC                    ; On                                     ; Off           ; --          ; --             ;
+; PHYSICAL_SYNTHESIS_REGISTER_DUPLICATION           ; On                                     ; Off           ; --          ; --             ;
+; PHYSICAL_SYNTHESIS_REGISTER_RETIMING              ; On                                     ; Off           ; --          ; --             ;
+; POWER_BOARD_THERMAL_MODEL                         ; None (CONSERVATIVE)                    ; --            ; --          ; --             ;
+; POWER_PRESET_COOLING_SOLUTION                     ; 23 MM HEAT SINK WITH 200 LFPM AIRFLOW  ; --            ; --          ; --             ;
+; QII_AUTO_PACKED_REGISTERS                         ; Normal                                 ; Auto          ; --          ; --             ;
+; ROUTER_TIMING_OPTIMIZATION_LEVEL                  ; MAXIMUM                                ; Normal        ; --          ; --             ;
+; SPD_FILE                                          ; ClockGen.spd                           ; --            ; --          ; --             ;
+; SYNTHESIS_ONLY_QIP                                ; On                                     ; --            ; --          ; --             ;
+; TIMING_ANALYZER_DO_CCPP_REMOVAL                   ; Off                                    ; On            ; --          ; --             ;
+; USE_GENERATED_PHYSICAL_CONSTRAINTS                ; Off                                    ; --            ; --          ; eda_blast_fpga ;
++---------------------------------------------------+----------------------------------------+---------------+-------------+----------------+
+
+
++--------------------------------------------------------------------------------------------------------------------------+
+; Flow Elapsed Time                                                                                                        ;
++----------------------+--------------+-------------------------+---------------------+------------------------------------+
+; Module Name          ; Elapsed Time ; Average Processors Used ; Peak Virtual Memory ; Total CPU Time (on all processors) ;
++----------------------+--------------+-------------------------+---------------------+------------------------------------+
+; Analysis & Synthesis ; 00:03:32     ; 1.0                     ; 5012 MB             ; 00:00:55                           ;
+; Fitter               ; 00:06:59     ; 1.3                     ; 7768 MB             ; 00:08:35                           ;
+; Assembler            ; 00:00:30     ; 1.0                     ; 4926 MB             ; 00:00:07                           ;
+; Timing Analyzer      ; 00:00:37     ; 3.1                     ; 5514 MB             ; 00:00:50                           ;
+; EDA Netlist Writer   ; 00:00:05     ; 1.0                     ; 4954 MB             ; 00:00:01                           ;
+; Total                ; 00:11:43     ; --                      ; --                  ; 00:10:28                           ;
++----------------------+--------------+-------------------------+---------------------+------------------------------------+
+
+
++------------------------------------------------------------------------------------+
+; Flow OS Summary                                                                    ;
++----------------------+------------------+------------+------------+----------------+
+; Module Name          ; Machine Hostname ; OS Name    ; OS Version ; Processor type ;
++----------------------+------------------+------------+------------+----------------+
+; Analysis & Synthesis ; StevenLaptop     ; Windows 10 ; 10.0       ; x86_64         ;
+; Fitter               ; StevenLaptop     ; Windows 10 ; 10.0       ; x86_64         ;
+; Assembler            ; StevenLaptop     ; Windows 10 ; 10.0       ; x86_64         ;
+; Timing Analyzer      ; StevenLaptop     ; Windows 10 ; 10.0       ; x86_64         ;
+; EDA Netlist Writer   ; StevenLaptop     ; Windows 10 ; 10.0       ; x86_64         ;
++----------------------+------------------+------------+------------+----------------+
+
+
+------------
+; Flow Log ;
+------------
+quartus_map --read_settings_files=on --write_settings_files=off MC68K -c MC68K
+quartus_fit --read_settings_files=off --write_settings_files=off MC68K -c MC68K
+quartus_asm --read_settings_files=off --write_settings_files=off MC68K -c MC68K
+quartus_sta MC68K -c MC68K
+quartus_eda --read_settings_files=off --write_settings_files=off MC68K -c MC68K
+
+
+
