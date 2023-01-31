@@ -238,7 +238,7 @@ module M68kDramController_Verilog (
 		DramAddress <= 13'h0000 ;									// no particular dram address
 		BankAddress <= 2'b00 ;										// no particular dram bank address
 		DramDataLatch_H <= 0;										// don't latch data yet
-		CPU_Dtack_L <= 1 ;											// don't acknowledge back to 68000
+		CPU_Dtack_L <= 0;											// don't acknowledge back to 68000
 		SDramWriteData <= 16'h0000 ;								// nothing to write in particular
 		CPUReset_L <= 0 ;												// default is reset to CPU (for the moment, though this will change when design is complete so that reset-out goes high at the end of the dram initialisation phase to allow CPU to resume)
 		FPGAWritingtoSDram_H <= 0 ;								// default is to tri-state the FPGA data lines leading to bi-directional SDRam data lines, i.e. assume a read operation

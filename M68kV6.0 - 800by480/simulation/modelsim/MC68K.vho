@@ -16,7 +16,7 @@
 -- PROGRAM "Quartus Prime"
 -- VERSION "Version 18.1.0 Build 625 09/12/2018 SJ Lite Edition"
 
--- DATE "01/30/2023 22:50:54"
+-- DATE "01/31/2023 00:12:06"
 
 -- 
 -- Device: Altera 5CSEMA5F31C6 Package FBGA896
@@ -3383,7 +3383,7 @@ GENERIC MAP (
 	shift_series_termination_control => "false")
 -- pragma translate_on
 PORT MAP (
-	i => VCC,
+	i => GND,
 	devoe => ww_devoe,
 	o => ww_DramDtack_L);
 

@@ -39,6 +39,10 @@ module AddressDecoder_Verilog (
 		// add other decoder signals here as we work through assignments and labs
 		//
 		
+		if(Address[31:26] == 6'b1111_00)							// address hex F000 0000 - F3FF FFFF Partial decoding
+			DramSelect_H <=1;											// memory range allocated for the SDram
+			
+		
 		
 		
 		
