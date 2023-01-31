@@ -64,7 +64,11 @@ module M68kDramController_Verilog (
 		
 		reg  FPGAWritingtoSDram_H;								// When '1' enables FPGA data out lines leading to SDRAM to allow writing, otherwise they are set to Tri-State "Z"
 		reg  CPU_Dtack_L;											// Dtack back to CPU
-		reg  CPUReset_L;		
+		reg  CPUReset_L;
+
+		//flag for intialisation support
+		reg initflag;	
+		reg unsigned [15:0] count;		
 
 		// 5 bit Commands to the SDRam
 
@@ -91,13 +95,22 @@ module M68kDramController_Verilog (
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////-
 	
 		parameter InitialisingState = 5'h00;				// power on initialising state
-		parameter WaitingForPowerUpState = 5'h01	;		// waiting for power up state to complete
+		parameter WaitingForPowerUpState = 5'h01;		// waiting for power up state to complete
 		parameter IssueFirstNOP = 5'h02;						// issuing 1st NOP after power up
 		parameter PrechargingAllBanks = 5'h03;
 		parameter Idle = 5'h04;			
 		
 		
 		// TODO - Add your own states as per your own design
+		parameter IssueSecondNOP = 5'h05;
+		parameter Refresh = 5'h06;
+		parameter IssueThirdNOP = 5'h07;
+		parameter IssueFourthNOP = 5'h08;
+		parameter IssueFifthNOP = 5'h09;
+		parameter LoadModeReg = 5'h0a;
+		parameter IssueSixthNOP = 5'h0b;
+		parameter IssueSeventhNOP = 5'h0c;
+		parameter IssueEighthNOP = 5'h0d;
 		
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -171,9 +184,9 @@ module M68kDramController_Verilog (
 			// remember the Dram chip has bi-directional data lines, when you read from it, it turns them on, when you write to it, it turns them off (tri-states them)
 
 			if(FPGAWritingtoSDram_H == 1) 			// if CPU is doing a write, we need to turn on the FPGA data out lines to the SDRam and present Dram with CPU data 
-				SDram_DQ	<= SDramWriteData ;
-			else
-				SDram_DQ	<= 16'bZZZZZZZZZZZZZZZZ;			// otherwise tri-state the FPGA data output lines to the SDRAM for anything other than writing to it
+				//SDram_DQ	<= SDramWriteData ;
+			//else
+				//SDram_DQ	<= 16'bZZZZZZZZZZZZZZZZ;			// otherwise tri-state the FPGA data output lines to the SDRAM for anything other than writing to it
 		
 			DramState <= CurrentState ;					// output current state - useful for debugging so you can see you state machine changing states etc
 		end
@@ -234,10 +247,12 @@ module M68kDramController_Verilog (
 		// we are going to load the timer above with a value equiv to 100us and then wait for timer to time out
 	
 		if(CurrentState == InitialisingState ) begin
-			TimerValue <= 16'h0000;									// chose a value equivalent to 100us at 50Mhz clock - you might want to shorten it to somthing small for simulation purposes
+			TimerValue <= 16'h0008;									// chose a value equivalent to 100us at 50Mhz clock - you might want to shorten it to somthing small for simulation purposes
 			TimerLoad_H <= 1 ;										// on next edge of clock, timer will be loaded and start to time out
 			Command <= PoweringUp ;									// clock enable and chip select to the Zentel Dram chip must be held low (disabled) during a power up phase
 			NextState <= WaitingForPowerUpState ;				// once we have loaded the timer, go to a new state where we wait for the 100us to elapse
+			
+			initflag <= 0; //supporting flag
 		end
 		
 		else if(CurrentState == WaitingForPowerUpState) begin
@@ -256,6 +271,66 @@ module M68kDramController_Verilog (
 		
 
 		// add your other states and conditions and outputs here
+
+		else if(CurrentState == PrechargingAllBanks) begin	 		// issue a valid NOP
+			Command <= PrechargeSelectBank;											// send a valid NOP command to the dram chip
+			NextState <= IssueSecondNOP;
+		end	
+
+		else if(CurrentState == IssueSecondNOP) begin	 		// issue a valid NOP
+			Command <= NOP ;											// send a valid NOP command to the dram chip
+			NextState <= Refresh;
+
+			TimerValue <= 16'h0027;
+			TimerLoad_H <= 1 ;	
+		end
+
+		else if(CurrentState == Refresh) begin	 		// issue a valid NOP
+			Command <= AutoRefresh ;											// send a valid NOP command to the dram chip
+			NextState <= IssueThirdNOP;
+			//TimerLoad_H <= 1 ;	
+
+			if(initflag == 0) begin
+				//TimerValue <= 16'h000a;									// chose a value equivalent to 100us at 50Mhz clock - you might want to shorten it to somthing small for simulation purposes
+				//TimerLoad_H <= 1 ;
+				//count <= 16'h000b;									// chose a value equivalent to 100us at 50Mhz clock - you might want to shorten it to somthing small for simulation purposes
+				//TimerLoad_H <= 1 ;
+				initflag <= 1;	
+			end
+		end
+
+		else if(CurrentState == IssueThirdNOP) begin	 		// issue a valid NOP
+			Command <= NOP ;											// send a valid NOP command to the dram chip
+			NextState <= IssueFourthNOP;
+		end
+
+		else if(CurrentState == IssueFourthNOP) begin	 		// issue a valid NOP
+			Command <= NOP ;											// send a valid NOP command to the dram chip
+			NextState <= IssueFifthNOP;
+		end
+
+		else if(CurrentState == IssueFifthNOP) begin	 		// issue a valid NOP
+			Command <= NOP ;
+
+			if(TimerDone_H == 1) begin											// send a valid NOP command to the dram chip
+				NextState <= LoadModeReg;
+			end
+			else begin
+				NextState <= Refresh;
+				//count <= count - 16'd1;
+			end
+		end
+
+		else if(CurrentState == LoadModeReg) begin	 		// issue a valid NOP
+			Command <= ModeRegisterSet ;											// send a valid NOP command to the dram chip
+			NextState <= IssueSixthNOP;
+		end
+
+		else begin
+			Command <= NOP ;
+			NextState <= Idle;
+		end			
 		
 	end	// always@ block
 endmodule
+
