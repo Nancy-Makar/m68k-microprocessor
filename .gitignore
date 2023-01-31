@@ -10,10 +10,10 @@ c5_pin_model_dump.txt
 *.qpg
 *.qtl
 *.qsf
-*.qpf
 *.sof
 *.bak
 work/
 db/
 incremental_db/
+simulation/
 output_files/
