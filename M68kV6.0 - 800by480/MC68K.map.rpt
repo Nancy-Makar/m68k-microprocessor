@@ -1,5 +1,5 @@
 Analysis & Synthesis report for MC68K
-Mon Jan 30 22:49:05 2023
+Mon Jan 30 22:52:09 2023
 Quartus Prime Version 18.1.0 Build 625 09/12/2018 SJ Lite Edition
 
 
@@ -110,7 +110,7 @@ refer to the applicable agreement for further details.
 +-------------------------------------------------------------------------------+
 ; Analysis & Synthesis Summary                                                  ;
 +---------------------------------+---------------------------------------------+
-; Analysis & Synthesis Status     ; Successful - Mon Jan 30 22:49:05 2023       ;
+; Analysis & Synthesis Status     ; Successful - Mon Jan 30 22:52:09 2023       ;
 ; Quartus Prime Version           ; 18.1.0 Build 625 09/12/2018 SJ Lite Edition ;
 ; Revision Name                   ; MC68K                                       ;
 ; Top-level Entity Name           ; MC68K                                       ;
@@ -3744,7 +3744,7 @@ Note: In order to hide this table in the UI and the text report file, please set
 +----------------+--------------+
 ; Partition Name ; Elapsed Time ;
 +----------------+--------------+
-; Top            ; 00:00:04     ;
+; Top            ; 00:00:05     ;
 +----------------+--------------+
 
 
@@ -3754,7 +3754,7 @@ Note: In order to hide this table in the UI and the text report file, please set
 Info: *******************************************************************
 Info: Running Quartus Prime Analysis & Synthesis
     Info: Version 18.1.0 Build 625 09/12/2018 SJ Lite Edition
-    Info: Processing started: Mon Jan 30 22:48:12 2023
+    Info: Processing started: Mon Jan 30 22:51:22 2023
 Info: Command: quartus_map --read_settings_files=on --write_settings_files=off MC68K -c MC68K
 Warning (18236): Number of processors has not been specified which may cause overloading on shared machines.  Set the global assignment NUM_PARALLEL_PROCESSORS in your QSF to an appropriate value for best performance.
 Info (20030): Parallel compilation is enabled and will use 4 of the 4 processors detected
@@ -3986,7 +3986,7 @@ Info (12128): Elaborating entity "Dram" for hierarchy "Dram:inst2"
 Info (12128): Elaborating entity "M68kDramController_Verilog" for hierarchy "Dram:inst2|M68kDramController_Verilog:inst1"
 Warning (10036): Verilog HDL or VHDL warning at M68kDramController_Verilog.v(52): object "RefreshTimerDone_H" assigned a value but never read File: C:/CPEN412/github_steup/M68kV6.0 - 800by480/M68kDramController_Verilog.v Line: 52
 Warning (10036): Verilog HDL or VHDL warning at M68kDramController_Verilog.v(63): object "SDramWriteData" assigned a value but never read File: C:/CPEN412/github_steup/M68kV6.0 - 800by480/M68kDramController_Verilog.v Line: 63
-Warning (10240): Verilog HDL Always Construct warning at M68kDramController_Verilog.v(239): inferring latch(es) for variable "initflag", which holds its previous value in one or more paths through the always construct File: C:/CPEN412/github_steup/M68kV6.0 - 800by480/M68kDramController_Verilog.v Line: 239
+Warning (10240): Verilog HDL Always Construct warning at M68kDramController_Verilog.v(231): inferring latch(es) for variable "initflag", which holds its previous value in one or more paths through the always construct File: C:/CPEN412/github_steup/M68kV6.0 - 800by480/M68kDramController_Verilog.v Line: 231
 Info (12128): Elaborating entity "lpm_bustri0" for hierarchy "Dram:inst2|lpm_bustri0:inst2"
 Info (12128): Elaborating entity "lpm_bustri" for hierarchy "Dram:inst2|lpm_bustri0:inst2|lpm_bustri:lpm_bustri_component" File: C:/CPEN412/github_steup/M68kV6.0 - 800by480/lpm_bustri0.vhd Line: 71
 Info (12130): Elaborated megafunction instantiation "Dram:inst2|lpm_bustri0:inst2|lpm_bustri:lpm_bustri_component" File: C:/CPEN412/github_steup/M68kV6.0 - 800by480/lpm_bustri0.vhd Line: 71
@@ -4285,7 +4285,7 @@ Warning (275009): Pin "DataIn" not connected
 Info (12128): Elaborating entity "InterruptPriorityEncoder" for hierarchy "InterruptPriorityEncoder:inst28"
 Info (12128): Elaborating entity "TraceExceptionGenerator" for hierarchy "TraceExceptionGenerator:inst30"
 Info (11170): Starting IP generation for the debug fabric: alt_sld_fab.
-Info (11172): 2023.01.30.22:48:47 Progress: Loading sldbe7d4d23/alt_sld_fab_wrapper_hw.tcl
+Info (11172): 2023.01.30.22:51:47 Progress: Loading sldbe7d4d23/alt_sld_fab_wrapper_hw.tcl
 Info (11172): Alt_sld_fab.alt_sld_fab: SLD fabric agents which did not specify prefer_host were connected to JTAG
 Info (11172): Alt_sld_fab: Generating alt_sld_fab "alt_sld_fab" for QUARTUS_SYNTH
 Info (11172): Alt_sld_fab: "alt_sld_fab" instantiated alt_sld_fab "alt_sld_fab"
@@ -5181,9 +5181,9 @@ Info (21057): Implemented 658 device resources after synthesis - the final resou
     Info (21064): Implemented 56 RAM segments
     Info (21065): Implemented 4 PLLs
 Info: Quartus Prime Analysis & Synthesis was successful. 0 errors, 835 warnings
-    Info: Peak virtual memory: 4966 megabytes
-    Info: Processing ended: Mon Jan 30 22:49:05 2023
-    Info: Elapsed time: 00:00:53
-    Info: Total CPU time (on all processors): 00:01:03
+    Info: Peak virtual memory: 4949 megabytes
+    Info: Processing ended: Mon Jan 30 22:52:09 2023
+    Info: Elapsed time: 00:00:47
+    Info: Total CPU time (on all processors): 00:01:12
 
 
