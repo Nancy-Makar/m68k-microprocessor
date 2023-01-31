@@ -1,0 +1,465 @@
+Determining the location of the ModelSim executable...
+
+Using: c:/intelfpga_lite/18.1/modelsim_ase/win32aloem/
+
+To specify a ModelSim executable directory, select: Tools -> Options -> EDA Tool Options
+Note: if both ModelSim-Altera and ModelSim executables are available, ModelSim-Altera will be used.
+
+**** Generating the ModelSim Testbench ****
+
+quartus_eda --gen_testbench --tool=modelsim_oem --format=verilog --write_settings_files=off MC68K -c MC68K --vector_source="C:/CPEN412/Lab1/M68kV6.0 - 800by480/Waveform68k-V15.0-DE1SoC.vwf" --testbench_file="C:/CPEN412/Lab1/M68kV6.0 - 800by480/simulation/qsim/Waveform68k-V15.0-DE1SoC.vwf.vt"
+
+Info: *******************************************************************
+Info: Running Quartus Prime EDA Netlist Writer
+    Info: Version 18.1.0 Build 625 09/12/2018 SJ Lite Edition
+    Info: Copyright (C) 2018  Intel Corporation. All rights reserved.
+    Info: Your use of Intel Corporation's design tools, logic functions 
+    Info: and other software and tools, and its AMPP partner logic 
+    Info: functions, and any output files from any of the foregoing 
+    Info: (including device programming or simulation files), and any 
+    Info: associated documentation or information are expressly subject 
+    Info: to the terms and conditions of the Intel Program License 
+    Info: Subscription Agreement, the Intel Quartus Prime License Agreement,
+    Info: the Intel FPGA IP License Agreement, or other applicable license
+    Info: agreement, including, without limitation, that your use is for
+    Info: the sole purpose of programming logic devices manufactured by
+    Info: Intel and sold by Intel or its authorized distributors.  Please
+    Info: refer to the applicable agreement for further details.
+    Info: Processing started: Fri Jan 20 12:40:07 2023
+Info: Command: quartus_eda --gen_testbench --tool=modelsim_oem --format=verilog --write_settings_files=off MC68K -c MC68K --vector_source="C:/CPEN412/Lab1/M68kV6.0 - 800by480/Waveform68k-V15.0-DE1SoC.vwf" --testbench_file="C:/CPEN412/Lab1/M68kV6.0 - 800by480/simulation/qsim/Waveform68k-V15.0-DE1SoC.vwf.vt"
+Warning (18236): Number of processors has not been specified which may cause overloading on shared machines.  Set the global assignment NUM_PARALLEL_PROCESSORS in your QSF to an appropriate value for best performance.
+
+n "DataBusOut[7]" in vector source file when writing test bench files
+
+essful. 0 errors, 100 warnings
+    Info: Peak virtual memory: 4757 megabytes
+    Info: Processing ended: Fri Jan 20 12:40:10 2023
+    Info: Elapsed time: 00:00:03
+    Info: Total CPU time (on all processors): 00:00:03
+
+Completed successfully. 
+
+Completed successfully. 
+
+**** Generating the functional simulation netlist ****
+
+quartus_eda --write_settings_files=off --simulation --functional=on --flatten_buses=off --tool=modelsim_oem --format=verilog --output_directory="C:/CPEN412/Lab1/M68kV6.0 - 800by480/simulation/qsim/" MC68K -c MC68K
+
+Info: *******************************************************************
+Info: Running Quartus Prime EDA Netlist Writer
+    Info: Version 18.1.0 Build 625 09/12/2018 SJ Lite Edition
+    Info: Copyright (C) 2018  Intel Corporation. All rights reserved.
+    Info: Your use of Intel Corporation's design tools, logic functions 
+    Info: and other software and tools, and its AMPP partner logic 
+    Info: functions, and any output files from any of the foregoing 
+    Info: (including device programming or simulation files), and any 
+    Info: associated documentation or information are expressly subject 
+    Info: to the terms and conditions of the Intel Program License 
+    Info: Subscription Agreement, the Intel Quartus Prime License Agreement,
+    Info: the Intel FPGA IP License Agreement, or other applicable license
+    Info: agreement, including, without limitation, that your use is for
+    Info: the sole purpose of programming logic devices manufactured by
+    Info: Intel and sold by Intel or its authorized distributors.  Please
+    Info: refer to the applicable agreement for further details.
+    Info: Processing started: Fri Jan 20 12:40:11 2023
+Info: Command: quartus_eda --write_settings_files=off --simulation=on --functional=on --flatten_buses=off --tool=modelsim_oem --format=verilog --output_directory="C:/CPEN412/Lab1/M68kV6.0 - 800by480/simulation/qsim/" MC68K -c MC68K
+Warning (18236): Number of processors has not been specified which may cause overloading on shared machines.  Set the global assignment NUM_PARALLEL_PROCESSORS in your QSF to an appropriate value for best performance.
+Info (204019): Generated file MC68K.vo in folder "C:/CPEN412/Lab1/M68kV6.0 - 800by480/simulation/qsim//" for EDA simulation tool
+Info: Quartus Prime EDA Netlist Writer was successful. 0 errors, 1 warning
+    Info: Peak virtual memory: 4878 megabytes
+    Info: Processing ended: Fri Jan 20 12:40:15 2023
+    Info: Elapsed time: 00:00:04
+    Info: Total CPU time (on all processors): 00:00:05
+
+Completed successfully. 
+
+**** Generating the ModelSim .do script ****
+
+C:/CPEN412/Lab1/M68kV6.0 - 800by480/simulation/qsim/MC68K.do generated.
+
+Completed successfully. 
+
+**** Running the ModelSim simulation ****
+
+c:/intelfpga_lite/18.1/modelsim_ase/win32aloem//vsim -c -do MC68K.do
+
+Reading C:/intelFPGA_lite/18.1/modelsim_ase/tcl/vsim/pref.tcl
+
+# 10.5b
+
+# do MC68K.do
+
+# ** Warning: (vlib-34) Library already exists at "work".
+# Model Technology ModelSim - Intel FPGA Edition vlog 10.5b Compiler 2016.10 Oct  5 2016
+# Start time: 12:40:16 on Jan 20,2023
+# vlog -work work MC68K.vo 
+# -- Compiling module MC68K
+
+# 
+# Top level modules:
+# 	MC68K
+# End time: 12:40:17 on Jan 20,2023, Elapsed time: 0:00:01
+# Errors: 0, Warnings: 0
+
+# Model Technology ModelSim - Intel FPGA Edition vlog 10.5b Compiler 2016.10 Oct  5 2016
+# Start time: 12:40:17 on Jan 20,2023
+# vlog -work work Waveform68k-V15.0-DE1SoC.vwf.vt 
+
+# -- Compiling module MC68K_vlg_vec_tst
+# 
+# Top level modules:
+# 	MC68K_vlg_vec_tst
+# End time: 12:40:18 on Jan 20,2023, Elapsed time: 0:00:01
+# Errors: 0, Warnings: 0
+
+# vsim -novopt -c -t 1ps -L cyclonev_ver -L altera_ver -L altera_mf_ver -L 220model_ver -L sgate_ver -L altera_lnsim_ver work.MC68K_vlg_vec_tst 
+# Start time: 12:40:18 on Jan 20,2023
+# Loading work.MC68K_vlg_vec_tst
+# Loading work.MC68K
+# Loading cyclonev_ver.cyclonev_lcell_comb
+# Loading cyclonev_ver.cyclonev_io_obuf
+# Loading cyclonev_ver.cyclonev_io_ibuf
+# Loading cyclonev_ver.cyclonev_pll_refclk_select
+# Loading cyclonev_ver.cyclonev_fractional_pll
+# Loading cyclonev_ver.cyclonev_pll_reconfig
+# Loading cyclonev_ver.cyclonev_pll_output_counter
+# Loading cyclonev_ver.cyclonev_clkena
+# Loading altera_ver.dffeas
+# Loading cyclonev_ver.cyclonev_jtag
+# Loading cyclonev_ver.cyclonev_ram_block
+# Loading sv_std.std
+# Loading altera_lnsim_ver.generic_m10k
+# Loading altera_lnsim_ver.altera_lnsim_functions
+# Loading altera_lnsim_ver.common_28nm_ram_block
+# Loading altera_lnsim_ver.common_28nm_ram_register
+# Loading altera_lnsim_ver.common_28nm_ram_pulse_generator
+# Loading altera_lnsim_ver.altera_pll_reconfig_tasks
+# Loading altera_lnsim_ver.generic_device_pll
+# Loading altera_lnsim_ver.altera_generic_pll_functions
+# Loading altera_lnsim_ver.generic_pll
+# ** Warning: (vsim-3017) Waveform68k-V15.0-DE1SoC.vwf.vt(108): [TFMPC] - Too few port connections. Expected 71, found 67.
+#    Time: 0 ps  Iteration: 0  Instance: /MC68K_vlg_vec_tst/i1 File: MC68K.vo
+# ** Warning: (vsim-3722) Waveform68k-V15.0-DE1SoC.vwf.vt(108): [TFMPC] - Missing connection for port 'altera_reserved_tms'.
+# ** Warning: (vsim-3722) Waveform68k-V15.0-DE1SoC.vwf.vt(108): [TFMPC] - Missing connection for port 'altera_reserved_tck'.
+# ** Warning: (vsim-3722) Waveform68k-V15.0-DE1SoC.vwf.vt(108): [TFMPC] - Missing connection for port 'altera_reserved_tdi'.
+# ** Warning: (vsim-3722) Waveform68k-V15.0-DE1SoC.vwf.vt(108): [TFMPC] - Missing connection for port 'altera_reserved_tdo'.
+# ** Warning: (vsim-3017) MC68K.vo(10387): [TFMPC] - Too few port connections. Expected 15, found 14.
+#    Time: 0 ps  Iteration: 0  Instance: /MC68K_vlg_vec_tst/i1/\inst7|clockgen_inst|altera_pll_i|general[0].gpll~PLL_REFCLK_SELECT  File: /build/swbuild/SJ/nightly/18.1std/625/l64/work/modelsim/eda/sim_lib/cyclonev_atoms.v
+# ** Warning: (vsim-3722) MC68K.vo(10387): [TFMPC] - Missing connection for port 'pllen'.
+# ** Warning: (vsim-3017) (): [TFMPC] - Too few port connections. Expected , found .
+#    Time: 0 ps  Iteration: 0  Protected: /MC68K_vlg_vec_tst/i1/\inst7|clockgen_inst|altera_pll_i|general[0].gpll~PLL_REFCLK_SELECT /cyclonev_pll_refclk_select_encrypted_inst/ File: nofile
+# ** Warning: (vsim-3722) (): [TFMPC] - Missing connection for port ''.
+# ** Warning: (vsim-3017) MC68K.vo(10425): [TFMPC] - Too few port connections. Expected 24, found 23.
+#    Time: 0 ps  Iteration: 0  Instance: /MC68K_vlg_vec_tst/i1/\inst7|clockgen_inst|altera_pll_i|general[0].gpll~FRACTIONAL_PLL  File: /build/swbuild/SJ/nightly/18.1std/625/l64/work/modelsim/eda/sim_lib/cyclonev_atoms.v
+# ** Warning: (vsim-3722) MC68K.vo(10425): [TFMPC] - Missing connection for port 'vsspl'.
+# ** Warning: (vsim-3017) /build/swbuild/SJ/nightly/18.1std/625/l64/work/modelsim/eda/sim_lib/cyclonev_atoms.v(3492): [TFMPC] - Too few port connections. Expected 33, found 32.
+#    Time: 0 ps  Iteration: 0  Instance: /MC68K_vlg_vec_tst/i1/\inst7|clockgen_inst|altera_pll_i|general[0].gpll~PLL_RECONFIG /cyclonev_pll_reconfig_encrypted_inst File: nofile
+# ** Warning: (vsim-3722) /build/swbuild/SJ/nightly/18.1std/625/l64/work/modelsim/eda/sim_lib/cyclonev_atoms.v(3492): [TFMPC] - Missing connection for port 'mhi'.
+# ** Warning: (vsim-3015) (): [PCDPC] - Port size () does not match connection size () for .
+#    Time: 0 ps  Iteration: 0  Protected: /MC68K_vlg_vec_tst/i1/\inst7|clockgen_inst|altera_pll_i|general[0].gpll~PLL_RECONFIG /cyclonev_pll_reconfig_encrypted_inst/ File: nofile
+# Loading altera_ver.PRIM_GDFF_LOW
+# ** Warning: (vsim-3017) MC68K.vo(10707): [TFMPC] - Too few port connections. Expected 21, found 14.
+#    Time: 0 ps  Iteration: 0  Instance: /MC68K_vlg_vec_tst/i1/altera_internal_jtag File: /build/swbuild/SJ/nightly/18.1std/625/l64/work/modelsim/eda/sim_lib/cyclonev_atoms.v
+# ** Warning: (vsim-3722) MC68K.vo(10707): [TFMPC] - Missing connection for port 'ntrst'.
+# ** Warning: (vsim-3722) MC68K.vo(10707): [TFMPC] - Missing connection for port 'corectl'.
+# ** Warning: (vsim-3722) MC68K.vo(10707): [TFMPC] - Missing connection for port 'ntdopinena'.
+# ** Warning: (vsim-3722) MC68K.vo(10707): [TFMPC] - Missing connection for port 'tckcore'.
+# ** Warning: (vsim-3722) MC68K.vo(10707): [TFMPC] - Missing connection for port 'tdicore'.
+# ** Warning: (vsim-3722) MC68K.vo(10707): [TFMPC] - Missing connection for port 'tmscore'.
+# ** Warning: (vsim-3722) MC68K.vo(10707): [TFMPC] - Missing connection for port 'tdocore'.
+# ** Warning: Design size of 45476 statements exceeds ModelSim-Intel FPGA Starter Edition recommended capacity.
+# Expect performance to be adversely affected.
+# after#25
+
+# 
+# Warning: por to CB BFM is not connected, internal por is used.
+# 
+# Info: =================================================
+# Info:           Generic PLL Summary
+# Info: =================================================
+# Time scale of (MC68K_vlg_vec_tst.i1.\inst7|clockgen_inst|altera_pll_i|general[0].gpll~FRACTIONAL_PLL .cyclonev_fractional_pll_encrypted_inst...inst_pll_phase_0.no_need_to_gen) is  1ps /  1ps
+# Info: hierarchical_name = MC68K_vlg_vec_tst.i1.\inst7|clockgen_inst|altera_pll_i|general[0].gpll~FRACTIONAL_PLL .cyclonev_fractional_pll_encrypted_inst...inst_pll_phase_0.no_need_to_gen
+# Info: reference_clock_frequency = 50.0 mhz
+# Info: output_clock_frequency = 300.0 mhz
+# Info: phase_shift = 0 ps
+# Info: duty_cycle = 50
+# Info: sim_additional_refclk_cycles_to_lock = 0
+# Info: output_clock_high_period = 1666.666667
+# Info: output_clock_low_period = 1666.666667
+# Info: =================================================
+# Info:           Generic PLL Summary
+# Info: =================================================
+# Time scale of (MC68K_vlg_vec_tst.i1.\inst7|clockgen_inst|altera_pll_i|general[0].gpll~FRACTIONAL_PLL .cyclonev_fractional_pll_encrypted_inst...inst_pll_phase_1.no_need_to_gen) is  1ps /  1ps
+# Info: hierarchical_name = MC68K_vlg_vec_tst.i1.\inst7|clockgen_inst|altera_pll_i|general[0].gpll~FRACTIONAL_PLL .cyclonev_fractional_pll_encrypted_inst...inst_pll_phase_1.no_need_to_gen
+# Info: reference_clock_frequency = 50.0 mhz
+# Info: output_clock_frequency = 300.0 mhz
+# Info: phase_shift = 416 ps
+# Info: duty_cycle = 50
+# Info: sim_additional_refclk_cycles_to_lock = 0
+# Info: output_clock_high_period = 1666.666667
+# Info: output_clock_low_period = 1666.666667
+# Info: =================================================
+# Info:           Generic PLL Summary
+# Info: =================================================
+# Time scale of (MC68K_vlg_vec_tst.i1.\inst7|clockgen_inst|altera_pll_i|general[0].gpll~FRACTIONAL_PLL .cyclonev_fractional_pll_encrypted_inst...inst_pll_phase_2.no_need_to_gen) is  1ps /  1ps
+# Info: hierarchical_name = MC68K_vlg_vec_tst.i1.\inst7|clockgen_inst|altera_pll_i|general[0].gpll~FRACTIONAL_PLL .cyclonev_fractional_pll_encrypted_inst...inst_pll_phase_2.no_need_to_gen
+# Info: reference_clock_frequency = 50.0 mhz
+# Info: output_clock_frequency = 300.0 mhz
+# Info: phase_shift = 832 ps
+# Info: duty_cycle = 50
+# Info: sim_additional_refclk_cycles_to_lock = 0
+# Info: output_clock_high_period = 1666.666667
+# Info: output_clock_low_period = 1666.666667
+# Info: =================================================
+# Info:           Generic PLL Summary
+# Info: =================================================
+# Time scale of (MC68K_vlg_vec_tst.i1.\inst7|clockgen_inst|altera_pll_i|general[0].gpll~FRACTIONAL_PLL .cyclonev_fractional_pll_encrypted_inst...inst_pll_phase_3.no_need_to_gen) is  1ps /  1ps
+# Info: hierarchical_name = MC68K_vlg_vec_tst.i1.\inst7|clockgen_inst|altera_pll_i|general[0].gpll~FRACTIONAL_PLL .cyclonev_fractional_pll_encrypted_inst...inst_pll_phase_3.no_need_to_gen
+# Info: reference_clock_frequency = 50.0 mhz
+# Info: output_clock_frequency = 300.0 mhz
+# Info: phase_shift = 1248 ps
+# Info: duty_cycle = 50
+# Info: sim_additional_refclk_cycles_to_lock = 0
+# Info: output_clock_high_period = 1666.666667
+# Info: output_clock_low_period = 1666.666667
+# 
+# Warning: por to CB BFM is not connected, internal por is used.
+# 
+# Simulation time: 0 ps
+
+# Simulation time: 0 ps
+
+# Simulation time: 0 ps
+
+# Simulation time: 0 ps
+
+# Simulation time: 0 ps
+
+# Simulation time: 0 ps
+
+# Simulation time: 0 ps
+
+# Simulation time: 0 ps
+
+# Simulation time: 1248340 ps
+
+# Simulation time: 1248340 ps
+
+# Simulation time: 1248340 ps
+
+# Simulation time: 1248340 ps
+
+# Simulation time: 1248340 ps
+
+# Simulation time: 1248340 ps
+
+# Simulation time: 1248340 ps
+
+# Simulation time: 1248340 ps
+
+# Simulation time: 2758630 ps
+
+# Simulation time: 2758630 ps
+
+# Simulation time: 2758630 ps
+
+# Simulation time: 2758630 ps
+
+# Simulation time: 2758630 ps
+
+# Simulation time: 2758630 ps
+
+# Simulation time: 2758630 ps
+
+# Simulation time: 2758630 ps
+
+# Simulation time: 4313334 ps
+
+# Simulation time: 4313334 ps
+
+# Simulation time: 4313334 ps
+
+# Simulation time: 4313334 ps
+
+# Simulation time: 4313334 ps
+
+# Simulation time: 4313334 ps
+
+# Simulation time: 4313334 ps
+
+# Simulation time: 4313334 ps
+
+# Simulation time: 5873334 ps
+
+# Simulation time: 5873334 ps
+
+# Simulation time: 5873334 ps
+
+# Simulation time: 5873334 ps
+
+# Simulation time: 5873334 ps
+
+# Simulation time: 5873334 ps
+
+# Simulation time: 5873334 ps
+
+# Simulation time: 5873334 ps
+
+# Simulation time: 7433334 ps
+
+# Simulation time: 7433334 ps
+
+# Simulation time: 7433334 ps
+
+# Simulation time: 7433334 ps
+
+# Simulation time: 7433334 ps
+
+# Simulation time: 7433334 ps
+
+# Simulation time: 7433334 ps
+
+# Simulation time: 7433334 ps
+
+# Simulation time: 8998751 ps
+
+# Simulation time: 8998751 ps
+
+# Simulation time: 8998751 ps
+
+# Simulation time: 8998751 ps
+
+# Simulation time: 8998751 ps
+
+# Simulation time: 8998751 ps
+
+# Simulation time: 8998751 ps
+
+# Simulation time: 8998751 ps
+
+# Simulation time: 10496730 ps
+
+# Simulation time: 10496730 ps
+
+# Simulation time: 10496730 ps
+
+# Simulation time: 10496730 ps
+
+# Simulation time: 10496730 ps
+
+# Simulation time: 10496730 ps
+
+# Simulation time: 10496730 ps
+
+# Simulation time: 10496730 ps
+
+# Simulation time: 12073334 ps
+
+# Simulation time: 12073334 ps
+
+# Simulation time: 12073334 ps
+
+# Simulation time: 12073334 ps
+
+# Simulation time: 12073334 ps
+
+# Simulation time: 12073334 ps
+
+# Simulation time: 12073334 ps
+
+# Simulation time: 12073334 ps
+
+# Simulation time: 13873334 ps
+
+# Simulation time: 13873334 ps
+
+# Simulation time: 13873334 ps
+
+# Simulation time: 13873334 ps
+
+# Simulation time: 13873334 ps
+
+# Simulation time: 13873334 ps
+
+# Simulation time: 13873334 ps
+
+# Simulation time: 13873334 ps
+
+# Simulation time: 16273334 ps
+
+# Simulation time: 16273334 ps
+
+# Simulation time: 16273334 ps
+
+# Simulation time: 16273334 ps
+
+# Simulation time: 16273334 ps
+
+# Simulation time: 16273334 ps
+
+# Simulation time: 16273334 ps
+
+# Simulation time: 16273334 ps
+
+# Simulation time: 18753334 ps
+
+# Simulation time: 18753334 ps
+
+# Simulation time: 18753334 ps
+
+# Simulation time: 18753334 ps
+
+# Simulation time: 18753334 ps
+
+# Simulation time: 18753334 ps
+
+# Simulation time: 18753334 ps
+
+# Simulation time: 18753334 ps
+
+# Simulation time: 21253334 ps
+
+# Simulation time: 21253334 ps
+
+# Simulation time: 21253334 ps
+
+# Simulation time: 21253334 ps
+
+# Simulation time: 21253334 ps
+
+# Simulation time: 21253334 ps
+
+# Simulation time: 21253334 ps
+
+# Simulation time: 23493334 ps
+
+# Simulation time: 23493334 ps
+
+# Simulation time: 23493334 ps
+
+# Simulation time: 23493334 ps
+
+# Simulation time: 23493334 ps
+
+# ** Note: $finish    : Waveform68k-V15.0-DE1SoC.vwf.vt(180)
+#    Time: 25 us  Iteration: 0  Instance: /MC68K_vlg_vec_tst
+# End time: 12:44:53 on Jan 20,2023, Elapsed time: 0:04:35
+# Errors: 0, Warnings: 23
+
+Completed successfully. 
+
+**** Converting ModelSim VCD to vector waveform ****
+
+Reading C:/CPEN412/Lab1/M68kV6.0 - 800by480/Waveform68k-V15.0-DE1SoC.vwf...
+
+Reading C:/CPEN412/Lab1/M68kV6.0 - 800by480/simulation/qsim/MC68K.msim.vcd...
+
+Processing channel transitions... 
+
+Writing the resulting VWF to C:/CPEN412/Lab1/M68kV6.0 - 800by480/simulation/qsim/MC68K_20230120124453.sim.vwf
+
+Finished VCD to VWF conversion.
+
+Completed successfully. 
+
+All completed.
