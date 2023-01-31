@@ -146,6 +146,7 @@ module M68kDramController_Verilog (
 		if(RefreshTimer == 16'd0) 								// if timer has counted down to 0
 			RefreshTimerDone_H <= 1 ;						// output '1' to indicate time has elapsed
 	end
+
 	
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////-
 // concurrent process state registers
@@ -251,7 +252,7 @@ module M68kDramController_Verilog (
 			TimerLoad_H <= 1 ;										// on next edge of clock, timer will be loaded and start to time out
 			Command <= PoweringUp ;									// clock enable and chip select to the Zentel Dram chip must be held low (disabled) during a power up phase
 			NextState <= WaitingForPowerUpState ;				// once we have loaded the timer, go to a new state where we wait for the 100us to elapse
-			
+			CPUReset_L <= 0;
 			initflag <= 0; //supporting flag
 		end
 		
@@ -325,6 +326,11 @@ module M68kDramController_Verilog (
 			Command <= ModeRegisterSet ;											// send a valid NOP command to the dram chip
 			NextState <= IssueSixthNOP;
 		end
+		
+		else if(CurrentState == Idle) begin
+			CPUReset_L <= 1;
+		end
+
 
 		else begin
 			Command <= NOP ;
