@@ -236,7 +236,7 @@ module M68kDramController_Verilog (
 		NextState <= InitialisingState ;							// assume next state will always be idle state unless overridden the value used here is not important, we cimple have to assign something to prevent storage on the signal so anything will do
 		
 		TimerValue <= 16'h0000;										// no timer value 
-		RefreshTimerValue <= 16'h0006;	 						// no refresh timer value
+		RefreshTimerValue <= 16'h0026;	 						// no refresh timer value
 		//for testing purpose
 		
 		//RefreshTimerValue <= 16'h0150;	//more refresh just in case
@@ -284,7 +284,7 @@ module M68kDramController_Verilog (
 		// add your other states and conditions and outputs here
 
 		else if(CurrentState == PrechargingAllBanks) begin	 		// issue a valid NOP
-			Command <= PrechargeSelectBank;											// send a valid NOP command to the dram chip
+			Command <= PrechargeAllBanks;											// send a valid NOP command to the dram chip
 			NextState <= IssueSecondNOP;
 
 			DramAddress <= 13'h0400 ; // may need to issue the 400 earlier
