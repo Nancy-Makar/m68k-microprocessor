@@ -71,7 +71,7 @@ module tb_M68kDramController_Verilog();
 		Reset_L = 0;
 		#1;
 		Reset_L = 1;
-		#120;
+		#140;
 		
 		$stop;
 
