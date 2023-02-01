@@ -236,11 +236,8 @@ module M68kDramController_Verilog (
 		NextState <= InitialisingState ;							// assume next state will always be idle state unless overridden the value used here is not important, we cimple have to assign something to prevent storage on the signal so anything will do
 		
 		TimerValue <= 16'h0000;										// no timer value 
-		RefreshTimerValue <= 16'h0026;	 						// no refresh timer value
-		//for testing purpose
-		
-		//RefreshTimerValue <= 16'h0150;	//more refresh just in case
-		//7.5 us = 375 cycles so hex 177
+		RefreshTimerValue <= 16'h0177;	 	// for testing purposes, change this timer value to a lower value
+		//7.5 us = 375 cycles, 177 in hex
 
 		TimerLoad_H <= 0;												// don't load Timer
 		RefreshTimerLoad_H <= 0 ;									// don't load refresh timer
