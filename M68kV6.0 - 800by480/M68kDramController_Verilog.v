@@ -262,7 +262,8 @@ module M68kDramController_Verilog (
 		end
 		
 		else if(CurrentState == WaitingForPowerUpState) begin
-			Command <= PoweringUp ;									// no DRam clock enable or CS while witing for 100us timer
+			Command <= PoweringUp;									// no DRam clock enable or CS while witing for 100us timer
+			CPUReset_L <= 0;
 			
 			if(TimerDone_H == 1) 									// if timer has timed out i.e. 100us have elapsed
 				NextState <= IssueFirstNOP ;						// take CKE and CS to active and issue a 1st NOP command
@@ -270,8 +271,9 @@ module M68kDramController_Verilog (
 				NextState <= WaitingForPowerUpState ;			// otherwise stay here until power up time delay finished
 		end
 		
-		else if(CurrentState == IssueFirstNOP) begin	 		// issue a valid NOP
-			Command <= NOP ;											// send a valid NOP command to the dram chip
+		else if(CurrentState == IssueFirstNOP) begin	 
+			CPUReset_L <= 0;		
+			Command <= NOP;											// issue a valid NOP
 			NextState <= PrechargingAllBanks;
 
 			//DramAddress <= 13'h0400 ; // may need to issue the 400 earlier
@@ -281,13 +283,14 @@ module M68kDramController_Verilog (
 		// add your other states and conditions and outputs here
 
 		else if(CurrentState == PrechargingAllBanks) begin	 		// issue a valid NOP
+			CPUReset_L <= 0;
 			Command <= PrechargeAllBanks;											// send a valid NOP command to the dram chip
 			NextState <= IssueSecondNOP;
-
 			DramAddress <= 13'h0400 ; // may need to issue the 400 earlier
 		end	
 
 		else if(CurrentState == IssueSecondNOP) begin	 		// issue a valid NOP
+			CPUReset_L <= 0;
 			Command <= NOP ;												// send a valid NOP command to the dram chip
 			NextState <= Refresh;
 
@@ -296,22 +299,26 @@ module M68kDramController_Verilog (
 		end
 
 		else if(CurrentState == Refresh) begin	 		// issue a valid NOP
+			CPUReset_L <= 0;
 			Command <= AutoRefresh ;						// send a valid NOP command to the dram chip
 			NextState <= IssueThirdNOP;
 			
 		end
 
 		else if(CurrentState == IssueThirdNOP) begin	 		// issue a valid NOP
+			CPUReset_L <= 0;
 			Command <= NOP ;											// send a valid NOP command to the dram chip
 			NextState <= IssueFourthNOP;
 		end
 
 		else if(CurrentState == IssueFourthNOP) begin	 	// issue a valid NOP
+			CPUReset_L <= 0;
 			Command <= NOP ;											// send a valid NOP command to the dram chip
 			NextState <= IssueFifthNOP;
 		end
 
 		else if(CurrentState == IssueFifthNOP) begin	 		// issue a valid NOP
+			CPUReset_L <= 0;
 			Command <= NOP ;
 
 			if(TimerDone_H == 1) begin								// send a valid NOP command to the dram chip
@@ -324,29 +331,30 @@ module M68kDramController_Verilog (
 		end
 
 		else if(CurrentState == LoadModeReg) begin	 		// issue a valid NOP
+			CPUReset_L <= 0;
 			Command <= ModeRegisterSet ;							// send a valid NOP command to the dram chip
 			NextState <= IssueSixthNOP;
-			//RefreshTimerLoad_H <= 1;
-
 			DramAddress <= 13'h0220 ; // may need to issue the 220 earlier								
 		end
 
 		else if(CurrentState == IssueSixthNOP) begin	 		// issue a valid NOP
+			CPUReset_L <= 0;
 			Command <= NOP  ;							// send a valid NOP command to the dram chip
 			NextState <= IssueSeventhNOP;
 						
 		end
 
 		else if(CurrentState == IssueSeventhNOP) begin	 		// issue a valid NOP
+			CPUReset_L <= 0;
 			Command <= NOP  ;							// send a valid NOP command to the dram chip
 			NextState <= IssueEighthNOP;
 						
 		end
 
 		else if(CurrentState == IssueEighthNOP) begin	 		// issue a valid NOP
-			Command <= NOP  ;							// send a valid NOP command to the dram chip
-			NextState <= IssueThirdNOPAfterRefresh;
-						
+			CPUReset_L <= 0;
+			Command <= NOP  ;												// send a valid NOP command to the dram chip
+			NextState <= Idle1;
 		end
 
 		
