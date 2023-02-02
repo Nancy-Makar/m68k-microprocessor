@@ -119,6 +119,7 @@ module M68kDramController_Verilog (
 		parameter IssueThirdNOPAfterRefresh = 5'h13;
 		parameter IssueReadCommand = 5'h14;
 		parameter IssueWriteCommand = 5'h15;
+		parameter IssueWaitAfterWriteCommand = 5'h16;
 		
 		parameter ERROR = 5'hFFFFF;
 		
@@ -195,9 +196,9 @@ module M68kDramController_Verilog (
 			// remember the Dram chip has bi-directional data lines, when you read from it, it turns them on, when you write to it, it turns them off (tri-states them)
 
 			if(FPGAWritingtoSDram_H == 1) 			// if CPU is doing a write, we need to turn on the FPGA data out lines to the SDRam and present Dram with CPU data 
-				//SDram_DQ	<= SDramWriteData ;
-			//else
-				//SDram_DQ	<= 16'bZZZZZZZZZZZZZZZZ;			// otherwise tri-state the FPGA data output lines to the SDRAM for anything other than writing to it
+				SDram_DQ	<= SDramWriteData ;
+			else
+				SDram_DQ	<= 16'bZZZZZZZZZZZZZZZZ;			// otherwise tri-state the FPGA data output lines to the SDRAM for anything other than writing to it
 		
 			DramState <= CurrentState ;					// output current state - useful for debugging so you can see you state machine changing states etc
 		end
@@ -366,6 +367,7 @@ module M68kDramController_Verilog (
 // Main IDLE state: Enter here after initialisation and return here after every transaction, e.g. 
 // refreshing, reading, writing operations.
 ///////////////////////////////////////////////////////////////////////////////////////////////////		
+		
 		else if(CurrentState == Idle1) begin
 			CPUReset_L <= 1;
 			Command <= NOP;
@@ -387,11 +389,27 @@ module M68kDramController_Verilog (
 			else 
 				NextState <= Idle1;
 		end
+		
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 // State associated with a 68k write where we wait for 68k’s UDS or LDS or both to go low
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 		
-		
+		else if (CurrentState == IssueWriteCommand) begin
+			CPUReset_L <= 1;
+			
+			if(UDS_L == 0 || LDS_L == 0) begin
+				DramAddress <= { 2'b00 , 1'b1, ColumnAddressFromCPU };	// issue an 10 bit Column address  (make sure A10 on Sdram = 1 for precharge all banks operation)
+				BankAddress <= BankAddressFromCPU;  							// ask the TA about this: issue a 2 bit Bank Address (the same value we issued in idle state when starting the write operation)
+				Command <= WriteAutoPrecharge;
+				CPU_Dtack_L <= 0; 											  		// issue a CPU_Dtack_L back to the 68k’s dtack generator
+				FPGAWritingtoSDram_H <= 1;									  		// turn on the sdram controller bi-directional data lines so we can drive data into sdram memory 
+				SDramWriteData	<= DataIn;	
+				NextState <= IssueWaitAfterWriteCommand;
+			end
+			
+			else
+				NextState <= IssueWriteCommand;
+		end
 	
 	
 
@@ -399,7 +417,14 @@ module M68kDramController_Verilog (
 // State associated with Memory writes where we wait for one clock cycle after a write 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-
+	if (CurrentState == IssueWaitAfterWriteCommand) begin
+		CPUReset_L <= 1;
+		CPU_Dtack_L <= 0; 
+		Command <= NOP;
+		FPGAWritingtoSDram_H <= 1;
+		SDramWriteData	<= DataIn;
+		// NextState <= The last state that Steven will write
+	end
 
 
 
