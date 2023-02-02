@@ -65,6 +65,10 @@ module M68kDramController_Verilog (
 		reg  FPGAWritingtoSDram_H;								// When '1' enables FPGA data out lines leading to SDRAM to allow writing, otherwise they are set to Tri-State "Z"
 		reg  CPU_Dtack_L;											// Dtack back to CPU
 		reg  CPUReset_L;
+		
+		wire RowAddressFromCPU = Address[22:10];
+		wire ColumnAddressFromCPU = Address[9:0];
+		wire BankAddressFromCPU = Address[24:23];
 
 		// 5 bit Commands to the SDRam
 
@@ -113,7 +117,9 @@ module M68kDramController_Verilog (
 		parameter IssueFirstNOPAfterRefresh = 5'h11;
 		parameter IssueSecondNOPAfterRefresh = 5'h12;
 		parameter IssueThirdNOPAfterRefresh = 5'h13;
-
+		parameter IssueReadCommand = 5'h14;
+		parameter IssueWriteCommand = 5'h15;
+		
 		parameter ERROR = 5'hFFFFF;
 		
 
@@ -356,21 +362,59 @@ module M68kDramController_Verilog (
 			Command <= NOP  ;												// send a valid NOP command to the dram chip
 			NextState <= IssueThirdNOPAfterRefresh;
 		end
-
-		
+///////////////////////////////////////////////////////////////////////////////////////////////////
+// Main IDLE state: Enter here after initialisation and return here after every transaction, e.g. 
+// refreshing, reading, writing operations.
+///////////////////////////////////////////////////////////////////////////////////////////////////		
 		else if(CurrentState == Idle1) begin
 			CPUReset_L <= 1;
 			Command <= NOP;
 			
 			if (RefreshTimerDone_H == 1)
 				NextState <= RechargeAllBanksBeforeRefresh;
+			else if(DramSelect_L == 0 && AS_L == 0) begin	// if CPU is accessing dram (i.e. DramSelect_L = '0' and AS_L = '0')
+				DramAddress <= RowAddressFromCPU;				// Issue a 13 bit Row Address to the Sdram from CPU
+				BankAddress <= BankAddressFromCPU;				// Issue a 2 bit Bank Address to the Sdram
+				Command <= BankActivate;							// Issue a BankActivate command to the sdram
+
+				// if CPU is attempting to READ from sdram
+				if(WE_L == 1) 
+					NextState <= IssueReadCommand;					
+				else
+					NextState <= IssueWriteCommand;
+			end
+			
 			else 
 				NextState <= Idle1;
 		end
+///////////////////////////////////////////////////////////////////////////////////////////////////
+// State associated with a 68k write where we wait for 68k’s UDS or LDS or both to go low
+///////////////////////////////////////////////////////////////////////////////////////////////////
 		
+		
+	
+	
+
+///////////////////////////////////////////////////////////////////////////////////////////////////	
+// State associated with Memory writes where we wait for one clock cycle after a write 
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+// State associated with issuing Read command (i.e. CAS) during a 68k Read
+///////////////////////////////////////////////////////////////////////////////////////////////////
+		
+		// Write the code for the read operation starting here
+		
+		
+		
+	
 		else if(CurrentState == RechargeAllBanksBeforeRefresh) begin
 			CPUReset_L <= 0;
-			Command <= PrechargeSelectBank;
+			Command <= PrechargeAllBanks;
 			NextState <= IssueNOPBeforeRefresh;
 
 			DramAddress <= 13'h0400 ; // may need to issue the 400 earlier
