@@ -236,7 +236,7 @@ module M68kDramController_Verilog (
 		NextState <= InitialisingState ;							// assume next state will always be idle state unless overridden the value used here is not important, we cimple have to assign something to prevent storage on the signal so anything will do
 		
 		TimerValue <= 16'h0000;										// no timer value 
-		RefreshTimerValue <= 16'h0177;	 	// for testing purposes, change this timer value to a lower value
+		RefreshTimerValue <= 16'h0150;	 	// for testing purposes, change this timer value to a lower value
 		//7.5 us = 375 cycles, 177 in hex
 
 		TimerLoad_H <= 0;												// don't load Timer
@@ -354,7 +354,7 @@ module M68kDramController_Verilog (
 		else if(CurrentState == IssueEighthNOP) begin	 		// issue a valid NOP
 			CPUReset_L <= 0;
 			Command <= NOP  ;												// send a valid NOP command to the dram chip
-			NextState <= Idle1;
+			NextState <= IssueThirdNOPAfterRefresh;
 		end
 
 		
@@ -369,6 +369,7 @@ module M68kDramController_Verilog (
 		end
 		
 		else if(CurrentState == RechargeAllBanksBeforeRefresh) begin
+			CPUReset_L <= 0;
 			Command <= PrechargeSelectBank;
 			NextState <= IssueNOPBeforeRefresh;
 
@@ -376,26 +377,31 @@ module M68kDramController_Verilog (
 		end
 		
 		else if(CurrentState == IssueNOPBeforeRefresh) begin
+			CPUReset_L <= 0;
 			Command <= NOP;
 			NextState <= IssueAutoRefresh;
 		end
 		
 		else if(CurrentState == IssueAutoRefresh) begin
+			CPUReset_L <= 0;
 			Command <= AutoRefresh;
 			NextState <= IssueFirstNOPAfterRefresh;
 		end
 		
 		else if(CurrentState == IssueFirstNOPAfterRefresh) begin
+			CPUReset_L <= 0;
 			Command <= NOP;
 			NextState <= IssueSecondNOPAfterRefresh;
 		end
 		
 		else if(CurrentState == IssueSecondNOPAfterRefresh) begin
+			CPUReset_L <= 0;
 			Command <= NOP;
 			NextState <= IssueThirdNOPAfterRefresh;
 		end
 		
 		else if(CurrentState == IssueThirdNOPAfterRefresh) begin
+			CPUReset_L <= 0;
 			Command <= NOP;
 			NextState <= Idle1;
 			RefreshTimerLoad_H <= 1;
