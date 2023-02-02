@@ -58,7 +58,7 @@ module Dtack_Generator_Verilog (
 			you switch from Sram to Dram later. Here’s the pseudo code for the Dtack 
 			generator
 			*/
-			if(DramSelect_H == 1)
+			 else if(DramSelect_H == 1)
 				DtackOut_L <= DramDtack_L;
 		end
 	end
