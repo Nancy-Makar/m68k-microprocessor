@@ -120,6 +120,8 @@ module M68kDramController_Verilog (
 		parameter IssueReadCommand = 5'h14;
 		parameter IssueWriteCommand = 5'h15;
 		parameter IssueWaitAfterWriteCommand = 5'h16;
+		parameter WaitCAS = 5'h17;
+		parameter Wait68k = 5'h18;
 		
 		parameter ERROR = 5'hFFFFF;
 		
@@ -423,7 +425,7 @@ module M68kDramController_Verilog (
 		Command <= NOP;
 		FPGAWritingtoSDram_H <= 1;
 		SDramWriteData	<= DataIn;
-		// NextState <= The last state that Steven will write
+		//NextState <= Wait68k;
 	end
 
 
@@ -433,6 +435,15 @@ module M68kDramController_Verilog (
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 		
 		// Write the code for the read operation starting here
+		else if (CurrentState == IssueReadCommand) begin
+			CPUReset_L <= 1;
+			DramAddress <= { 2'b00 , 1'b1, ColumnAddressFromCPU };
+			BankAddress <= BankAddressFromCPU;  
+			Command <= ReadAutoPrecharge;
+			TimerValue <= 16'h0002;									// chose a value equivalent to 100us at 50Mhz clock - you might want to shorten it to somthing small for simulation purposes
+			TimerLoad_H <= 1 ;
+			NextState <= WaitCAS;
+		end
 		
 		
 		
