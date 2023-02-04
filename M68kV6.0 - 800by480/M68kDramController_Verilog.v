@@ -66,9 +66,9 @@ module M68kDramController_Verilog (
 		reg  CPU_Dtack_L;											// Dtack back to CPU
 		reg  CPUReset_L;
 		
-		wire RowAddressFromCPU = Address[22:10];
-		wire ColumnAddressFromCPU = Address[9:0];
-		wire BankAddressFromCPU = Address[24:23];
+		wire [12:0] RowAddressFromCPU = Address[23:11];
+		wire [9:0] ColumnAddressFromCPU = Address[10:1];
+		wire [1:0] BankAddressFromCPU = Address[25:24];
 
 		// 5 bit Commands to the SDRam
 
@@ -120,6 +120,8 @@ module M68kDramController_Verilog (
 		parameter IssueReadCommand = 5'h14;
 		parameter IssueWriteCommand = 5'h15;
 		parameter IssueWaitAfterWriteCommand = 5'h16;
+		parameter WaitCAS = 5'h17;
+		parameter Wait68k = 5'h18;
 		
 		parameter ERROR = 5'hFFFFF;
 		
@@ -245,6 +247,7 @@ module M68kDramController_Verilog (
 		TimerValue <= 16'h0000;										// no timer value 
 		RefreshTimerValue <= 16'h0177;	 	// for testing purposes, change this timer value to a lower value
 		//7.5 us = 375 cycles, 177 in hex
+		//RefreshTimerValue <= 16'h0006;
 
 		TimerLoad_H <= 0;												// don't load Timer
 		RefreshTimerLoad_H <= 0 ;									// don't load refresh timer
@@ -417,14 +420,14 @@ module M68kDramController_Verilog (
 // State associated with Memory writes where we wait for one clock cycle after a write 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-	if (CurrentState == IssueWaitAfterWriteCommand) begin
-		CPUReset_L <= 1;
-		CPU_Dtack_L <= 0; 
-		Command <= NOP;
-		FPGAWritingtoSDram_H <= 1;
-		SDramWriteData	<= DataIn;
-		// NextState <= The last state that Steven will write
-	end
+		else if (CurrentState == IssueWaitAfterWriteCommand) begin
+			CPUReset_L <= 1;
+			CPU_Dtack_L <= 0; 
+			Command <= NOP;
+			FPGAWritingtoSDram_H <= 1;
+			SDramWriteData	<= DataIn;
+			NextState <= Wait68k;
+		end
 
 
 
@@ -433,8 +436,44 @@ module M68kDramController_Verilog (
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 		
 		// Write the code for the read operation starting here
-		
-		
+		else if (CurrentState == IssueReadCommand) begin
+			CPUReset_L <= 1;
+			DramAddress <= { 2'b00 , 1'b1, ColumnAddressFromCPU };
+			BankAddress <= BankAddressFromCPU;  
+			Command <= ReadAutoPrecharge;
+			TimerValue <= 16'h0002;									// chose a value equivalent to 100us at 50Mhz clock - you might want to shorten it to somthing small for simulation purposes
+			TimerLoad_H <= 1 ;
+			NextState <= WaitCAS;
+		end
+
+		else if (CurrentState == WaitCAS) begin
+			CPUReset_L <= 1;
+			CPU_Dtack_L <= 0; 
+			Command <= NOP;
+			DramDataLatch_H <= 1;
+
+			if(TimerDone_H == 1) 									// if timer has timed out i.e. 100us have elapsed
+				NextState <= Wait68k ;						// take CKE and CS to active and issue a 1st NOP command
+			else
+				NextState <= WaitCAS;
+
+
+		end
+
+		else if (CurrentState == Wait68k) begin
+			CPUReset_L <= 1;
+			Command <= NOP;
+
+			if(UDS_L == 0 || LDS_L == 0) begin								// if timer has timed out i.e. 100us have elapsed
+				NextState <= Wait68k ;						// take CKE and CS to active and issue a 1st NOP command
+				CPU_Dtack_L <= 0; 
+			end
+			else
+				NextState <= Idle1;
+
+
+		end
+	
 		
 	
 		else if(CurrentState == RechargeAllBanksBeforeRefresh) begin
@@ -478,8 +517,10 @@ module M68kDramController_Verilog (
 		
 
 		else begin
+			CPUReset_L <= 1;
 			Command <= NOP;
-			NextState <= ERROR;
+			NextState <= Idle1;
+			//NextState <= ERROR;
 		end			
 		
 	end	
