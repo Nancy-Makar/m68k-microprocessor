@@ -20,7 +20,7 @@ module tb_M68kDramController_Verilog();
 	wire SDram_WE_L;								// active low Write enable for dram chip
 	wire [12:0] SDram_Addr;			// 13 bit address bus dram chip	
 	wire [1:0] SDram_BA;				// 2 bit bank address
-	wire [15:0] SDram_DQ;			// 16 bit bi-directional data lines to dram chip
+	reg [15:0] SDram_DQ;			// 16 bit bi-directional data lines to dram chip
 			
 	wire Dtack_L;									// Dtack back to CPU at end of bus cycle
 	wire ResetOut_L;								// reset out to the CPU
@@ -72,6 +72,20 @@ module tb_M68kDramController_Verilog();
 		#1;
 		Reset_L = 1;
 		#140;
+
+		//write
+		#2;
+		DramSelect_L = 0; AS_L = 0; WE_L = 1; Address = 32'b00001000000001100000000000000000; SDram_DQ = 16'b1111111111111111;
+		#10;
+
+		UDS_L = 0; LDS_L = 0;  DataIn = 16'b1111111111111111;
+		#5;
+
+		#8;
+
+		UDS_L = 1; LDS_L = 1; DramSelect_L = 1; AS_L = 1;
+
+		#5;
 		
 		$stop;
 
