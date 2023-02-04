@@ -66,9 +66,9 @@ module M68kDramController_Verilog (
 		reg  CPU_Dtack_L;											// Dtack back to CPU
 		reg  CPUReset_L;
 		
-		wire RowAddressFromCPU = Address[22:10];
-		wire ColumnAddressFromCPU = Address[9:0];
-		wire BankAddressFromCPU = Address[24:23];
+		wire [12:0] RowAddressFromCPU = Address[23:11];
+		wire [9:0] ColumnAddressFromCPU = Address[10:1];
+		wire [1:0] BankAddressFromCPU = Address[25:24];
 
 		// 5 bit Commands to the SDRam
 
@@ -251,7 +251,7 @@ module M68kDramController_Verilog (
 		DramAddress <= 13'h0000 ;									// no particular dram address
 		BankAddress <= 2'b00 ;										// no particular dram bank address
 		DramDataLatch_H <= 0;										// don't latch data yet
-		CPU_Dtack_L <= 1;											// don't acknowledge back to 68000
+		CPU_Dtack_L <= 1;												// don't acknowledge back to 68000
 		SDramWriteData <= 16'h0000 ;								// nothing to write in particular
 		CPUReset_L <= 1;												// default is reset to CPU (for the moment, though this will change when design is complete so that reset-out goes high at the end of the dram initialisation phase to allow CPU to resume)
 		FPGAWritingtoSDram_H <= 0 ;								// default is to tri-state the FPGA data lines leading to bi-directional SDRam data lines, i.e. assume a read operation
@@ -438,7 +438,6 @@ module M68kDramController_Verilog (
 		
 	
 		else if(CurrentState == RechargeAllBanksBeforeRefresh) begin
-			CPUReset_L <= 0;
 			Command <= PrechargeAllBanks;
 			NextState <= IssueNOPBeforeRefresh;
 
@@ -446,31 +445,26 @@ module M68kDramController_Verilog (
 		end
 		
 		else if(CurrentState == IssueNOPBeforeRefresh) begin
-			CPUReset_L <= 0;
 			Command <= NOP;
 			NextState <= IssueAutoRefresh;
 		end
 		
 		else if(CurrentState == IssueAutoRefresh) begin
-			CPUReset_L <= 0;
 			Command <= AutoRefresh;
 			NextState <= IssueFirstNOPAfterRefresh;
 		end
 		
 		else if(CurrentState == IssueFirstNOPAfterRefresh) begin
-			CPUReset_L <= 0;
 			Command <= NOP;
 			NextState <= IssueSecondNOPAfterRefresh;
 		end
 		
 		else if(CurrentState == IssueSecondNOPAfterRefresh) begin
-			CPUReset_L <= 0;
 			Command <= NOP;
 			NextState <= IssueThirdNOPAfterRefresh;
 		end
 		
 		else if(CurrentState == IssueThirdNOPAfterRefresh) begin
-			CPUReset_L <= 0;
 			Command <= NOP;
 			NextState <= Idle1;
 			RefreshTimerLoad_H <= 1;
