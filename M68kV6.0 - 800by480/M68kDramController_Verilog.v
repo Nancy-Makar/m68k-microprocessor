@@ -423,7 +423,7 @@ module M68kDramController_Verilog (
 // State associated with Memory writes where we wait for one clock cycle after a write 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-	if (CurrentState == IssueWaitAfterWriteCommand) begin
+	else if (CurrentState == IssueWaitAfterWriteCommand) begin //added an else here
 		CPUReset_L <= 1;
 		CPU_Dtack_L <= 0; 
 		Command <= NOP;
@@ -448,6 +448,38 @@ module M68kDramController_Verilog (
 			TimerLoad_H <= 1 ;
 			NextState <= WaitCAS;
 		end
+		
+		else if (CurrentState == WaitCAS) begin
+			CPUReset_L <= 1;
+			CPU_Dtack_L <= 0; 
+			Command <= NOP;
+			DramDataLatch_H <= 1;
+
+			if(TimerDone_H == 1) 									// if timer has timed out i.e. 100us have elapsed
+				NextState <= Wait68k ;						// take CKE and CS to active and issue a 1st NOP command
+			else
+				NextState <= WaitCAS;
+
+
+		end
+		
+		else if (CurrentState == Wait68k) begin
+			CPUReset_L <= 1;
+			Command <= NOP;
+
+			if(UDS_L == 0 || LDS_L == 0) begin								// if timer has timed out i.e. 100us have elapsed
+				NextState <= Wait68k ;						// take CKE and CS to active and issue a 1st NOP command
+				CPU_Dtack_L <= 0; 
+			end
+			else
+				NextState <= Idle1;
+
+
+		end
+		
+		
+		
+		
 		
 		
 		
