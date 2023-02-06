@@ -245,9 +245,9 @@ module M68kDramController_Verilog (
 		NextState <= InitialisingState ;							// assume next state will always be idle state unless overridden the value used here is not important, we cimple have to assign something to prevent storage on the signal so anything will do
 		
 		TimerValue <= 16'h0000;										// no timer value 
-		//RefreshTimerValue <= 16'h0177;	 	// for testing purposes, change this timer value to a lower value
+		RefreshTimerValue <= 16'h0177;	 	// for testing purposes, change this timer value to a lower value
 		//7.5 us = 375 cycles, 177 in hex
-		RefreshTimerValue <= 16'h0006;
+		//RefreshTimerValue <= 16'h0006;
 		
 		TimerLoad_H <= 0;												// don't load Timer
 		RefreshTimerLoad_H <= 0 ;									// don't load refresh timer
@@ -400,22 +400,22 @@ module M68kDramController_Verilog (
 // State associated with a 68k write where we wait for 68k’s UDS or LDS or both to go low
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 		
-	//	else if (CurrentState == IssueWriteCommand) begin
-		//	CPUReset_L <= 1;
+		else if (CurrentState == IssueWriteCommand) begin
+			CPUReset_L <= 1;
 			
-			//if(UDS_L == 0 || LDS_L == 0) begin
-			//	DramAddress <= { 2'b00 , 1'b1, ColumnAddressFromCPU };	// issue an 10 bit Column address  (make sure A10 on Sdram = 1 for precharge all banks operation)
-			//	BankAddress <= BankAddressFromCPU;  							// ask the TA about this: issue a 2 bit Bank Address (the same value we issued in idle state when starting the write operation)
-			//	Command <= WriteAutoPrecharge;
-			//	CPU_Dtack_L <= 0; 											  		// issue a CPU_Dtack_L back to the 68k’s dtack generator
-			//	FPGAWritingtoSDram_H <= 1;									  		// turn on the sdram controller bi-directional data lines so we can drive data into sdram memory 
-			//	SDramWriteData	<= DataIn;	
-			//	NextState <= IssueWaitAfterWriteCommand;
-			//end
+			if(UDS_L == 0 || LDS_L == 0) begin
+				DramAddress <= { 2'b00 , 1'b1, ColumnAddressFromCPU };	// issue an 10 bit Column address  (make sure A10 on Sdram = 1 for precharge all banks operation)
+				BankAddress <= BankAddressFromCPU;  							// ask the TA about this: issue a 2 bit Bank Address (the same value we issued in idle state when starting the write operation)
+				Command <= WriteAutoPrecharge;
+				CPU_Dtack_L <= 0; 											  		// issue a CPU_Dtack_L back to the 68k’s dtack generator
+				FPGAWritingtoSDram_H <= 1;									  		// turn on the sdram controller bi-directional data lines so we can drive data into sdram memory 
+				SDramWriteData	<= DataIn;	
+				NextState <= IssueWaitAfterWriteCommand;
+			end
 			
-			//else
-				//NextState <= IssueWriteCommand;
-		//end
+			else
+				NextState <= IssueWriteCommand;
+		end
 	
 	
 
@@ -423,14 +423,14 @@ module M68kDramController_Verilog (
 // State associated with Memory writes where we wait for one clock cycle after a write 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-	//if (CurrentState == IssueWaitAfterWriteCommand) begin
-		//CPUReset_L <= 1;
-		//CPU_Dtack_L <= 0; 
-		//Command <= NOP;
-		//FPGAWritingtoSDram_H <= 1;
-		//SDramWriteData	<= DataIn;
-		//NextState <= Wait68k;
-	//end
+	if (CurrentState == IssueWaitAfterWriteCommand) begin
+		CPUReset_L <= 1;
+		CPU_Dtack_L <= 0; 
+		Command <= NOP;
+		FPGAWritingtoSDram_H <= 1;
+		SDramWriteData	<= DataIn;
+		NextState <= Wait68k;
+	end
 
 
 
@@ -439,15 +439,15 @@ module M68kDramController_Verilog (
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 		
 		// Write the code for the read operation starting here
-		//else if (CurrentState == IssueReadCommand) begin
-			//CPUReset_L <= 1;
-			//DramAddress <= { 2'b00 , 1'b1, ColumnAddressFromCPU };
-			//BankAddress <= BankAddressFromCPU;  
-			//Command <= ReadAutoPrecharge;
-			//TimerValue <= 16'h0002;									// chose a value equivalent to 100us at 50Mhz clock - you might want to shorten it to somthing small for simulation purposes
-			//TimerLoad_H <= 1 ;
-			//NextState <= WaitCAS;
-		//end
+		else if (CurrentState == IssueReadCommand) begin
+			CPUReset_L <= 1;
+			DramAddress <= { 2'b00 , 1'b1, ColumnAddressFromCPU };
+			BankAddress <= BankAddressFromCPU;  
+			Command <= ReadAutoPrecharge;
+			TimerValue <= 16'h0002;									// chose a value equivalent to 100us at 50Mhz clock - you might want to shorten it to somthing small for simulation purposes
+			TimerLoad_H <= 1 ;
+			NextState <= WaitCAS;
+		end
 		
 		
 		
