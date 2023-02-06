@@ -248,7 +248,6 @@ module M68kDramController_Verilog (
 		RefreshTimerValue <= 16'h0177;	 	// for testing purposes, change this timer value to a lower value
 		//7.5 us = 375 cycles, 177 in hex
 		//RefreshTimerValue <= 16'h0006;
-		
 		TimerLoad_H <= 0;												// don't load Timer
 		RefreshTimerLoad_H <= 0 ;									// don't load refresh timer
 		DramAddress <= 13'h0000 ;									// no particular dram address
@@ -423,15 +422,14 @@ module M68kDramController_Verilog (
 // State associated with Memory writes where we wait for one clock cycle after a write 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-	else if (CurrentState == IssueWaitAfterWriteCommand) begin //added an else here
-		CPUReset_L <= 1;
-		CPU_Dtack_L <= 0; 
-		Command <= NOP;
-		FPGAWritingtoSDram_H <= 1;
-		SDramWriteData	<= DataIn;
-		NextState <= Wait68k;
-	end
-
+		else if (CurrentState == IssueWaitAfterWriteCommand) begin
+			CPUReset_L <= 1;
+			CPU_Dtack_L <= 0; 
+			Command <= NOP;
+			FPGAWritingtoSDram_H <= 1;
+			SDramWriteData	<= DataIn;
+			NextState <= Wait68k;
+		end
 
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -448,7 +446,7 @@ module M68kDramController_Verilog (
 			TimerLoad_H <= 1 ;
 			NextState <= WaitCAS;
 		end
-		
+
 		else if (CurrentState == WaitCAS) begin
 			CPUReset_L <= 1;
 			CPU_Dtack_L <= 0; 
@@ -462,7 +460,7 @@ module M68kDramController_Verilog (
 
 
 		end
-		
+
 		else if (CurrentState == Wait68k) begin
 			CPUReset_L <= 1;
 			Command <= NOP;
@@ -476,14 +474,8 @@ module M68kDramController_Verilog (
 
 
 		end
-		
-		
-		
-		
-		
-		
-		
-	
+
+			
 		else if(CurrentState == RechargeAllBanksBeforeRefresh) begin
 			Command <= PrechargeAllBanks;
 			NextState <= IssueNOPBeforeRefresh;
@@ -517,11 +509,12 @@ module M68kDramController_Verilog (
 			RefreshTimerLoad_H <= 1;
 		end
 		
-
-		//else begin
-			//Command <= NOP;
+		else begin
+			CPUReset_L <= 1;
+			Command <= NOP;
+			NextState <= Idle1;
 			//NextState <= ERROR;
-		//end			
+		end			
 		
 	end	
 endmodule
