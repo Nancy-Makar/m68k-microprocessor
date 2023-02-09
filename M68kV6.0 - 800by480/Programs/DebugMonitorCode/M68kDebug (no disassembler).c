@@ -1160,7 +1160,7 @@ void menu(void)
                 printf("\r\nSingle Step  :[ON]") ;
                 printf("\r\nBreak Points :[Disabled]") ;
                 SR = SR | (unsigned short int)(0x8000) ;    // set T bit in status register
-                printf("\r\nPress 'G' to Trace Program from address $%08x.....",PC) ;
+                printf("\r\nPress 'G' to Trace Program from address $%X.....",PC) ;
                 printf("\r\nPush <RESET Button> to Stop.....") ;
                 DumpRegisters() ;
 
