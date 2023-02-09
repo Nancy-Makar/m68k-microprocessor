@@ -1,19 +1,19 @@
 680x0 MACRO ASSEMBLER   Version 5.00   (c) 1992-2005 Peter J. Fondse
 
-Date: 08 Feb 2023      Time: 20:51:43          Source: C:\CPEN412\GITHUB_STEUP\M68KV6.0 - 800BY480\PROGRAMS\DEBUGMONITORCODE\M68KDEBUGMONITOR.SRC
+Date: 08 Feb 2023      Time: 22:38:38          Source: C:\CPEN412\GITHUB_STEUP\M68KV6.0 - 800BY480\PROGRAMS\DEBUGMONITORCODE\M68KDEBUGMONITOR.SRC
 
                        1          section   code
                        2   ; for initial stack use $08040000 if your system uses SRAM for main memory (top of 256kbyte SRAM space)
                        3   ; When your system is converted to use DRAM for main memory set this constant to $0C000000 (top of 64MByte DRAM space
                        4   
-          0804 0000    5   StackPointerVal     equ $08040000      when using sram
-                       6   ;StackPointerVal     equ $0C000000      when using dram
+                       5   ;StackPointerVal     equ $08040000      when using sram
+          0C00 0000    6   StackPointerVal     equ $0C000000      when using dram
                        7   
                        8   ; define RamVectorTable as $0803000 if your system uses SRAM for main memory
                        9   ; When your system is converted to use DRAM for main memory define RamVectorTable constant as $0B000000 (top of 64MByte DRAM space)
                       10   
-          0803 0000   11   RamVectorTable      equ $08030000      when using sram
-                      12   ;RamVectorTable      equ $0B000000      when using dram
+                      11   ;RamVectorTable      equ $08030000      when using sram
+          0B00 0000   12   RamVectorTable      equ $0B000000      when using dram
                       13   
                       14   
                       15   
@@ -22,7 +22,7 @@ Date: 08 Feb 2023      Time: 20:51:43          Source: C:\CPEN412\GITHUB_STEUP\M
                       18   
 00000000              19                   org $00000000          ;start of rom based vector table, 68k hard wired to expect this at $0
                       20   
-00000000  0804 0000   21   InitialSP       dc.l StackPointerVal   ;initial supervisor state stack pointer(stack decrements first before being used)
+00000000  0C00 0000   21   InitialSP       dc.l StackPointerVal   ;initial supervisor state stack pointer(stack decrements first before being used)
 00000004  0000 0400   22   InitialPC       dc.l start             ;address of 1st instruction of program after a reset
 00000008  0000 0802   23   BusError        dc.l E_BErro           ;bus error - stop program
 0000000C  0000 0814   24   AddressError    dc.l E_AErro           ;address error - stop program
@@ -123,13 +123,13 @@ Date: 08 Feb 2023      Time: 20:51:43          Source: C:\CPEN412\GITHUB_STEUP\M
                      104   
                      105                   ; some important initialisation do not modify
 00000474  23FC FFFF  106                   move.l    #-1,__ungetbuf  ; unget-buffer for keyboard input
-00000478  FFFF 0803 
+00000478  FFFF 0B00 
 0000047C  00C0      
 0000047E  23FC 0000  107                   move.l    #0,__allocp     ; pointer to allocated memory for malloc-function
-00000482  0000 0803 
+00000482  0000 0B00 
 00000486  00C4      
-00000488  23FC 0803  108                   move.l    #heap,__heap    ; pointer to free memory
-0000048C  0596 0803 
+00000488  23FC 0B00  108                   move.l    #heap,__heap    ; pointer to free memory
+0000048C  0596 0B00 
 00000490  00C4      
                      109   
                      110   
@@ -141,25 +141,25 @@ Date: 08 Feb 2023      Time: 20:51:43          Source: C:\CPEN412\GITHUB_STEUP\M
                      115   * Code to call Ram Based Interrupt handler and other exeception handler code
                      116   *********************************************************************************************************
 0000049A  48E7 FFFE  117   Level1RamISR    movem.l   d0-d7/a0-a6,-(SP)       save everything not automatically saved
-0000049E  2079 0803  118                   move.l    VL1IRQ,a0               get ram based address into a0
+0000049E  2079 0B00  118                   move.l    VL1IRQ,a0               get ram based address into a0
 000004A2  0064      
 000004A4  4E90       119                   jsr       0(a0)                   jump to the subroutine that is the interrupt handler, using ram based address
 000004A6  4CDF 7FFF  120                   movem.l   (SP)+,d0-d7/a0-a6       pull eveything off the stack
 000004AA  4E73       121                   rte
 000004AC  48E7 FFFE  122   Level2RamISR    movem.l   d0-d7/a0-a6,-(SP)       save everything not automatically saved
-000004B0  2079 0803  123                   move.l    VL2IRQ,a0               get ram based address into a0
+000004B0  2079 0B00  123                   move.l    VL2IRQ,a0               get ram based address into a0
 000004B4  0068      
 000004B6  4E90       124                   jsr       0(a0)                   jump to the subroutine that is the interrupt handler, using ram based address
 000004B8  4CDF 7FFF  125                   movem.l   (SP)+,d0-d7/a0-a6       pull eveything off the stack
 000004BC  4E73       126                   rte
 000004BE  48E7 FFFE  127   Level3RamISR    movem.l   d0-d7/a0-a6,-(SP)       save everything not automatically saved
-000004C2  2079 0803  128                   move.l    VL3IRQ,a0               get ram based address into a0
+000004C2  2079 0B00  128                   move.l    VL3IRQ,a0               get ram based address into a0
 000004C6  006C      
 000004C8  4E90       129                   jsr       0(a0)                   jump to the subroutine that is the interrupt handler, using ram based address
 000004CA  4CDF 7FFF  130                   movem.l   (SP)+,d0-d7/a0-a6       pull eveything off the stack
 000004CE  4E73       131                   rte
 000004D0  48E7 FFFE  132   Level4RamISR    movem.l   d0-d7/a0-a6,-(SP)       save everything not automatically saved
-000004D4  2079 0803  133                   move.l    VL4IRQ,a0               get ram based address into a0
+000004D4  2079 0B00  133                   move.l    VL4IRQ,a0               get ram based address into a0
 000004D8  0070      
 000004DA  4E90       134                   jsr       0(a0)                   jump to the subroutine that is the interrupt handler, using ram based address
 000004DC  4CDF 7FFF  135                   movem.l   (SP)+,d0-d7/a0-a6       pull eveything off the stack
@@ -173,98 +173,98 @@ Date: 08 Feb 2023      Time: 20:51:43          Source: C:\CPEN412\GITHUB_STEUP\M
                      143   *
                      144   *
 000004E2  23FC 0000  145                   move.l    #1,_Trace              switch on Trace Mode
-000004E6  0001 0803 
+000004E6  0001 0B00 
 000004EA  00D8      
 000004EC  13FC 0000  146                   move.b    #$0,$0040000A          turn off a trace exception so we don't when generate a trace when disassembling instruction in the register dump (disassembling causes access to use program)
 000004F0  0040 000A 
-000004F4  33DF 0803  147                   move.w    (sp)+,_SR              get at the users status register pointed to by stack pointer and copy
+000004F4  33DF 0B00  147                   move.w    (sp)+,_SR              get at the users status register pointed to by stack pointer and copy
 000004F8  012C      
-000004FA  23DF 0803  148                   move.l    (sp)+,_PC              get at the users program counter and copy
+000004FA  23DF 0B00  148                   move.l    (sp)+,_PC              get at the users program counter and copy
 000004FE  0120      
                      149   *
-00000500  23CF 0803  150                   move.l    SP,_SSP                copy system stack pointer to debug monitor variable
+00000500  23CF 0B00  150                   move.l    SP,_SSP                copy system stack pointer to debug monitor variable
 00000504  0124      
-00000506  23C0 0803  151                   move.l    d0,_d0
+00000506  23C0 0B00  151                   move.l    d0,_d0
 0000050A  00E4      
-0000050C  23C1 0803  152                   move.l    d1,_d1
+0000050C  23C1 0B00  152                   move.l    d1,_d1
 00000510  00E8      
-00000512  23C2 0803  153                   move.l    d2,_d2
+00000512  23C2 0B00  153                   move.l    d2,_d2
 00000516  00EC      
-00000518  23C3 0803  154                   move.l    d3,_d3
+00000518  23C3 0B00  154                   move.l    d3,_d3
 0000051C  00F0      
-0000051E  23C4 0803  155                   move.l    d4,_d4
+0000051E  23C4 0B00  155                   move.l    d4,_d4
 00000522  00F4      
-00000524  23C5 0803  156                   move.l    d5,_d5
+00000524  23C5 0B00  156                   move.l    d5,_d5
 00000528  00F8      
-0000052A  23C6 0803  157                   move.l    d6,_d6
+0000052A  23C6 0B00  157                   move.l    d6,_d6
 0000052E  00FC      
-00000530  23C7 0803  158                   move.l    d7,_d7
+00000530  23C7 0B00  158                   move.l    d7,_d7
 00000534  0100      
                      159   *
-00000536  23C8 0803  160                   move.l    a0,_a0
+00000536  23C8 0B00  160                   move.l    a0,_a0
 0000053A  0104      
-0000053C  23C9 0803  161                   move.l    a1,_a1
+0000053C  23C9 0B00  161                   move.l    a1,_a1
 00000540  0108      
-00000542  23CA 0803  162                   move.l    a2,_a2
+00000542  23CA 0B00  162                   move.l    a2,_a2
 00000546  010C      
-00000548  23CB 0803  163                   move.l    a3,_a3
+00000548  23CB 0B00  163                   move.l    a3,_a3
 0000054C  0110      
-0000054E  23CC 0803  164                   move.l    a4,_a4
+0000054E  23CC 0B00  164                   move.l    a4,_a4
 00000552  0114      
-00000554  23CD 0803  165                   move.l    a5,_a5
+00000554  23CD 0B00  165                   move.l    a5,_a5
 00000558  0118      
-0000055A  23CE 0803  166                   move.l    a6,_a6
+0000055A  23CE 0B00  166                   move.l    a6,_a6
 0000055E  011C      
 00000560  4E68       167                   move.l    usp,a0
-00000562  23C8 0803  168                   move.l    a0,_USP
+00000562  23C8 0B00  168                   move.l    a0,_USP
 00000566  0128      
                      169   *
-00000568  2079 0803  170                   move.l    VL5IRQ,a0              get ram based address into a0, trace exception for next instruction will be generated in Menu SPACE command
+00000568  2079 0B00  170                   move.l    VL5IRQ,a0              get ram based address into a0, trace exception for next instruction will be generated in Menu SPACE command
 0000056C  0074      
 0000056E  4E90       171                   jsr       0(a0)                  jump to the subroutine that is the trap handler, using ram based address
                      172   
                      173   ** After trace, reload 68000 registers with new values before continuing
                      174   
-00000570  2039 0803  175                   move.l   _d0,d0
+00000570  2039 0B00  175                   move.l   _d0,d0
 00000574  00E4      
-00000576  2239 0803  176                   move.l   _d1,d1
+00000576  2239 0B00  176                   move.l   _d1,d1
 0000057A  00E8      
-0000057C  2439 0803  177                   move.l   _d2,d2
+0000057C  2439 0B00  177                   move.l   _d2,d2
 00000580  00EC      
-00000582  2639 0803  178                   move.l   _d3,d3
+00000582  2639 0B00  178                   move.l   _d3,d3
 00000586  00F0      
-00000588  2839 0803  179                   move.l   _d4,d4
+00000588  2839 0B00  179                   move.l   _d4,d4
 0000058C  00F4      
-0000058E  2A39 0803  180                   move.l   _d5,d5
+0000058E  2A39 0B00  180                   move.l   _d5,d5
 00000592  00F8      
-00000594  2C39 0803  181                   move.l   _d6,d6
+00000594  2C39 0B00  181                   move.l   _d6,d6
 00000598  00FC      
-0000059A  2E39 0803  182                   move.l   _d7,d7
+0000059A  2E39 0B00  182                   move.l   _d7,d7
 0000059E  0100      
                      183   
-000005A0  2079 0803  184                   move.l   _USP,a0
+000005A0  2079 0B00  184                   move.l   _USP,a0
 000005A4  0128      
 000005A6  4E60       185                   move.l   a0,USP                     load user stack pointer
-000005A8  2079 0803  186                   move.l   _a0,a0
+000005A8  2079 0B00  186                   move.l   _a0,a0
 000005AC  0104      
-000005AE  2279 0803  187                   move.l   _a1,a1
+000005AE  2279 0B00  187                   move.l   _a1,a1
 000005B2  0108      
-000005B4  2479 0803  188                   move.l   _a2,a2
+000005B4  2479 0B00  188                   move.l   _a2,a2
 000005B8  010C      
-000005BA  2679 0803  189                   move.l   _a3,a3
+000005BA  2679 0B00  189                   move.l   _a3,a3
 000005BE  0110      
-000005C0  2879 0803  190                   move.l   _a4,a4
+000005C0  2879 0B00  190                   move.l   _a4,a4
 000005C4  0114      
-000005C6  2A79 0803  191                   move.l   _a5,a5
+000005C6  2A79 0B00  191                   move.l   _a5,a5
 000005CA  0118      
-000005CC  2C79 0803  192                   move.l   _a6,a6
+000005CC  2C79 0B00  192                   move.l   _a6,a6
 000005D0  011C      
                      193   
-000005D2  2E79 0803  194                   move.l   _SSP,sp
+000005D2  2E79 0B00  194                   move.l   _SSP,sp
 000005D6  0124      
-000005D8  2F39 0803  195                   move.l   _PC,-(sp)
+000005D8  2F39 0B00  195                   move.l   _PC,-(sp)
 000005DC  0120      
-000005DE  3F39 0803  196                   move.w   _SR,-(sp)
+000005DE  3F39 0B00  196                   move.w   _SR,-(sp)
 000005E2  012C      
 000005E4  11F8 0074  197                   move.b    $00000074,$0	          read trace exception vector after accessing disassembly to reset the trace request causes by disassembling program above
 000005E8  0000      
@@ -273,14 +273,14 @@ Date: 08 Feb 2023      Time: 20:51:43          Source: C:\CPEN412\GITHUB_STEUP\M
                      200   * address trap handler
                      201   
 000005EC  48E7 FFFE  202   Level6RamISR    movem.l   d0-d7/a0-a6,-(SP)       save everything not automatically saved
-000005F0  2079 0803  203                   move.l    VL6IRQ,a0               get ram based address into a0
+000005F0  2079 0B00  203                   move.l    VL6IRQ,a0               get ram based address into a0
 000005F4  0078      
 000005F6  4E90       204                   jsr       0(a0)                   jump to the subroutine that is the interrupt handler, using ram based address
 000005F8  4CDF 7FFF  205                   movem.l   (SP)+,d0-d7/a0-a6       pull eveything off the stack
 000005FC  4E73       206                   rte
                      207   
 000005FE  48E7 FFFE  208   Level7RamISR    movem.l   d0-d7/a0-a6,-(SP)       save everything not automatically saved
-00000602  2079 0803  209                   move.l    VL7IRQ,a0               get ram based address into a0
+00000602  2079 0B00  209                   move.l    VL7IRQ,a0               get ram based address into a0
 00000606  007C      
 00000608  4E90       210                   jsr       0(a0)                   jump to the subroutine that is the interrupt handler, using ram based address
 0000060A  4CDF 7FFF  211                   movem.l   (SP)+,d0-d7/a0-a6       pull eveything off the stack
@@ -292,98 +292,98 @@ Date: 08 Feb 2023      Time: 20:51:43          Source: C:\CPEN412\GITHUB_STEUP\M
                      217   *********************************************************************************************************
                      218   
 00000610  48E7 FFFE  219   Trap0RamISR     movem.l   d0-d7/a0-a6,-(SP)       save everything not automatically saved
-00000614  2079 0803  220                   move.l    VTrap0,a0                get ram based address into a0
+00000614  2079 0B00  220                   move.l    VTrap0,a0                get ram based address into a0
 00000618  0080      
 0000061A  4E90       221                   jsr       0(a0)                   jump to the subroutine that is the trap handler, using ram based address
 0000061C  4CDF 7FFF  222                   movem.l   (SP)+,d0-d7/a0-a6       pull eveything off the stack
 00000620  4E73       223                   rte
                      224   
 00000622  48E7 FFFE  225   Trap1RamISR     movem.l   d0-d7/a0-a6,-(SP)       save everything not automatically saved
-00000626  2079 0803  226                   move.l    VTrap1,a0                get ram based address into a0
+00000626  2079 0B00  226                   move.l    VTrap1,a0                get ram based address into a0
 0000062A  0084      
 0000062C  4E90       227                   jsr       0(a0)                   jump to the subroutine that is the trap handler, using ram based address
 0000062E  4CDF 7FFF  228                   movem.l   (SP)+,d0-d7/a0-a6       pull eveything off the stack
 00000632  4E73       229                   rte
                      230   
 00000634  48E7 FFFE  231   Trap2RamISR     movem.l   d0-d7/a0-a6,-(SP)       save everything not automatically saved
-00000638  2079 0803  232                   move.l    VTrap2,a0                get ram based address into a0
+00000638  2079 0B00  232                   move.l    VTrap2,a0                get ram based address into a0
 0000063C  0088      
 0000063E  4E90       233                   jsr       0(a0)                   jump to the subroutine that is the trap handler, using ram based address
 00000640  4CDF 7FFF  234                   movem.l   (SP)+,d0-d7/a0-a6       pull eveything off the stack
 00000644  4E73       235                   rte
                      236   
 00000646  48E7 FFFE  237   Trap3RamISR     movem.l   d0-d7/a0-a6,-(SP)       save everything not automatically saved
-0000064A  2079 0803  238                   move.l    VTrap3,a0                get ram based address into a0
+0000064A  2079 0B00  238                   move.l    VTrap3,a0                get ram based address into a0
 0000064E  008C      
 00000650  4E90       239                   jsr       0(a0)                   jump to the subroutine that is the trap handler, using ram based address
 00000652  4CDF 7FFF  240                   movem.l   (SP)+,d0-d7/a0-a6       pull eveything off the stack
 00000656  4E73       241                   rte
                      242   
 00000658  48E7 FFFE  243   Trap4RamISR     movem.l   d0-d7/a0-a6,-(SP)       save everything not automatically saved
-0000065C  2079 0803  244                   move.l    VTrap4,a0                get ram based address into a0
+0000065C  2079 0B00  244                   move.l    VTrap4,a0                get ram based address into a0
 00000660  0090      
 00000662  4E90       245                   jsr       0(a0)                   jump to the subroutine that is the trap handler, using ram based address
 00000664  4CDF 7FFF  246                   movem.l   (SP)+,d0-d7/a0-a6       pull eveything off the stack
 00000668  4E73       247                   rte
                      248   
 0000066A  48E7 FFFE  249   Trap5RamISR     movem.l   d0-d7/a0-a6,-(SP)       save everything not automatically saved
-0000066E  2079 0803  250                   move.l    VTrap5,a0                get ram based address into a0
+0000066E  2079 0B00  250                   move.l    VTrap5,a0                get ram based address into a0
 00000672  0094      
 00000674  4E90       251                   jsr       0(a0)                   jump to the subroutine that is the trap handler, using ram based address
 00000676  4CDF 7FFF  252                   movem.l   (SP)+,d0-d7/a0-a6       pull eveything off the stack
 0000067A  4E73       253                   rte
                      254   
 0000067C  48E7 FFFE  255   Trap6RamISR     movem.l   d0-d7/a0-a6,-(SP)       save everything not automatically saved
-00000680  2079 0803  256                   move.l    VTrap6,a0                get ram based address into a0
+00000680  2079 0B00  256                   move.l    VTrap6,a0                get ram based address into a0
 00000684  0098      
 00000686  4E90       257                   jsr       0(a0)                   jump to the subroutine that is the trap handler, using ram based address
 00000688  4CDF 7FFF  258                   movem.l   (SP)+,d0-d7/a0-a6       pull eveything off the stack
 0000068C  4E73       259                   rte
                      260   
 0000068E  48E7 FFFE  261   Trap7RamISR     movem.l   d0-d7/a0-a6,-(SP)       save everything not automatically saved
-00000692  2079 0803  262                   move.l    VTrap7,a0                get ram based address into a0
+00000692  2079 0B00  262                   move.l    VTrap7,a0                get ram based address into a0
 00000696  009C      
 00000698  4E90       263                   jsr       0(a0)                   jump to the subroutine that is the trap handler, using ram based address
 0000069A  4CDF 7FFF  264                   movem.l   (SP)+,d0-d7/a0-a6       pull eveything off the stack
 0000069E  4E73       265                   rte
                      266   
 000006A0  48E7 FFFE  267   Trap8RamISR     movem.l   d0-d7/a0-a6,-(SP)       save everything not automatically saved
-000006A4  2079 0803  268                   move.l    VTrap8,a0                get ram based address into a0
+000006A4  2079 0B00  268                   move.l    VTrap8,a0                get ram based address into a0
 000006A8  00A0      
 000006AA  4E90       269                   jsr       0(a0)                   jump to the subroutine that is the trap handler, using ram based address
 000006AC  4CDF 7FFF  270                   movem.l   (SP)+,d0-d7/a0-a6       pull eveything off the stack
 000006B0  4E73       271                   rte
                      272   
 000006B2  48E7 FFFE  273   Trap9RamISR     movem.l   d0-d7/a0-a6,-(SP)       save everything not automatically saved
-000006B6  2079 0803  274                   move.l    VTrap9,a0                get ram based address into a0
+000006B6  2079 0B00  274                   move.l    VTrap9,a0                get ram based address into a0
 000006BA  00A4      
 000006BC  4E90       275                   jsr       0(a0)                   jump to the subroutine that is the trap handler, using ram based address
 000006BE  4CDF 7FFF  276                   movem.l   (SP)+,d0-d7/a0-a6       pull eveything off the stack
 000006C2  4E73       277                   rte
                      278   
 000006C4  48E7 FFFE  279   Trap10RamISR    movem.l   d0-d7/a0-a6,-(SP)       save everything not automatically saved
-000006C8  2079 0803  280                   move.l    VTrap10,a0                get ram based address into a0
+000006C8  2079 0B00  280                   move.l    VTrap10,a0                get ram based address into a0
 000006CC  00A8      
 000006CE  4E90       281                   jsr       0(a0)                   jump to the subroutine that is the trap handler, using ram based address
 000006D0  4CDF 7FFF  282                   movem.l   (SP)+,d0-d7/a0-a6       pull eveything off the stack
 000006D4  4E73       283                   rte
                      284   
 000006D6  48E7 FFFE  285   Trap11RamISR    movem.l   d0-d7/a0-a6,-(SP)       save everything not automatically saved
-000006DA  2079 0803  286                   move.l    VTrap11,a0                get ram based address into a0
+000006DA  2079 0B00  286                   move.l    VTrap11,a0                get ram based address into a0
 000006DE  00AC      
 000006E0  4E90       287                   jsr       0(a0)                   jump to the subroutine that is the trap handler, using ram based address
 000006E2  4CDF 7FFF  288                   movem.l   (SP)+,d0-d7/a0-a6       pull eveything off the stack
 000006E6  4E73       289                   rte
                      290   
 000006E8  48E7 FFFE  291   Trap12RamISR    movem.l   d0-d7/a0-a6,-(SP)       save everything not automatically saved
-000006EC  2079 0803  292                   move.l    VTrap12,a0                get ram based address into a0
+000006EC  2079 0B00  292                   move.l    VTrap12,a0                get ram based address into a0
 000006F0  00B0      
 000006F2  4E90       293                   jsr       0(a0)                   jump to the subroutine that is the trap handler, using ram based address
 000006F4  4CDF 7FFF  294                   movem.l   (SP)+,d0-d7/a0-a6       pull eveything off the stack
 000006F8  4E73       295                   rte
                      296   
 000006FA  48E7 FFFE  297   Trap13RamISR    movem.l   d0-d7/a0-a6,-(SP)       save everything not automatically saved
-000006FE  2079 0803  298                   move.l    VTrap13,a0                get ram based address into a0
+000006FE  2079 0B00  298                   move.l    VTrap13,a0                get ram based address into a0
 00000702  00B4      
 00000704  4E90       299                   jsr       0(a0)                   jump to the subroutine that is the trap handler, using ram based address
 00000706  4CDF 7FFF  300                   movem.l   (SP)+,d0-d7/a0-a6       pull eveything off the stack
@@ -394,93 +394,93 @@ Date: 08 Feb 2023      Time: 20:51:43          Source: C:\CPEN412\GITHUB_STEUP\M
                      305   **         Copy 68000 registers from debug monitor Variables
                      306   *
 0000070C  23FC 0000  307                   move.l    #1,_Trace      switch on Trace Mode
-00000710  0001 0803 
+00000710  0001 0B00 
 00000714  00D8      
-00000716  33DF 0803  308                   move.w    (sp)+,_SR       get at the users status register pointed to by stack pointer and copy
+00000716  33DF 0B00  308                   move.w    (sp)+,_SR       get at the users status register pointed to by stack pointer and copy
 0000071A  012C      
-0000071C  23DF 0803  309                   move.l    (sp)+,_PC      get at the users program counter and copy
+0000071C  23DF 0B00  309                   move.l    (sp)+,_PC      get at the users program counter and copy
 00000720  0120      
                      310   *
-00000722  23C0 0803  311                   move.l    d0,_d0
+00000722  23C0 0B00  311                   move.l    d0,_d0
 00000726  00E4      
-00000728  23C1 0803  312                   move.l    d1,_d1
+00000728  23C1 0B00  312                   move.l    d1,_d1
 0000072C  00E8      
-0000072E  23C2 0803  313                   move.l    d2,_d2
+0000072E  23C2 0B00  313                   move.l    d2,_d2
 00000732  00EC      
-00000734  23C3 0803  314                   move.l    d3,_d3
+00000734  23C3 0B00  314                   move.l    d3,_d3
 00000738  00F0      
-0000073A  23C4 0803  315                   move.l    d4,_d4
+0000073A  23C4 0B00  315                   move.l    d4,_d4
 0000073E  00F4      
-00000740  23C5 0803  316                   move.l    d5,_d5
+00000740  23C5 0B00  316                   move.l    d5,_d5
 00000744  00F8      
-00000746  23C6 0803  317                   move.l    d6,_d6
+00000746  23C6 0B00  317                   move.l    d6,_d6
 0000074A  00FC      
-0000074C  23C7 0803  318                   move.l    d7,_d7
+0000074C  23C7 0B00  318                   move.l    d7,_d7
 00000750  0100      
                      319   *
-00000752  23C8 0803  320                   move.l    a0,_a0
+00000752  23C8 0B00  320                   move.l    a0,_a0
 00000756  0104      
-00000758  23C9 0803  321                   move.l    a1,_a1
+00000758  23C9 0B00  321                   move.l    a1,_a1
 0000075C  0108      
-0000075E  23CA 0803  322                   move.l    a2,_a2
+0000075E  23CA 0B00  322                   move.l    a2,_a2
 00000762  010C      
-00000764  23CB 0803  323                   move.l    a3,_a3
+00000764  23CB 0B00  323                   move.l    a3,_a3
 00000768  0110      
-0000076A  23CC 0803  324                   move.l    a4,_a4
+0000076A  23CC 0B00  324                   move.l    a4,_a4
 0000076E  0114      
-00000770  23CD 0803  325                   move.l    a5,_a5
+00000770  23CD 0B00  325                   move.l    a5,_a5
 00000774  0118      
-00000776  23CE 0803  326                   move.l    a6,_a6
+00000776  23CE 0B00  326                   move.l    a6,_a6
 0000077A  011C      
 0000077C  4E68       327                   move.l    USP,a0
-0000077E  23C8 0803  328                   move.l    a0,_USP
+0000077E  23C8 0B00  328                   move.l    a0,_USP
 00000782  0128      
                      329   *
-00000784  2079 0803  330                   move.l    VTrap14,a0             get ram based address into a0
+00000784  2079 0B00  330                   move.l    VTrap14,a0             get ram based address into a0
 00000788  00B8      
 0000078A  4E90       331                   jsr       0(a0)                  jump to the subroutine that is the trap handler, using ram based address
                      332   
                      333   ** After breakpoint reload 68000 registers with new values before continuing
                      334   
                      335   *                move.b    #$ff,$0040000A     generate a trace exception for the next instruction
-0000078C  2039 0803  336                   move.l   _d0,d0
+0000078C  2039 0B00  336                   move.l   _d0,d0
 00000790  00E4      
-00000792  2239 0803  337                   move.l   _d1,d1
+00000792  2239 0B00  337                   move.l   _d1,d1
 00000796  00E8      
-00000798  2439 0803  338                   move.l   _d2,d2
+00000798  2439 0B00  338                   move.l   _d2,d2
 0000079C  00EC      
-0000079E  2639 0803  339                   move.l   _d3,d3
+0000079E  2639 0B00  339                   move.l   _d3,d3
 000007A2  00F0      
-000007A4  2839 0803  340                   move.l   _d4,d4
+000007A4  2839 0B00  340                   move.l   _d4,d4
 000007A8  00F4      
-000007AA  2A39 0803  341                   move.l   _d5,d5
+000007AA  2A39 0B00  341                   move.l   _d5,d5
 000007AE  00F8      
-000007B0  2C39 0803  342                   move.l   _d6,d6
+000007B0  2C39 0B00  342                   move.l   _d6,d6
 000007B4  00FC      
-000007B6  2E39 0803  343                   move.l   _d7,d7
+000007B6  2E39 0B00  343                   move.l   _d7,d7
 000007BA  0100      
                      344   
-000007BC  2079 0803  345                   move.l   _USP,a0
+000007BC  2079 0B00  345                   move.l   _USP,a0
 000007C0  0128      
 000007C2  4E60       346                   move.l   a0,USP        load user stack pointer A7
-000007C4  2079 0803  347                   move.l   _a0,a0
+000007C4  2079 0B00  347                   move.l   _a0,a0
 000007C8  0104      
-000007CA  2279 0803  348                   move.l   _a1,a1
+000007CA  2279 0B00  348                   move.l   _a1,a1
 000007CE  0108      
-000007D0  2479 0803  349                   move.l   _a2,a2
+000007D0  2479 0B00  349                   move.l   _a2,a2
 000007D4  010C      
-000007D6  2679 0803  350                   move.l   _a3,a3
+000007D6  2679 0B00  350                   move.l   _a3,a3
 000007DA  0110      
-000007DC  2879 0803  351                   move.l   _a4,a4
+000007DC  2879 0B00  351                   move.l   _a4,a4
 000007E0  0114      
-000007E2  2A79 0803  352                   move.l   _a5,a5
+000007E2  2A79 0B00  352                   move.l   _a5,a5
 000007E6  0118      
-000007E8  2C79 0803  353                   move.l   _a6,a6
+000007E8  2C79 0B00  353                   move.l   _a6,a6
 000007EC  011C      
                      354   
-000007EE  2F39 0803  355                   move.l   _PC,-(sp)
+000007EE  2F39 0B00  355                   move.l   _PC,-(sp)
 000007F2  0120      
-000007F4  3F39 0803  356                   move.w   _SR,-(sp)
+000007F4  3F39 0B00  356                   move.w   _SR,-(sp)
 000007F8  012C      
 000007FA  4E73       357                   rte
                      358   
@@ -502,61 +502,61 @@ Date: 08 Feb 2023      Time: 20:51:43          Source: C:\CPEN412\GITHUB_STEUP\M
                      373   *
                      374   
 00000802  48E7 FFFE  375   E_BErro         movem.l   d0-d7/a0-a6,-(SP)       save everything not automatically saved
-00000806  2079 0803  376                   move.l    VBusError,a0            get ram based address into a0
+00000806  2079 0B00  376                   move.l    VBusError,a0            get ram based address into a0
 0000080A  0008      
 0000080C  4E90       377                   jsr       0(a0)                   jump to the subroutine that is the trap handler, using ram based address
 0000080E  4CDF 7FFF  378                   movem.l   (SP)+,d0-d7/a0-a6       pull eveything off the stack
 00000812  4E73       379                   rte
 00000814  48E7 FFFE  380   E_AErro         movem.l   d0-d7/a0-a6,-(SP)       save everything not automatically saved
-00000818  2079 0803  381                   move.l    VAddressError,a0        get ram based address into a0
+00000818  2079 0B00  381                   move.l    VAddressError,a0        get ram based address into a0
 0000081C  000C      
 0000081E  4E90       382                   jsr       0(a0)                   jump to the subroutine that is the trap handler, using ram based address
 00000820  4CDF 7FFF  383                   movem.l   (SP)+,d0-d7/a0-a6       pull eveything off the stack
 00000824  4E73       384                   rte
 00000826  48E7 FFFE  385   E_IInst         movem.l   d0-d7/a0-a6,-(SP)       save everything not automatically saved
-0000082A  2079 0803  386                   move.l    VIllegalInstr,a0        get ram based address into a0
+0000082A  2079 0B00  386                   move.l    VIllegalInstr,a0        get ram based address into a0
 0000082E  0010      
 00000830  4E90       387                   jsr       0(a0)                   jump to the subroutine that is the trap handler, using ram based address
 00000832  4CDF 7FFF  388                   movem.l   (SP)+,d0-d7/a0-a6       pull eveything off the stack
 00000836  4E73       389                   rte
 00000838  48E7 FFFE  390   E_DZero         movem.l   d0-d7/a0-a6,-(SP)       save everything not automatically saved
-0000083C  2079 0803  391                   move.l    VDividebyZero,a0        get ram based address into a0
+0000083C  2079 0B00  391                   move.l    VDividebyZero,a0        get ram based address into a0
 00000840  0014      
 00000842  4E90       392                   jsr       0(a0)                   jump to the subroutine that is the trap handler, using ram based address
 00000844  4CDF 7FFF  393                   movem.l   (SP)+,d0-d7/a0-a6       pull eveything off the stack
 00000848  4E73       394                   rte
 0000084A  48E7 FFFE  395   E_Check         movem.l   d0-d7/a0-a6,-(SP)       save everything not automatically saved
-0000084E  2079 0803  396                   move.l    VCheck,a0               get ram based address into a0
+0000084E  2079 0B00  396                   move.l    VCheck,a0               get ram based address into a0
 00000852  0018      
 00000854  4E90       397                   jsr       0(a0)                   jump to the subroutine that is the trap handler, using ram based address
 00000856  4CDF 7FFF  398                   movem.l   (SP)+,d0-d7/a0-a6       pull eveything off the stack
 0000085A  4E73       399                   rte
 0000085C  48E7 FFFE  400   E_Trapv         movem.l   d0-d7/a0-a6,-(SP)       save everything not automatically saved
-00000860  2079 0803  401                   move.l    VTrapV,a0               get ram based address into a0
+00000860  2079 0B00  401                   move.l    VTrapV,a0               get ram based address into a0
 00000864  001C      
 00000866  4E90       402                   jsr       0(a0)                   jump to the subroutine that is the trap handler, using ram based address
 00000868  4CDF 7FFF  403                   movem.l   (SP)+,d0-d7/a0-a6       pull eveything off the stack
 0000086C  4E73       404                   rte
 0000086E  48E7 FFFE  405   E_Priv          movem.l   d0-d7/a0-a6,-(SP)       save everything not automatically saved
-00000872  2079 0803  406                   move.l    VPrivilege,a0           get ram based address into a0
+00000872  2079 0B00  406                   move.l    VPrivilege,a0           get ram based address into a0
 00000876  0020      
 00000878  4E90       407                   jsr       0(a0)                   jump to the subroutine that is the trap handler, using ram based address
 0000087A  4CDF 7FFF  408                   movem.l   (SP)+,d0-d7/a0-a6       pull eveything off the stack
 0000087E  4E73       409                   rte
 00000880  48E7 FFFE  410   E_Trace         movem.l   d0-d7/a0-a6,-(SP)       save everything not automatically saved
-00000884  2079 0803  411                   move.l    VTrace,a0               get ram based address into a0
+00000884  2079 0B00  411                   move.l    VTrace,a0               get ram based address into a0
 00000888  0024      
 0000088A  4E90       412                   jsr       0(a0)                   jump to the subroutine that is the trap handler, using ram based address
 0000088C  4CDF 7FFF  413                   movem.l   (SP)+,d0-d7/a0-a6       pull eveything off the stack
 00000890  4E73       414                   rte
 00000892  48E7 FFFE  415   E_1010          movem.l   d0-d7/a0-a6,-(SP)       save everything not automatically saved
-00000896  2079 0803  416                   move.l    VLine1010emul,a0        get ram based address into a0
+00000896  2079 0B00  416                   move.l    VLine1010emul,a0        get ram based address into a0
 0000089A  0028      
 0000089C  4E90       417                   jsr       0(a0)                   jump to the subroutine that is the trap handler, using ram based address
 0000089E  4CDF 7FFF  418                   movem.l   (SP)+,d0-d7/a0-a6       pull eveything off the stack
 000008A2  4E73       419                   rte
 000008A4  48E7 FFFE  420   E_1111          movem.l   d0-d7/a0-a6,-(SP)       save everything not automatically saved
-000008A8  2079 0803  421                   move.l    VLine1111emul,a0        get ram based address into a0
+000008A8  2079 0B00  421                   move.l    VLine1111emul,a0        get ram based address into a0
 000008AC  002C      
 000008AE  4E90       422                   jsr       0(a0)                   jump to the subroutine that is the trap handler, using ram based address
 000008B0  4CDF 7FFF  423                   movem.l   (SP)+,d0-d7/a0-a6       pull eveything off the stack
@@ -579,47 +579,47 @@ Date: 08 Feb 2023      Time: 20:51:43          Source: C:\CPEN412\GITHUB_STEUP\M
                      440   * Go() function in debug monitor
                      441   ***************************************************************************************************
                      442   _go
-000008B8  2E79 0803  443                   move.l   _SSP,a7        load system stack pointer (remember we are in supervisor mode when running this so a7 is the System stack pointer)
+000008B8  2E79 0B00  443                   move.l   _SSP,a7        load system stack pointer (remember we are in supervisor mode when running this so a7 is the System stack pointer)
 000008BC  0124      
-000008BE  2F39 0803  444                   move.l   _PC,-(sp)      copy debug monitor PC variable to the stack
+000008BE  2F39 0B00  444                   move.l   _PC,-(sp)      copy debug monitor PC variable to the stack
 000008C2  0120      
-000008C4  3F39 0803  445                   move.w   _SR,-(sp)      copy debug monitor status reg to the stack
+000008C4  3F39 0B00  445                   move.w   _SR,-(sp)      copy debug monitor status reg to the stack
 000008C8  012C      
                      446   
 000008CA  1038 0078  447                   move.b   $00000078,d0  remove any spurious address exception arising after power on
-000008CE  2039 0803  448                   move.l   _d0,d0
+000008CE  2039 0B00  448                   move.l   _d0,d0
 000008D2  00E4      
-000008D4  2239 0803  449                   move.l   _d1,d1
+000008D4  2239 0B00  449                   move.l   _d1,d1
 000008D8  00E8      
-000008DA  2439 0803  450                   move.l   _d2,d2
+000008DA  2439 0B00  450                   move.l   _d2,d2
 000008DE  00EC      
-000008E0  2639 0803  451                   move.l   _d3,d3
+000008E0  2639 0B00  451                   move.l   _d3,d3
 000008E4  00F0      
-000008E6  2839 0803  452                   move.l   _d4,d4
+000008E6  2839 0B00  452                   move.l   _d4,d4
 000008EA  00F4      
-000008EC  2A39 0803  453                   move.l   _d5,d5
+000008EC  2A39 0B00  453                   move.l   _d5,d5
 000008F0  00F8      
-000008F2  2C39 0803  454                   move.l   _d6,d6
+000008F2  2C39 0B00  454                   move.l   _d6,d6
 000008F6  00FC      
-000008F8  2E39 0803  455                   move.l   _d7,d7
+000008F8  2E39 0B00  455                   move.l   _d7,d7
 000008FC  0100      
                      456   
-000008FE  2079 0803  457                   move.l   _USP,a0
+000008FE  2079 0B00  457                   move.l   _USP,a0
 00000902  0128      
 00000904  4E60       458                   move.l   a0,USP        load user stack pointer (remember we are in supervisor mode when running this, so a7 is the System stack pointer)
-00000906  2079 0803  459                   move.l   _a0,a0
+00000906  2079 0B00  459                   move.l   _a0,a0
 0000090A  0104      
-0000090C  2279 0803  460                   move.l   _a1,a1
+0000090C  2279 0B00  460                   move.l   _a1,a1
 00000910  0108      
-00000912  2479 0803  461                   move.l   _a2,a2
+00000912  2479 0B00  461                   move.l   _a2,a2
 00000916  010C      
-00000918  2679 0803  462                   move.l   _a3,a3
+00000918  2679 0B00  462                   move.l   _a3,a3
 0000091C  0110      
-0000091E  2879 0803  463                   move.l   _a4,a4
+0000091E  2879 0B00  463                   move.l   _a4,a4
 00000922  0114      
-00000924  2A79 0803  464                   move.l   _a5,a5
+00000924  2A79 0B00  464                   move.l   _a5,a5
 00000928  0118      
-0000092A  2C79 0803  465                   move.l   _a6,a6
+0000092A  2C79 0B00  465                   move.l   _a6,a6
 0000092E  011C      
 00000930  4E73       466                   rte                    load the status reg and PC from the stack and commence running
                      467                                          *used to be rte but this didn't load the status byte
@@ -627,11 +627,11 @@ Date: 08 Feb 2023      Time: 20:51:43          Source: C:\CPEN412\GITHUB_STEUP\M
                      469   ; C:\CPEN412\GITHUB_STEUP\M68KV6.0 - 800BY480\PROGRAMS\DEBUGMONITORCODE\M68KDEBUG (NO DISASSEMBLER).C - Compiled by CC68K  Version 5.00 (c) 1991-2005  Peter J. Fondse
                      470   ; #include "DebugMonitor.h"
                      471   ; // use 08030000 for a system running from sram or 0B000000 for system running from dram
-                     472   ; #define StartOfExceptionVectorTable 0x08030000
-                     473   ; //#define StartOfExceptionVectorTable 0x0B000000
+                     472   ; //#define StartOfExceptionVectorTable 0x08030000
+                     473   ; #define StartOfExceptionVectorTable 0x0B000000
                      474   ; // use 0C000000 for dram or hex 08040000 for sram
-                     475   ; #define TopOfStack 0x08040000
-                     476   ; //#define TopOfStack 0x0C000000
+                     475   ; //#define TopOfStack 0x08040000
+                     476   ; #define TopOfStack 0x0C000000
                      477   ; /* DO NOT INITIALISE GLOBAL VARIABLES - DO IT in MAIN() */
                      478   ; unsigned int i, x, y, z, PortA_Count;
                      479   ; int     Trace, GoFlag, Echo;                       // used in tracing/single stepping
@@ -836,7 +836,7 @@ Date: 08 Feb 2023      Time: 20:51:43          Source: C:\CPEN412\GITHUB_STEUP\M
                      669   _InstallExceptionHandler:
 00000A30  4E56 FFFC  670          link      A6,#-4
                      671   ; volatile long int *RamVectorAddress = (volatile long int *)(StartOfExceptionVectorTable) ;   // pointer to the Ram based interrupt vector table created in Cstart in debug monitor
-00000A34  2D7C 0803  672          move.l    #134414336,-4(A6)
+00000A34  2D7C 0B00  672          move.l    #184549376,-4(A6)
 00000A38  0000 FFFC 
                      673   ; RamVectorAddress[level] = (long int *)(function_ptr);
 00000A3C  206E FFFC  674          move.l    -4(A6),A0
@@ -1057,7 +1057,7 @@ Date: 08 Feb 2023      Time: 20:51:43          Source: C:\CPEN412\GITHUB_STEUP\M
 00000B8E  2400       859          move.l    D0,D2
                      860   ; // shall we echo the character? Echo is set to TRUE at reset, but for speed we don't want to echo when downloading code with the 'L' debugger command
                      861   ; if(Echo)
-00000B90  4AB9 0803  862          tst.l     _Echo.L
+00000B90  4AB9 0B00  862          tst.l     _Echo.L
 00000B94  00E0      
 00000B96  6708       863          beq.s     _getch_4
                      864   ; _putch(c);
@@ -1453,7 +1453,7 @@ Date: 08 Feb 2023      Time: 20:51:43          Source: C:\CPEN412\GITHUB_STEUP\M
                     1228   ; AddressFail = 0 ;
 00000E56  42AE FFEA 1229          clr.l     -22(A6)
                     1230   ; Echo = 0 ;                              // don't echo S records during download
-00000E5A  42B9 0803 1231          clr.l     _Echo.L
+00000E5A  42B9 0B00 1231          clr.l     _Echo.L
 00000E5E  00E0      
                     1232   ; printf("\r\nUse HyperTerminal to Send Text File (.hex)\r\n") ;
 00000E60  4879 0000 1233          pea       @m68kde~1_14.L
@@ -1655,7 +1655,7 @@ Date: 08 Feb 2023      Time: 20:51:43          Source: C:\CPEN412\GITHUB_STEUP\M
 00000FAE  4EB8 0BA6 1421          jsr       _FlushKeyboard
                     1422   ; Echo = 1;
 00000FB2  23FC 0000 1423          move.l    #1,_Echo.L
-00000FB6  0001 0803 
+00000FB6  0001 0B00 
 00000FBA  00E0      
                     1424   Load_SRecordFile_8:
 00000FBC  4CDF 3CFC 1425          movem.l   (A7)+,D2/D3/D4/D5/D6/D7/A2/A3/A4/A5
@@ -1849,9 +1849,9 @@ Date: 08 Feb 2023      Time: 20:51:43          Source: C:\CPEN412\GITHUB_STEUP\M
 000010DE  326E      
 000010E0  47F9 0000 1598          lea       _printf.L,A3
 000010E4  3C12      
-000010E6  49F9 0803 1599          lea       _SR.L,A4
+000010E6  49F9 0B00 1599          lea       _SR.L,A4
 000010EA  012C      
-000010EC  4BF9 0803 1600          lea       _WatchPointString.L,A5
+000010EC  4BF9 0B00 1600          lea       _WatchPointString.L,A5
 000010F0  01C2      
                     1601   ; short i, x, j, k ;
                     1602   ; unsigned char c, *BytePointer;
@@ -1866,7 +1866,7 @@ Date: 08 Feb 2023      Time: 20:51:43          Source: C:\CPEN412\GITHUB_STEUP\M
 000010FC  48C2      1611          ext.l     D2
 000010FE  2002      1612          move.l    D2,D0
 00001100  E588      1613          lsl.l     #2,D0
-00001102  41F9 0803 1614          lea       _WatchPointSetOrCleared.L,A0
+00001102  41F9 0B00 1614          lea       _WatchPointSetOrCleared.L,A0
 00001106  01A2      
 00001108  2030 0800 1615          move.l    0(A0,D0.L),D0
 0000110C  0C80 0000 1616          cmp.l     #1,D0
@@ -1877,7 +1877,7 @@ Date: 08 Feb 2023      Time: 20:51:43          Source: C:\CPEN412\GITHUB_STEUP\M
 00001116  48C2      1620          ext.l     D2
 00001118  2202      1621          move.l    D2,D1
 0000111A  E589      1622          lsl.l     #2,D1
-0000111C  41F9 0803 1623          lea       _WatchPointAddress.L,A0
+0000111C  41F9 0B00 1623          lea       _WatchPointAddress.L,A0
 00001120  0182      
 00001122  2F30 1800 1624          move.l    0(A0,D1.L),-(A7)
 00001126  4879 0000 1625          pea       @m68kde~1_23.L
@@ -1897,7 +1897,7 @@ Date: 08 Feb 2023      Time: 20:51:43          Source: C:\CPEN412\GITHUB_STEUP\M
 00001148  48C2      1637          ext.l     D2
 0000114A  2002      1638          move.l    D2,D0
 0000114C  E588      1639          lsl.l     #2,D0
-0000114E  41F9 0803 1640          lea       _WatchPointAddress.L,A0
+0000114E  41F9 0B00 1640          lea       _WatchPointAddress.L,A0
 00001152  0182      
 00001154  2A30 0800 1641          move.l    0(A0,D0.L),D5
                     1642   ; for(j = 0; j < (short)(16); j+=2)
@@ -1924,13 +1924,13 @@ Date: 08 Feb 2023      Time: 20:51:43          Source: C:\CPEN412\GITHUB_STEUP\M
 00001180  2F01      1662          move.l    D1,-(A7)
 00001182  4879 0000 1663          pea       @m68kde~1_8.L
 00001186  464E      
-00001188  4879 0803 1664          pea       _TempString.L
+00001188  4879 0B00 1664          pea       _TempString.L
 0000118C  04E2      
 0000118E  4EB9 0000 1665          jsr       _sprintf
 00001192  3306      
 00001194  DEFC 000C 1666          add.w     #12,A7
                     1667   ; strcat(WatchPointString[x], TempString) ;
-00001198  4879 0803 1668          pea       _TempString.L
+00001198  4879 0B00 1668          pea       _TempString.L
 0000119C  04E2      
 0000119E  220D      1669          move.l    A5,D1
 000011A0  48C2      1670          ext.l     D2
@@ -1983,7 +1983,7 @@ Date: 08 Feb 2023      Time: 20:51:43          Source: C:\CPEN412\GITHUB_STEUP\M
 00001202  48C2      1712          ext.l     D2
 00001204  2002      1713          move.l    D2,D0
 00001206  E588      1714          lsl.l     #2,D0
-00001208  41F9 0803 1715          lea       _WatchPointAddress.L,A0
+00001208  41F9 0B00 1715          lea       _WatchPointAddress.L,A0
 0000120C  0182      
 0000120E  2A30 0800 1716          move.l    0(A0,D0.L),D5
                     1717   ; for(j = 0; j < (short)(16); j++)
@@ -2007,7 +2007,7 @@ Date: 08 Feb 2023      Time: 20:51:43          Source: C:\CPEN412\GITHUB_STEUP\M
                     1735   ; sprintf(TempString, ".") ;
 00001236  4879 0000 1736          pea       @m68kde~1_25.L
 0000123A  4828      
-0000123C  4879 0803 1737          pea       _TempString.L
+0000123C  4879 0B00 1737          pea       _TempString.L
 00001240  04E2      
 00001242  4EB9 0000 1738          jsr       _sprintf
 00001246  3306      
@@ -2024,14 +2024,14 @@ Date: 08 Feb 2023      Time: 20:51:43          Source: C:\CPEN412\GITHUB_STEUP\M
 0000125A  2F01      1748          move.l    D1,-(A7)
 0000125C  4879 0000 1749          pea       @m68kde~1_26.L
 00001260  482A      
-00001262  4879 0803 1750          pea       _TempString.L
+00001262  4879 0B00 1750          pea       _TempString.L
 00001266  04E2      
 00001268  4EB9 0000 1751          jsr       _sprintf
 0000126C  3306      
 0000126E  DEFC 000C 1752          add.w     #12,A7
                     1753   DumpRegisters_16:
                     1754   ; strcat(WatchPointString[x], TempString) ;
-00001272  4879 0803 1755          pea       _TempString.L
+00001272  4879 0B00 1755          pea       _TempString.L
 00001276  04E2      
 00001278  220D      1756          move.l    A5,D1
 0000127A  48C2      1757          ext.l     D2
@@ -2072,63 +2072,63 @@ Date: 08 Feb 2023      Time: 20:51:43          Source: C:\CPEN412\GITHUB_STEUP\M
                     1789   DumpRegisters_3:
                     1790   ; }
                     1791   ; printf("\r\n\r\n D0 = $%08X  A0 = $%08X",d0,a0) ;
-000012C0  2F39 0803 1792          move.l    _a0.L,-(A7)
+000012C0  2F39 0B00 1792          move.l    _a0.L,-(A7)
 000012C4  0104      
-000012C6  2F39 0803 1793          move.l    _d0.L,-(A7)
+000012C6  2F39 0B00 1793          move.l    _d0.L,-(A7)
 000012CA  00E4      
 000012CC  4879 0000 1794          pea       @m68kde~1_28.L
 000012D0  4830      
 000012D2  4E93      1795          jsr       (A3)
 000012D4  DEFC 000C 1796          add.w     #12,A7
                     1797   ; printf("\r\n D1 = $%08X  A1 = $%08X",d1,a1) ;
-000012D8  2F39 0803 1798          move.l    _a1.L,-(A7)
+000012D8  2F39 0B00 1798          move.l    _a1.L,-(A7)
 000012DC  0108      
-000012DE  2F39 0803 1799          move.l    _d1.L,-(A7)
+000012DE  2F39 0B00 1799          move.l    _d1.L,-(A7)
 000012E2  00E8      
 000012E4  4879 0000 1800          pea       @m68kde~1_29.L
 000012E8  484C      
 000012EA  4E93      1801          jsr       (A3)
 000012EC  DEFC 000C 1802          add.w     #12,A7
                     1803   ; printf("\r\n D2 = $%08X  A2 = $%08X",d2,a2) ;
-000012F0  2F39 0803 1804          move.l    _a2.L,-(A7)
+000012F0  2F39 0B00 1804          move.l    _a2.L,-(A7)
 000012F4  010C      
-000012F6  2F39 0803 1805          move.l    _d2.L,-(A7)
+000012F6  2F39 0B00 1805          move.l    _d2.L,-(A7)
 000012FA  00EC      
 000012FC  4879 0000 1806          pea       @m68kde~1_30.L
 00001300  4866      
 00001302  4E93      1807          jsr       (A3)
 00001304  DEFC 000C 1808          add.w     #12,A7
                     1809   ; printf("\r\n D3 = $%08X  A3 = $%08X",d3,a3) ;
-00001308  2F39 0803 1810          move.l    _a3.L,-(A7)
+00001308  2F39 0B00 1810          move.l    _a3.L,-(A7)
 0000130C  0110      
-0000130E  2F39 0803 1811          move.l    _d3.L,-(A7)
+0000130E  2F39 0B00 1811          move.l    _d3.L,-(A7)
 00001312  00F0      
 00001314  4879 0000 1812          pea       @m68kde~1_31.L
 00001318  4880      
 0000131A  4E93      1813          jsr       (A3)
 0000131C  DEFC 000C 1814          add.w     #12,A7
                     1815   ; printf("\r\n D4 = $%08X  A4 = $%08X",d4,a4) ;
-00001320  2F39 0803 1816          move.l    _a4.L,-(A7)
+00001320  2F39 0B00 1816          move.l    _a4.L,-(A7)
 00001324  0114      
-00001326  2F39 0803 1817          move.l    _d4.L,-(A7)
+00001326  2F39 0B00 1817          move.l    _d4.L,-(A7)
 0000132A  00F4      
 0000132C  4879 0000 1818          pea       @m68kde~1_32.L
 00001330  489A      
 00001332  4E93      1819          jsr       (A3)
 00001334  DEFC 000C 1820          add.w     #12,A7
                     1821   ; printf("\r\n D5 = $%08X  A5 = $%08X",d5,a5) ;
-00001338  2F39 0803 1822          move.l    _a5.L,-(A7)
+00001338  2F39 0B00 1822          move.l    _a5.L,-(A7)
 0000133C  0118      
-0000133E  2F39 0803 1823          move.l    _d5.L,-(A7)
+0000133E  2F39 0B00 1823          move.l    _d5.L,-(A7)
 00001342  00F8      
 00001344  4879 0000 1824          pea       @m68kde~1_33.L
 00001348  48B4      
 0000134A  4E93      1825          jsr       (A3)
 0000134C  DEFC 000C 1826          add.w     #12,A7
                     1827   ; printf("\r\n D6 = $%08X  A6 = $%08X",d6,a6) ;
-00001350  2F39 0803 1828          move.l    _a6.L,-(A7)
+00001350  2F39 0B00 1828          move.l    _a6.L,-(A7)
 00001354  011C      
-00001356  2F39 0803 1829          move.l    _d6.L,-(A7)
+00001356  2F39 0B00 1829          move.l    _d6.L,-(A7)
 0000135A  00FC      
 0000135C  4879 0000 1830          pea       @m68kde~1_34.L
 00001360  48CE      
@@ -2139,29 +2139,29 @@ Date: 08 Feb 2023      Time: 20:51:43          Source: C:\CPEN412\GITHUB_STEUP\M
 0000136A  C27C 2000 1835          and.w     #8192,D1
 0000136E  0C41 2000 1836          cmp.w     #8192,D1
 00001372  6608      1837          bne.s     DumpRegisters_18
-00001374  2239 0803 1838          move.l    _SSP.L,D1
+00001374  2239 0B00 1838          move.l    _SSP.L,D1
 00001378  0124      
 0000137A  6006      1839          bra.s     DumpRegisters_19
                     1840   DumpRegisters_18:
-0000137C  2239 0803 1841          move.l    _USP.L,D1
+0000137C  2239 0B00 1841          move.l    _USP.L,D1
 00001380  0128      
                     1842   DumpRegisters_19:
 00001382  2F01      1843          move.l    D1,-(A7)
-00001384  2F39 0803 1844          move.l    _d7.L,-(A7)
+00001384  2F39 0B00 1844          move.l    _d7.L,-(A7)
 00001388  0100      
 0000138A  4879 0000 1845          pea       @m68kde~1_35.L
 0000138E  48E8      
 00001390  4E93      1846          jsr       (A3)
 00001392  DEFC 000C 1847          add.w     #12,A7
                     1848   ; printf("\r\n\r\nUSP = $%08X  (A7) User SP", USP ) ;
-00001396  2F39 0803 1849          move.l    _USP.L,-(A7)
+00001396  2F39 0B00 1849          move.l    _USP.L,-(A7)
 0000139A  0128      
 0000139C  4879 0000 1850          pea       @m68kde~1_36.L
 000013A0  4902      
 000013A2  4E93      1851          jsr       (A3)
 000013A4  504F      1852          addq.w    #8,A7
                     1853   ; printf("\r\nSSP = $%08X  (A7) Supervisor SP", SSP) ;
-000013A6  2F39 0803 1854          move.l    _SSP.L,-(A7)
+000013A6  2F39 0B00 1854          move.l    _SSP.L,-(A7)
 000013AA  0124      
 000013AC  4879 0000 1855          pea       @m68kde~1_37.L
 000013B0  4920      
@@ -2327,14 +2327,14 @@ Date: 08 Feb 2023      Time: 20:51:43          Source: C:\CPEN412\GITHUB_STEUP\M
 00001504  4E92      2012          jsr       (A2)
 00001506  584F      2013          addq.w    #4,A7
                     2014   ; printf("\r\n PC = $%08X  ", PC) ;
-00001508  2F39 0803 2015          move.l    _PC.L,-(A7)
+00001508  2F39 0B00 2015          move.l    _PC.L,-(A7)
 0000150C  0120      
 0000150E  4879 0000 2016          pea       @m68kde~1_40.L
 00001512  495A      
 00001514  4E93      2017          jsr       (A3)
 00001516  504F      2018          addq.w    #8,A7
                     2019   ; if(*(unsigned short int *)(PC) == 0x4e4e)
-00001518  2039 0803 2020          move.l    _PC.L,D0
+00001518  2039 0B00 2020          move.l    _PC.L,D0
 0000151C  0120      
 0000151E  2040      2021          move.l    D0,A0
 00001520  3010      2022          move.w    (A0),D0
@@ -2360,7 +2360,7 @@ Date: 08 Feb 2023      Time: 20:51:43          Source: C:\CPEN412\GITHUB_STEUP\M
 00001546  48C4      2040          ext.l     D4
 00001548  2004      2041          move.l    D4,D0
 0000154A  E588      2042          lsl.l     #2,D0
-0000154C  41F9 0803 2043          lea       _WatchPointSetOrCleared.L,A0
+0000154C  41F9 0B00 2043          lea       _WatchPointSetOrCleared.L,A0
 00001550  01A2      
 00001552  2030 0800 2044          move.l    0(A0,D0.L),D0
 00001556  0C80 0000 2045          cmp.l     #1,D0
@@ -2499,7 +2499,7 @@ Date: 08 Feb 2023      Time: 20:51:43          Source: C:\CPEN412\GITHUB_STEUP\M
 00001652  0C02 0030 2165          cmp.b     #48,D2
 00001656  660A      2166          bne.s     ChangeRegisters_7
                     2167   ; d0 = reg_val ;
-00001658  23C3 0803 2168          move.l    D3,_d0.L
+00001658  23C3 0B00 2168          move.l    D3,_d0.L
 0000165C  00E4      
 0000165E  6000 0060 2169          bra       ChangeRegisters_20
                     2170   ChangeRegisters_7:
@@ -2507,7 +2507,7 @@ Date: 08 Feb 2023      Time: 20:51:43          Source: C:\CPEN412\GITHUB_STEUP\M
 00001662  0C02 0031 2172          cmp.b     #49,D2
 00001666  660A      2173          bne.s     ChangeRegisters_9
                     2174   ; d1 = reg_val ;
-00001668  23C3 0803 2175          move.l    D3,_d1.L
+00001668  23C3 0B00 2175          move.l    D3,_d1.L
 0000166C  00E8      
 0000166E  6000 0050 2176          bra       ChangeRegisters_20
                     2177   ChangeRegisters_9:
@@ -2515,7 +2515,7 @@ Date: 08 Feb 2023      Time: 20:51:43          Source: C:\CPEN412\GITHUB_STEUP\M
 00001672  0C02 0032 2179          cmp.b     #50,D2
 00001676  660A      2180          bne.s     ChangeRegisters_11
                     2181   ; d2 = reg_val ;
-00001678  23C3 0803 2182          move.l    D3,_d2.L
+00001678  23C3 0B00 2182          move.l    D3,_d2.L
 0000167C  00EC      
 0000167E  6000 0040 2183          bra       ChangeRegisters_20
                     2184   ChangeRegisters_11:
@@ -2523,7 +2523,7 @@ Date: 08 Feb 2023      Time: 20:51:43          Source: C:\CPEN412\GITHUB_STEUP\M
 00001682  0C02 0033 2186          cmp.b     #51,D2
 00001686  6608      2187          bne.s     ChangeRegisters_13
                     2188   ; d3 = reg_val ;
-00001688  23C3 0803 2189          move.l    D3,_d3.L
+00001688  23C3 0B00 2189          move.l    D3,_d3.L
 0000168C  00F0      
 0000168E  6030      2190          bra.s     ChangeRegisters_20
                     2191   ChangeRegisters_13:
@@ -2531,7 +2531,7 @@ Date: 08 Feb 2023      Time: 20:51:43          Source: C:\CPEN412\GITHUB_STEUP\M
 00001690  0C02 0034 2193          cmp.b     #52,D2
 00001694  6608      2194          bne.s     ChangeRegisters_15
                     2195   ; d4 = reg_val ;
-00001696  23C3 0803 2196          move.l    D3,_d4.L
+00001696  23C3 0B00 2196          move.l    D3,_d4.L
 0000169A  00F4      
 0000169C  6022      2197          bra.s     ChangeRegisters_20
                     2198   ChangeRegisters_15:
@@ -2539,7 +2539,7 @@ Date: 08 Feb 2023      Time: 20:51:43          Source: C:\CPEN412\GITHUB_STEUP\M
 0000169E  0C02 0035 2200          cmp.b     #53,D2
 000016A2  6608      2201          bne.s     ChangeRegisters_17
                     2202   ; d5 = reg_val ;
-000016A4  23C3 0803 2203          move.l    D3,_d5.L
+000016A4  23C3 0B00 2203          move.l    D3,_d5.L
 000016A8  00F8      
 000016AA  6014      2204          bra.s     ChangeRegisters_20
                     2205   ChangeRegisters_17:
@@ -2547,13 +2547,13 @@ Date: 08 Feb 2023      Time: 20:51:43          Source: C:\CPEN412\GITHUB_STEUP\M
 000016AC  0C02 0036 2207          cmp.b     #54,D2
 000016B0  6608      2208          bne.s     ChangeRegisters_19
                     2209   ; d6 = reg_val ;
-000016B2  23C3 0803 2210          move.l    D3,_d6.L
+000016B2  23C3 0B00 2210          move.l    D3,_d6.L
 000016B6  00FC      
 000016B8  6006      2211          bra.s     ChangeRegisters_20
                     2212   ChangeRegisters_19:
                     2213   ; else
                     2214   ; d7 = reg_val ;
-000016BA  23C3 0803 2215          move.l    D3,_d7.L
+000016BA  23C3 0B00 2215          move.l    D3,_d7.L
 000016BE  0100      
                     2216   ChangeRegisters_20:
 000016C0  6000 01B6 2217          bra       ChangeRegisters_51
@@ -2598,7 +2598,7 @@ Date: 08 Feb 2023      Time: 20:51:43          Source: C:\CPEN412\GITHUB_STEUP\M
 00001700  0C02 0030 2254          cmp.b     #48,D2
 00001704  660A      2255          bne.s     ChangeRegisters_26
                     2256   ; a0 = reg_val ;
-00001706  23C3 0803 2257          move.l    D3,_a0.L
+00001706  23C3 0B00 2257          move.l    D3,_a0.L
 0000170A  0104      
 0000170C  6000 0060 2258          bra       ChangeRegisters_39
                     2259   ChangeRegisters_26:
@@ -2606,7 +2606,7 @@ Date: 08 Feb 2023      Time: 20:51:43          Source: C:\CPEN412\GITHUB_STEUP\M
 00001710  0C02 0031 2261          cmp.b     #49,D2
 00001714  660A      2262          bne.s     ChangeRegisters_28
                     2263   ; a1 = reg_val ;
-00001716  23C3 0803 2264          move.l    D3,_a1.L
+00001716  23C3 0B00 2264          move.l    D3,_a1.L
 0000171A  0108      
 0000171C  6000 0050 2265          bra       ChangeRegisters_39
                     2266   ChangeRegisters_28:
@@ -2614,7 +2614,7 @@ Date: 08 Feb 2023      Time: 20:51:43          Source: C:\CPEN412\GITHUB_STEUP\M
 00001720  0C02 0032 2268          cmp.b     #50,D2
 00001724  660A      2269          bne.s     ChangeRegisters_30
                     2270   ; a2 = reg_val ;
-00001726  23C3 0803 2271          move.l    D3,_a2.L
+00001726  23C3 0B00 2271          move.l    D3,_a2.L
 0000172A  010C      
 0000172C  6000 0040 2272          bra       ChangeRegisters_39
                     2273   ChangeRegisters_30:
@@ -2622,7 +2622,7 @@ Date: 08 Feb 2023      Time: 20:51:43          Source: C:\CPEN412\GITHUB_STEUP\M
 00001730  0C02 0033 2275          cmp.b     #51,D2
 00001734  6608      2276          bne.s     ChangeRegisters_32
                     2277   ; a3 = reg_val ;
-00001736  23C3 0803 2278          move.l    D3,_a3.L
+00001736  23C3 0B00 2278          move.l    D3,_a3.L
 0000173A  0110      
 0000173C  6030      2279          bra.s     ChangeRegisters_39
                     2280   ChangeRegisters_32:
@@ -2630,7 +2630,7 @@ Date: 08 Feb 2023      Time: 20:51:43          Source: C:\CPEN412\GITHUB_STEUP\M
 0000173E  0C02 0034 2282          cmp.b     #52,D2
 00001742  6608      2283          bne.s     ChangeRegisters_34
                     2284   ; a4 = reg_val ;
-00001744  23C3 0803 2285          move.l    D3,_a4.L
+00001744  23C3 0B00 2285          move.l    D3,_a4.L
 00001748  0114      
 0000174A  6022      2286          bra.s     ChangeRegisters_39
                     2287   ChangeRegisters_34:
@@ -2638,7 +2638,7 @@ Date: 08 Feb 2023      Time: 20:51:43          Source: C:\CPEN412\GITHUB_STEUP\M
 0000174C  0C02 0035 2289          cmp.b     #53,D2
 00001750  6608      2290          bne.s     ChangeRegisters_36
                     2291   ; a5 = reg_val ;
-00001752  23C3 0803 2292          move.l    D3,_a5.L
+00001752  23C3 0B00 2292          move.l    D3,_a5.L
 00001756  0118      
 00001758  6014      2293          bra.s     ChangeRegisters_39
                     2294   ChangeRegisters_36:
@@ -2646,13 +2646,13 @@ Date: 08 Feb 2023      Time: 20:51:43          Source: C:\CPEN412\GITHUB_STEUP\M
 0000175A  0C02 0036 2296          cmp.b     #54,D2
 0000175E  6608      2297          bne.s     ChangeRegisters_38
                     2298   ; a6 = reg_val ;
-00001760  23C3 0803 2299          move.l    D3,_a6.L
+00001760  23C3 0B00 2299          move.l    D3,_a6.L
 00001764  011C      
 00001766  6006      2300          bra.s     ChangeRegisters_39
                     2301   ChangeRegisters_38:
                     2302   ; else
                     2303   ; USP = reg_val ;
-00001768  23C3 0803 2304          move.l    D3,_USP.L
+00001768  23C3 0B00 2304          move.l    D3,_USP.L
 0000176C  0128      
                     2305   ChangeRegisters_39:
 0000176E  6000 0108 2306          bra       ChangeRegisters_51
@@ -2685,7 +2685,7 @@ Date: 08 Feb 2023      Time: 20:51:43          Source: C:\CPEN412\GITHUB_STEUP\M
 000017A8  42A7      2330          clr.l     -(A7)
 000017AA  4E94      2331          jsr       (A4)
 000017AC  584F      2332          addq.w    #4,A7
-000017AE  23C0 0803 2333          move.l    D0,_USP.L
+000017AE  23C0 0B00 2333          move.l    D0,_USP.L
 000017B2  0128      
 000017B4  600E      2334          bra.s     ChangeRegisters_43
                     2335   ChangeRegisters_42:
@@ -2730,7 +2730,7 @@ Date: 08 Feb 2023      Time: 20:51:43          Source: C:\CPEN412\GITHUB_STEUP\M
 000017FE  42A7      2370          clr.l     -(A7)
 00001800  4E94      2371          jsr       (A4)
 00001802  584F      2372          addq.w    #4,A7
-00001804  23C0 0803 2373          move.l    D0,_SSP.L
+00001804  23C0 0B00 2373          move.l    D0,_SSP.L
 00001808  0124      
 0000180A  600E      2374          bra.s     ChangeRegisters_47
                     2375   ChangeRegisters_46:
@@ -2763,7 +2763,7 @@ Date: 08 Feb 2023      Time: 20:51:43          Source: C:\CPEN412\GITHUB_STEUP\M
 00001836  42A7      2400          clr.l     -(A7)
 00001838  4E94      2401          jsr       (A4)
 0000183A  584F      2402          addq.w    #4,A7
-0000183C  23C0 0803 2403          move.l    D0,_PC.L
+0000183C  23C0 0B00 2403          move.l    D0,_PC.L
 00001840  0120      
 00001842  6000 0034 2404          bra       ChangeRegisters_51
                     2405   ChangeRegisters_48:
@@ -2783,7 +2783,7 @@ Date: 08 Feb 2023      Time: 20:51:43          Source: C:\CPEN412\GITHUB_STEUP\M
 0000185E  42A7      2418          clr.l     -(A7)
 00001860  4EB8 0C58 2419          jsr       _Get4HexDigits
 00001864  584F      2420          addq.w    #4,A7
-00001866  33C0 0803 2421          move.w    D0,_SR.L
+00001866  33C0 0B00 2421          move.w    D0,_SR.L
 0000186A  012C      
 0000186C  600A      2422          bra.s     ChangeRegisters_51
                     2423   ChangeRegisters_50:
@@ -2808,7 +2808,7 @@ Date: 08 Feb 2023      Time: 20:51:43          Source: C:\CPEN412\GITHUB_STEUP\M
 00001884  48E7 3030 2441          movem.l   D2/D3/A2/A3,-(A7)
 00001888  45F9 0000 2442          lea       _printf.L,A2
 0000188C  3C12      
-0000188E  47F9 0803 2443          lea       _BreakPointAddress.L,A3
+0000188E  47F9 0B00 2443          lea       _BreakPointAddress.L,A3
 00001892  012E      
                     2444   ; int i, BreakPointsSet = 0 ;
 00001894  4283      2445          clr.l     D3
@@ -2822,7 +2822,7 @@ Date: 08 Feb 2023      Time: 20:51:43          Source: C:\CPEN412\GITHUB_STEUP\M
                     2452   ; if(BreakPointSetOrCleared[i] == 1)
 000018A0  2002      2453          move.l    D2,D0
 000018A2  E588      2454          lsl.l     #2,D0
-000018A4  41F9 0803 2455          lea       _BreakPointSetOrCleared.L,A0
+000018A4  41F9 0B00 2455          lea       _BreakPointSetOrCleared.L,A0
 000018A8  015E      
 000018AA  2030 0800 2456          move.l    0(A0,D0.L),D0
 000018AE  0C80 0000 2457          cmp.l     #1,D0
@@ -2869,7 +2869,7 @@ Date: 08 Feb 2023      Time: 20:51:43          Source: C:\CPEN412\GITHUB_STEUP\M
                     2492   ; if(BreakPointSetOrCleared[i] == 1)  {
 000018F0  2002      2493          move.l    D2,D0
 000018F2  E588      2494          lsl.l     #2,D0
-000018F4  41F9 0803 2495          lea       _BreakPointSetOrCleared.L,A0
+000018F4  41F9 0B00 2495          lea       _BreakPointSetOrCleared.L,A0
 000018F8  015E      
 000018FA  2030 0800 2496          move.l    0(A0,D0.L),D0
 000018FE  0C80 0000 2497          cmp.l     #1,D0
@@ -2878,7 +2878,7 @@ Date: 08 Feb 2023      Time: 20:51:43          Source: C:\CPEN412\GITHUB_STEUP\M
                     2499   ; *(unsigned short int *)(BreakPointAddress[i]) = BreakPointInstruction[i];
 00001908  2002      2500          move.l    D2,D0
 0000190A  E388      2501          lsl.l     #1,D0
-0000190C  41F9 0803 2502          lea       _BreakPointInstruction.L,A0
+0000190C  41F9 0B00 2502          lea       _BreakPointInstruction.L,A0
 00001910  014E      
 00001912  2202      2503          move.l    D2,D1
 00001914  E589      2504          lsl.l     #2,D1
@@ -2933,7 +2933,7 @@ Date: 08 Feb 2023      Time: 20:51:43          Source: C:\CPEN412\GITHUB_STEUP\M
                     2549   ; if(WatchPointSetOrCleared[i] == 1)
 0000196E  2002      2550          move.l    D2,D0
 00001970  E588      2551          lsl.l     #2,D0
-00001972  41F9 0803 2552          lea       _WatchPointSetOrCleared.L,A0
+00001972  41F9 0B00 2552          lea       _WatchPointSetOrCleared.L,A0
 00001976  01A2      
 00001978  2030 0800 2553          move.l    0(A0,D0.L),D0
 0000197C  0C80 0000 2554          cmp.l     #1,D0
@@ -2979,7 +2979,7 @@ Date: 08 Feb 2023      Time: 20:51:43          Source: C:\CPEN412\GITHUB_STEUP\M
                     2588   ; if(WatchPointSetOrCleared[i] == 1)
 000019BE  2002      2589          move.l    D2,D0
 000019C0  E588      2590          lsl.l     #2,D0
-000019C2  41F9 0803 2591          lea       _WatchPointSetOrCleared.L,A0
+000019C2  41F9 0B00 2591          lea       _WatchPointSetOrCleared.L,A0
 000019C6  01A2      
 000019C8  2030 0800 2592          move.l    0(A0,D0.L),D0
 000019CC  0C80 0000 2593          cmp.l     #1,D0
@@ -2988,7 +2988,7 @@ Date: 08 Feb 2023      Time: 20:51:43          Source: C:\CPEN412\GITHUB_STEUP\M
                     2595   ; printf("\r\n%3d     $%08x",i, WatchPointAddress[i]) ;
 000019D4  2202      2596          move.l    D2,D1
 000019D6  E589      2597          lsl.l     #2,D1
-000019D8  41F9 0803 2598          lea       _WatchPointAddress.L,A0
+000019D8  41F9 0B00 2598          lea       _WatchPointAddress.L,A0
 000019DC  0182      
 000019DE  2F30 1800 2599          move.l    0(A0,D1.L),-(A7)
 000019E2  2F02      2600          move.l    D2,-(A7)
@@ -3056,7 +3056,7 @@ Date: 08 Feb 2023      Time: 20:51:43          Source: C:\CPEN412\GITHUB_STEUP\M
                     2654   ; if(BreakPointSetOrCleared[i] == 1)  {       // if break point set
 00001A58  2002      2655          move.l    D2,D0
 00001A5A  E588      2656          lsl.l     #2,D0
-00001A5C  41F9 0803 2657          lea       _BreakPointSetOrCleared.L,A0
+00001A5C  41F9 0B00 2657          lea       _BreakPointSetOrCleared.L,A0
 00001A60  015E      
 00001A62  2030 0800 2658          move.l    0(A0,D0.L),D0
 00001A66  0C80 0000 2659          cmp.l     #1,D0
@@ -3065,33 +3065,33 @@ Date: 08 Feb 2023      Time: 20:51:43          Source: C:\CPEN412\GITHUB_STEUP\M
                     2661   ; ProgramBreakPointAddress = (volatile unsigned short int *)(BreakPointAddress[i]) ;     // point to the instruction in the user program we are about to change
 00001A70  2002      2662          move.l    D2,D0
 00001A72  E588      2663          lsl.l     #2,D0
-00001A74  41F9 0803 2664          lea       _BreakPointAddress.L,A0
+00001A74  41F9 0B00 2664          lea       _BreakPointAddress.L,A0
 00001A78  012E      
 00001A7A  2D70 0800 2665          move.l    0(A0,D0.L),-4(A6)
 00001A7E  FFFC      
                     2666   ; BreakPointAddress[i] = 0 ;
 00001A80  2002      2667          move.l    D2,D0
 00001A82  E588      2668          lsl.l     #2,D0
-00001A84  41F9 0803 2669          lea       _BreakPointAddress.L,A0
+00001A84  41F9 0B00 2669          lea       _BreakPointAddress.L,A0
 00001A88  012E      
 00001A8A  42B0 0800 2670          clr.l     0(A0,D0.L)
                     2671   ; BreakPointSetOrCleared[i] = 0 ;
 00001A8E  2002      2672          move.l    D2,D0
 00001A90  E588      2673          lsl.l     #2,D0
-00001A92  41F9 0803 2674          lea       _BreakPointSetOrCleared.L,A0
+00001A92  41F9 0B00 2674          lea       _BreakPointSetOrCleared.L,A0
 00001A96  015E      
 00001A98  42B0 0800 2675          clr.l     0(A0,D0.L)
                     2676   ; *ProgramBreakPointAddress = BreakPointInstruction[i] ;  // put original instruction back
 00001A9C  2002      2677          move.l    D2,D0
 00001A9E  E388      2678          lsl.l     #1,D0
-00001AA0  41F9 0803 2679          lea       _BreakPointInstruction.L,A0
+00001AA0  41F9 0B00 2679          lea       _BreakPointInstruction.L,A0
 00001AA4  014E      
 00001AA6  226E FFFC 2680          move.l    -4(A6),A1
 00001AAA  32B0 0800 2681          move.w    0(A0,D0.L),(A1)
                     2682   ; BreakPointInstruction[i] = 0 ;
 00001AAE  2002      2683          move.l    D2,D0
 00001AB0  E388      2684          lsl.l     #1,D0
-00001AB2  41F9 0803 2685          lea       _BreakPointInstruction.L,A0
+00001AB2  41F9 0B00 2685          lea       _BreakPointInstruction.L,A0
 00001AB6  014E      
 00001AB8  4270 0800 2686          clr.w     0(A0,D0.L)
                     2687   ; printf("\r\nBreak Point Cleared.....\r\n") ;
@@ -3162,7 +3162,7 @@ Date: 08 Feb 2023      Time: 20:51:43          Source: C:\CPEN412\GITHUB_STEUP\M
                     2744   ; if(WatchPointSetOrCleared[i] == 1)  {       // if watch point set
 00001B2E  2002      2745          move.l    D2,D0
 00001B30  E588      2746          lsl.l     #2,D0
-00001B32  41F9 0803 2747          lea       _WatchPointSetOrCleared.L,A0
+00001B32  41F9 0B00 2747          lea       _WatchPointSetOrCleared.L,A0
 00001B36  01A2      
 00001B38  2030 0800 2748          move.l    0(A0,D0.L),D0
 00001B3C  0C80 0000 2749          cmp.l     #1,D0
@@ -3171,13 +3171,13 @@ Date: 08 Feb 2023      Time: 20:51:43          Source: C:\CPEN412\GITHUB_STEUP\M
                     2751   ; WatchPointAddress[i] = 0 ;
 00001B44  2002      2752          move.l    D2,D0
 00001B46  E588      2753          lsl.l     #2,D0
-00001B48  41F9 0803 2754          lea       _WatchPointAddress.L,A0
+00001B48  41F9 0B00 2754          lea       _WatchPointAddress.L,A0
 00001B4C  0182      
 00001B4E  42B0 0800 2755          clr.l     0(A0,D0.L)
                     2756   ; WatchPointSetOrCleared[i] = 0 ;
 00001B52  2002      2757          move.l    D2,D0
 00001B54  E588      2758          lsl.l     #2,D0
-00001B56  41F9 0803 2759          lea       _WatchPointSetOrCleared.L,A0
+00001B56  41F9 0B00 2759          lea       _WatchPointSetOrCleared.L,A0
 00001B5A  01A2      
 00001B5C  42B0 0800 2760          clr.l     0(A0,D0.L)
                     2761   ; printf("\r\nWatch Point Cleared.....\r\n") ;
@@ -3218,7 +3218,7 @@ Date: 08 Feb 2023      Time: 20:51:43          Source: C:\CPEN412\GITHUB_STEUP\M
                     2793   ; if(BreakPointSetOrCleared[i] == 1)    {                                                    // if break point set
 00001B92  2002      2794          move.l    D2,D0
 00001B94  E588      2795          lsl.l     #2,D0
-00001B96  41F9 0803 2796          lea       _BreakPointSetOrCleared.L,A0
+00001B96  41F9 0B00 2796          lea       _BreakPointSetOrCleared.L,A0
 00001B9A  015E      
 00001B9C  2030 0800 2797          move.l    0(A0,D0.L),D0
 00001BA0  0C80 0000 2798          cmp.l     #1,D0
@@ -3227,14 +3227,14 @@ Date: 08 Feb 2023      Time: 20:51:43          Source: C:\CPEN412\GITHUB_STEUP\M
                     2800   ; ProgramBreakPointAddress = (volatile unsigned short int *)(BreakPointAddress[i]) ;     // point to the instruction in the user program where the break point has been set
 00001BA8  2002      2801          move.l    D2,D0
 00001BAA  E588      2802          lsl.l     #2,D0
-00001BAC  41F9 0803 2803          lea       _BreakPointAddress.L,A0
+00001BAC  41F9 0B00 2803          lea       _BreakPointAddress.L,A0
 00001BB0  012E      
 00001BB2  2D70 0800 2804          move.l    0(A0,D0.L),-4(A6)
 00001BB6  FFFC      
                     2805   ; *ProgramBreakPointAddress = BreakPointInstruction[i];                                  // copy the instruction back to the user program overwritting the $4e4e
 00001BB8  2002      2806          move.l    D2,D0
 00001BBA  E388      2807          lsl.l     #1,D0
-00001BBC  41F9 0803 2808          lea       _BreakPointInstruction.L,A0
+00001BBC  41F9 0B00 2808          lea       _BreakPointInstruction.L,A0
 00001BC0  014E      
 00001BC2  226E FFFC 2809          move.l    -4(A6),A1
 00001BC6  32B0 0800 2810          move.w    0(A0,D0.L),(A1)
@@ -3264,7 +3264,7 @@ Date: 08 Feb 2023      Time: 20:51:43          Source: C:\CPEN412\GITHUB_STEUP\M
                     2833   ; if(BreakPointSetOrCleared[i] == 1)    {                                                     // if break point set
 00001BE4  2002      2834          move.l    D2,D0
 00001BE6  E588      2835          lsl.l     #2,D0
-00001BE8  41F9 0803 2836          lea       _BreakPointSetOrCleared.L,A0
+00001BE8  41F9 0B00 2836          lea       _BreakPointSetOrCleared.L,A0
 00001BEC  015E      
 00001BEE  2030 0800 2837          move.l    0(A0,D0.L),D0
 00001BF2  0C80 0000 2838          cmp.l     #1,D0
@@ -3273,7 +3273,7 @@ Date: 08 Feb 2023      Time: 20:51:43          Source: C:\CPEN412\GITHUB_STEUP\M
                     2840   ; ProgramBreakPointAddress = (volatile unsigned short int *)(BreakPointAddress[i]) ;     // point to the instruction in the user program where the break point has been set
 00001BFA  2002      2841          move.l    D2,D0
 00001BFC  E588      2842          lsl.l     #2,D0
-00001BFE  41F9 0803 2843          lea       _BreakPointAddress.L,A0
+00001BFE  41F9 0B00 2843          lea       _BreakPointAddress.L,A0
 00001C02  012E      
 00001C04  2D70 0800 2844          move.l    0(A0,D0.L),-4(A6)
 00001C08  FFFC      
@@ -3307,33 +3307,33 @@ Date: 08 Feb 2023      Time: 20:51:43          Source: C:\CPEN412\GITHUB_STEUP\M
                     2871   ; ProgramBreakPointAddress = (volatile unsigned short int *)(BreakPointAddress[i]) ;     // point to the instruction in the user program where the break point has been set
 00001C2E  2002      2872          move.l    D2,D0
 00001C30  E588      2873          lsl.l     #2,D0
-00001C32  41F9 0803 2874          lea       _BreakPointAddress.L,A0
+00001C32  41F9 0B00 2874          lea       _BreakPointAddress.L,A0
 00001C36  012E      
 00001C38  2D70 0800 2875          move.l    0(A0,D0.L),-4(A6)
 00001C3C  FFFC      
                     2876   ; *ProgramBreakPointAddress = BreakPointInstruction[i];                                  // copy the instruction back to the user program
 00001C3E  2002      2877          move.l    D2,D0
 00001C40  E388      2878          lsl.l     #1,D0
-00001C42  41F9 0803 2879          lea       _BreakPointInstruction.L,A0
+00001C42  41F9 0B00 2879          lea       _BreakPointInstruction.L,A0
 00001C46  014E      
 00001C48  226E FFFC 2880          move.l    -4(A6),A1
 00001C4C  32B0 0800 2881          move.w    0(A0,D0.L),(A1)
                     2882   ; BreakPointAddress[i] = 0 ;                                                             // set BP address to NULL
 00001C50  2002      2883          move.l    D2,D0
 00001C52  E588      2884          lsl.l     #2,D0
-00001C54  41F9 0803 2885          lea       _BreakPointAddress.L,A0
+00001C54  41F9 0B00 2885          lea       _BreakPointAddress.L,A0
 00001C58  012E      
 00001C5A  42B0 0800 2886          clr.l     0(A0,D0.L)
                     2887   ; BreakPointInstruction[i] = 0 ;
 00001C5E  2002      2888          move.l    D2,D0
 00001C60  E388      2889          lsl.l     #1,D0
-00001C62  41F9 0803 2890          lea       _BreakPointInstruction.L,A0
+00001C62  41F9 0B00 2890          lea       _BreakPointInstruction.L,A0
 00001C66  014E      
 00001C68  4270 0800 2891          clr.w     0(A0,D0.L)
                     2892   ; BreakPointSetOrCleared[i] = 0 ;                                                        // mark break point as cleared for future setting
 00001C6C  2002      2893          move.l    D2,D0
 00001C6E  E588      2894          lsl.l     #2,D0
-00001C70  41F9 0803 2895          lea       _BreakPointSetOrCleared.L,A0
+00001C70  41F9 0B00 2895          lea       _BreakPointSetOrCleared.L,A0
 00001C74  015E      
 00001C76  42B0 0800 2896          clr.l     0(A0,D0.L)
 00001C7A  5282      2897          addq.l    #1,D2
@@ -3359,13 +3359,13 @@ Date: 08 Feb 2023      Time: 20:51:43          Source: C:\CPEN412\GITHUB_STEUP\M
                     2916   ; WatchPointAddress[i] = 0 ;                                                             // set BP address to NULL
 00001C90  2002      2917          move.l    D2,D0
 00001C92  E588      2918          lsl.l     #2,D0
-00001C94  41F9 0803 2919          lea       _WatchPointAddress.L,A0
+00001C94  41F9 0B00 2919          lea       _WatchPointAddress.L,A0
 00001C98  0182      
 00001C9A  42B0 0800 2920          clr.l     0(A0,D0.L)
                     2921   ; WatchPointSetOrCleared[i] = 0 ;                                                        // mark break point as cleared for future setting
 00001C9E  2002      2922          move.l    D2,D0
 00001CA0  E588      2923          lsl.l     #2,D0
-00001CA2  41F9 0803 2924          lea       _WatchPointSetOrCleared.L,A0
+00001CA2  41F9 0B00 2924          lea       _WatchPointSetOrCleared.L,A0
 00001CA6  01A2      
 00001CA8  42B0 0800 2925          clr.l     0(A0,D0.L)
 00001CAC  5282      2926          addq.l    #1,D2
@@ -3383,7 +3383,7 @@ Date: 08 Feb 2023      Time: 20:51:43          Source: C:\CPEN412\GITHUB_STEUP\M
 00001CB8  48E7 3830 2938          movem.l   D2/D3/D4/A2/A3,-(A7)
 00001CBC  45F9 0000 2939          lea       _printf.L,A2
 00001CC0  3C12      
-00001CC2  47F9 0803 2940          lea       _BreakPointSetOrCleared.L,A3
+00001CC2  47F9 0B00 2940          lea       _BreakPointSetOrCleared.L,A3
 00001CC6  015E      
                     2941   ; int i ;
                     2942   ; int BPNumber;
@@ -3472,7 +3472,7 @@ Date: 08 Feb 2023      Time: 20:51:43          Source: C:\CPEN412\GITHUB_STEUP\M
                     3015   ; if(BreakPointAddress[i] == BPAddress)   {
 00001D4E  2002      3016          move.l    D2,D0
 00001D50  E588      3017          lsl.l     #2,D0
-00001D52  41F9 0803 3018          lea       _BreakPointAddress.L,A0
+00001D52  41F9 0B00 3018          lea       _BreakPointAddress.L,A0
 00001D56  012E      
 00001D58  B6B0 0800 3019          cmp.l     0(A0,D0.L),D3
 00001D5C  6610      3020          bne.s     SetBreakPoint_16
@@ -3501,7 +3501,7 @@ Date: 08 Feb 2023      Time: 20:51:43          Source: C:\CPEN412\GITHUB_STEUP\M
 00001D86  2044      3041          move.l    D4,A0
 00001D88  2002      3042          move.l    D2,D0
 00001D8A  E388      3043          lsl.l     #1,D0
-00001D8C  43F9 0803 3044          lea       _BreakPointInstruction.L,A1
+00001D8C  43F9 0B00 3044          lea       _BreakPointInstruction.L,A1
 00001D90  014E      
 00001D92  3390 0800 3045          move.w    (A0),0(A1,D0.L)
                     3046   ; printf("\r\nBreak Point Set at Address: [$%08x]", ProgramBreakPointAddress) ;
@@ -3516,7 +3516,7 @@ Date: 08 Feb 2023      Time: 20:51:43          Source: C:\CPEN412\GITHUB_STEUP\M
                     3054   ; BreakPointAddress[i] = BPAddress ;                              // record the address of this break point in the debugger
 00001DA8  2002      3055          move.l    D2,D0
 00001DAA  E588      3056          lsl.l     #2,D0
-00001DAC  41F9 0803 3057          lea       _BreakPointAddress.L,A0
+00001DAC  41F9 0B00 3057          lea       _BreakPointAddress.L,A0
 00001DB0  012E      
 00001DB2  2183 0800 3058          move.l    D3,0(A0,D0.L)
                     3059   ; printf("\r\n") ;
@@ -3545,7 +3545,7 @@ Date: 08 Feb 2023      Time: 20:51:43          Source: C:\CPEN412\GITHUB_STEUP\M
 00001DD8  48E7 3030 3081          movem.l   D2/D3/A2/A3,-(A7)
 00001DDC  45F9 0000 3082          lea       _printf.L,A2
 00001DE0  3C12      
-00001DE2  47F9 0803 3083          lea       _WatchPointSetOrCleared.L,A3
+00001DE2  47F9 0B00 3083          lea       _WatchPointSetOrCleared.L,A3
 00001DE6  01A2      
                     3084   ; int i ;
                     3085   ; int WPNumber;
@@ -3603,7 +3603,7 @@ Date: 08 Feb 2023      Time: 20:51:43          Source: C:\CPEN412\GITHUB_STEUP\M
                     3132   ; if(WatchPointAddress[i] == WPAddress && WPAddress != 0)   {     //so we can set a wp at 0
 00001E38  2002      3133          move.l    D2,D0
 00001E3A  E588      3134          lsl.l     #2,D0
-00001E3C  41F9 0803 3135          lea       _WatchPointAddress.L,A0
+00001E3C  41F9 0B00 3135          lea       _WatchPointAddress.L,A0
 00001E40  0182      
 00001E42  B6B0 0800 3136          cmp.l     0(A0,D0.L),D3
 00001E46  6614      3137          bne.s     SetWatchPoint_12
@@ -3638,7 +3638,7 @@ Date: 08 Feb 2023      Time: 20:51:43          Source: C:\CPEN412\GITHUB_STEUP\M
                     3163   ; WatchPointAddress[i] = WPAddress ;                              // record the address of this watch point in the debugger
 00001E80  2002      3164          move.l    D2,D0
 00001E82  E588      3165          lsl.l     #2,D0
-00001E84  41F9 0803 3166          lea       _WatchPointAddress.L,A0
+00001E84  41F9 0B00 3166          lea       _WatchPointAddress.L,A0
 00001E88  0182      
 00001E8A  2183 0800 3167          move.l    D3,0(A0,D0.L)
                     3168   ; printf("\r\n") ;
@@ -3665,11 +3665,11 @@ Date: 08 Feb 2023      Time: 20:51:43          Source: C:\CPEN412\GITHUB_STEUP\M
                     3188   _HandleBreakPoint:
 00001EAA  4E56 FFFC 3189          link      A6,#-4
 00001EAE  48E7 0038 3190          movem.l   A2/A3/A4,-(A7)
-00001EB2  45F9 0803 3191          lea       _i.L,A2
+00001EB2  45F9 0B00 3191          lea       _i.L,A2
 00001EB6  00C4      
 00001EB8  47F9 0000 3192          lea       _printf.L,A3
 00001EBC  3C12      
-00001EBE  49F9 0803 3193          lea       _PC.L,A4
+00001EBE  49F9 0B00 3193          lea       _PC.L,A4
 00001EC2  0120      
                     3194   ; volatile unsigned short int *ProgramBreakPointAddress ;
                     3195   ; // now we have to put the break point back to run the instruction
@@ -3704,7 +3704,7 @@ Date: 08 Feb 2023      Time: 20:51:43          Source: C:\CPEN412\GITHUB_STEUP\M
                     3220   ; if(BreakPointAddress[i] == PC) {        // if we have found the breakpoint
 00001EF6  2012      3221          move.l    (A2),D0
 00001EF8  E588      3222          lsl.l     #2,D0
-00001EFA  41F9 0803 3223          lea       _BreakPointAddress.L,A0
+00001EFA  41F9 0B00 3223          lea       _BreakPointAddress.L,A0
 00001EFE  012E      
 00001F00  2230 0800 3224          move.l    0(A0,D0.L),D1
 00001F04  B294      3225          cmp.l     (A4),D1
@@ -3712,26 +3712,26 @@ Date: 08 Feb 2023      Time: 20:51:43          Source: C:\CPEN412\GITHUB_STEUP\M
                     3227   ; BreakPointAddress[i] = 0 ;
 00001F0A  2012      3228          move.l    (A2),D0
 00001F0C  E588      3229          lsl.l     #2,D0
-00001F0E  41F9 0803 3230          lea       _BreakPointAddress.L,A0
+00001F0E  41F9 0B00 3230          lea       _BreakPointAddress.L,A0
 00001F12  012E      
 00001F14  42B0 0800 3231          clr.l     0(A0,D0.L)
                     3232   ; BreakPointSetOrCleared[i] = 0 ;
 00001F18  2012      3233          move.l    (A2),D0
 00001F1A  E588      3234          lsl.l     #2,D0
-00001F1C  41F9 0803 3235          lea       _BreakPointSetOrCleared.L,A0
+00001F1C  41F9 0B00 3235          lea       _BreakPointSetOrCleared.L,A0
 00001F20  015E      
 00001F22  42B0 0800 3236          clr.l     0(A0,D0.L)
                     3237   ; *ProgramBreakPointAddress = BreakPointInstruction[i] ;  // put original instruction back
 00001F26  2012      3238          move.l    (A2),D0
 00001F28  E388      3239          lsl.l     #1,D0
-00001F2A  41F9 0803 3240          lea       _BreakPointInstruction.L,A0
+00001F2A  41F9 0B00 3240          lea       _BreakPointInstruction.L,A0
 00001F2E  014E      
 00001F30  226E FFFC 3241          move.l    -4(A6),A1
 00001F34  32B0 0800 3242          move.w    0(A0,D0.L),(A1)
                     3243   ; BreakPointInstruction[i] = 0 ;
 00001F38  2012      3244          move.l    (A2),D0
 00001F3A  E388      3245          lsl.l     #1,D0
-00001F3C  41F9 0803 3246          lea       _BreakPointInstruction.L,A0
+00001F3C  41F9 0B00 3246          lea       _BreakPointInstruction.L,A0
 00001F40  014E      
 00001F42  4270 0800 3247          clr.w     0(A0,D0.L)
                     3248   HandleBreakPoint_4:
@@ -3988,7 +3988,7 @@ Date: 08 Feb 2023      Time: 20:51:43          Source: C:\CPEN412\GITHUB_STEUP\M
 000020F4  4E92      3473          jsr       (A2)
 000020F6  584F      3474          addq.w    #4,A7
                     3475   ; printf("\r\n  G            - Go Program Starting at Address: $%08X", PC) ;
-000020F8  2F39 0803 3476          move.l    _PC.L,-(A7)
+000020F8  2F39 0B00 3476          move.l    _PC.L,-(A7)
 000020FC  0120      
 000020FE  4879 0000 3477          pea       @m68kde~1_97.L
 00002102  50A6      
@@ -4052,11 +4052,11 @@ Date: 08 Feb 2023      Time: 20:51:43          Source: C:\CPEN412\GITHUB_STEUP\M
 0000216E  48E7 303C 3526          movem.l   D2/D3/A2/A3/A4/A5,-(A7)
 00002172  45F9 0000 3527          lea       _printf.L,A2
 00002176  3C12      
-00002178  47F9 0803 3528          lea       _Trace.L,A3
+00002178  47F9 0B00 3528          lea       _Trace.L,A3
 0000217C  00D8      
-0000217E  49F9 0803 3529          lea       _x.L,A4
+0000217E  49F9 0B00 3529          lea       _x.L,A4
 00002182  00C8      
-00002184  4BF9 0803 3530          lea       _SR.L,A5
+00002184  4BF9 0B00 3530          lea       _SR.L,A5
 00002188  012C      
                     3531   ; char c,c1 ;
                     3532   ; while(1)    {
@@ -4122,7 +4122,7 @@ Date: 08 Feb 2023      Time: 20:51:43          Source: C:\CPEN412\GITHUB_STEUP\M
 00002200  584F      3587          addq.w    #4,A7
                     3588   ; GoFlag = 1 ;
 00002202  23FC 0000 3589          move.l    #1,_GoFlag.L
-00002206  0001 0803 
+00002206  0001 0B00 
 0000220A  00DC      
                     3590   ; go() ;
 0000220C  4EB8 08B8 3591          jsr       _go
@@ -4223,7 +4223,7 @@ Date: 08 Feb 2023      Time: 20:51:43          Source: C:\CPEN412\GITHUB_STEUP\M
 000022C0  0C80 0000 3684          cmp.l     #1,D0
 000022C4  0001      
 000022C6  661A      3685          bne.s     menu_36
-000022C8  2039 0803 3686          move.l    _GoFlag.L,D0
+000022C8  2039 0B00 3686          move.l    _GoFlag.L,D0
 000022CC  00DC      
 000022CE  0C80 0000 3687          cmp.l     #1,D0
 000022D2  0001      
@@ -4265,7 +4265,7 @@ Date: 08 Feb 2023      Time: 20:51:43          Source: C:\CPEN412\GITHUB_STEUP\M
                     3719   ; SR = SR | (unsigned short int)(0x8000) ;    // set T bit in status register
 00002316  0055 8000 3720          or.w      #32768,(A5)
                     3721   ; printf("\r\nPress 'G' to Trace Program from address $%08x.....",PC) ;
-0000231A  2F39 0803 3722          move.l    _PC.L,-(A7)
+0000231A  2F39 0B00 3722          move.l    _PC.L,-(A7)
 0000231E  0120      
 00002320  4879 0000 3723          pea       @m68kde~1_112.L
 00002324  531E      
@@ -5811,69 +5811,69 @@ Date: 08 Feb 2023      Time: 20:51:43          Source: C:\CPEN412\GITHUB_STEUP\M
                     5127   ; KillAllBreakPoints() ;
 00002ED8  4EB8 1C1C 5128          jsr       _KillAllBreakPoints
                     5129   ; i = x = y = z = PortA_Count = 0;
-00002EDC  42B9 0803 5130          clr.l     _PortA_Count.L
+00002EDC  42B9 0B00 5130          clr.l     _PortA_Count.L
 00002EE0  00D4      
-00002EE2  42B9 0803 5131          clr.l     _z.L
+00002EE2  42B9 0B00 5131          clr.l     _z.L
 00002EE6  00D0      
-00002EE8  42B9 0803 5132          clr.l     _y.L
+00002EE8  42B9 0B00 5132          clr.l     _y.L
 00002EEC  00CC      
-00002EEE  42B9 0803 5133          clr.l     _x.L
+00002EEE  42B9 0B00 5133          clr.l     _x.L
 00002EF2  00C8      
 00002EF4  4282      5134          clr.l     D2
                     5135   ; Trace = GoFlag = 0;                       // used in tracing/single stepping
-00002EF6  42B9 0803 5136          clr.l     _GoFlag.L
+00002EF6  42B9 0B00 5136          clr.l     _GoFlag.L
 00002EFA  00DC      
-00002EFC  42B9 0803 5137          clr.l     _Trace.L
+00002EFC  42B9 0B00 5137          clr.l     _Trace.L
 00002F00  00D8      
                     5138   ; Echo = 1 ;
 00002F02  23FC 0000 5139          move.l    #1,_Echo.L
-00002F06  0001 0803 
+00002F06  0001 0B00 
 00002F0A  00E0      
                     5140   ; d0=d1=d2=d3=d4=d5=d6=d7=0 ;
-00002F0C  42B9 0803 5141          clr.l     _d7.L
+00002F0C  42B9 0B00 5141          clr.l     _d7.L
 00002F10  0100      
-00002F12  42B9 0803 5142          clr.l     _d6.L
+00002F12  42B9 0B00 5142          clr.l     _d6.L
 00002F16  00FC      
-00002F18  42B9 0803 5143          clr.l     _d5.L
+00002F18  42B9 0B00 5143          clr.l     _d5.L
 00002F1C  00F8      
-00002F1E  42B9 0803 5144          clr.l     _d4.L
+00002F1E  42B9 0B00 5144          clr.l     _d4.L
 00002F22  00F4      
-00002F24  42B9 0803 5145          clr.l     _d3.L
+00002F24  42B9 0B00 5145          clr.l     _d3.L
 00002F28  00F0      
-00002F2A  42B9 0803 5146          clr.l     _d2.L
+00002F2A  42B9 0B00 5146          clr.l     _d2.L
 00002F2E  00EC      
-00002F30  42B9 0803 5147          clr.l     _d1.L
+00002F30  42B9 0B00 5147          clr.l     _d1.L
 00002F34  00E8      
-00002F36  42B9 0803 5148          clr.l     _d0.L
+00002F36  42B9 0B00 5148          clr.l     _d0.L
 00002F3A  00E4      
                     5149   ; a0=a1=a2=a3=a4=a5=a6=0 ;
-00002F3C  42B9 0803 5150          clr.l     _a6.L
+00002F3C  42B9 0B00 5150          clr.l     _a6.L
 00002F40  011C      
-00002F42  42B9 0803 5151          clr.l     _a5.L
+00002F42  42B9 0B00 5151          clr.l     _a5.L
 00002F46  0118      
-00002F48  42B9 0803 5152          clr.l     _a4.L
+00002F48  42B9 0B00 5152          clr.l     _a4.L
 00002F4C  0114      
-00002F4E  42B9 0803 5153          clr.l     _a3.L
+00002F4E  42B9 0B00 5153          clr.l     _a3.L
 00002F52  0110      
-00002F54  42B9 0803 5154          clr.l     _a2.L
+00002F54  42B9 0B00 5154          clr.l     _a2.L
 00002F58  010C      
-00002F5A  42B9 0803 5155          clr.l     _a1.L
+00002F5A  42B9 0B00 5155          clr.l     _a1.L
 00002F5E  0108      
-00002F60  42B9 0803 5156          clr.l     _a0.L
+00002F60  42B9 0B00 5156          clr.l     _a0.L
 00002F64  0104      
                     5157   ; PC = ProgramStart, SSP=TopOfStack, USP = TopOfStack;
 00002F66  23FC 0800 5158          move.l    #134217728,_PC.L
-00002F6A  0000 0803 
+00002F6A  0000 0B00 
 00002F6E  0120      
-00002F70  23FC 0804 5159          move.l    #134479872,_SSP.L
-00002F74  0000 0803 
+00002F70  23FC 0C00 5159          move.l    #201326592,_SSP.L
+00002F74  0000 0B00 
 00002F78  0124      
-00002F7A  23FC 0804 5160          move.l    #134479872,_USP.L
-00002F7E  0000 0803 
+00002F7A  23FC 0C00 5160          move.l    #201326592,_USP.L
+00002F7E  0000 0B00 
 00002F82  0128      
                     5161   ; SR = 0x2000;                            // clear interrupts enable tracing  uses IRQ6
 00002F84  33FC 2000 5162          move.w    #8192,_SR.L
-00002F88  0803 012C 
+00002F88  0B00 012C 
                     5163   ; // Initialise Breakpoint variables
                     5164   ; for(i = 0; i < 8; i++)  {
 00002F8C  4282      5165          clr.l     D2
@@ -5884,31 +5884,31 @@ Date: 08 Feb 2023      Time: 20:51:43          Source: C:\CPEN412\GITHUB_STEUP\M
                     5169   ; BreakPointAddress[i] = 0;               //array of 8 breakpoint addresses
 00002F98  2002      5170          move.l    D2,D0
 00002F9A  E588      5171          lsl.l     #2,D0
-00002F9C  41F9 0803 5172          lea       _BreakPointAddress.L,A0
+00002F9C  41F9 0B00 5172          lea       _BreakPointAddress.L,A0
 00002FA0  012E      
 00002FA2  42B0 0800 5173          clr.l     0(A0,D0.L)
                     5174   ; WatchPointAddress[i] = 0 ;
 00002FA6  2002      5175          move.l    D2,D0
 00002FA8  E588      5176          lsl.l     #2,D0
-00002FAA  41F9 0803 5177          lea       _WatchPointAddress.L,A0
+00002FAA  41F9 0B00 5177          lea       _WatchPointAddress.L,A0
 00002FAE  0182      
 00002FB0  42B0 0800 5178          clr.l     0(A0,D0.L)
                     5179   ; BreakPointInstruction[i] = 0;           // to hold the instruction at the break point
 00002FB4  2002      5180          move.l    D2,D0
 00002FB6  E388      5181          lsl.l     #1,D0
-00002FB8  41F9 0803 5182          lea       _BreakPointInstruction.L,A0
+00002FB8  41F9 0B00 5182          lea       _BreakPointInstruction.L,A0
 00002FBC  014E      
 00002FBE  4270 0800 5183          clr.w     0(A0,D0.L)
                     5184   ; BreakPointSetOrCleared[i] = 0;          // indicates if break point set
 00002FC2  2002      5185          move.l    D2,D0
 00002FC4  E588      5186          lsl.l     #2,D0
-00002FC6  41F9 0803 5187          lea       _BreakPointSetOrCleared.L,A0
+00002FC6  41F9 0B00 5187          lea       _BreakPointSetOrCleared.L,A0
 00002FCA  015E      
 00002FCC  42B0 0800 5188          clr.l     0(A0,D0.L)
                     5189   ; WatchPointSetOrCleared[i] = 0;
 00002FD0  2002      5190          move.l    D2,D0
 00002FD2  E588      5191          lsl.l     #2,D0
-00002FD4  41F9 0803 5192          lea       _WatchPointSetOrCleared.L,A0
+00002FD4  41F9 0B00 5192          lea       _WatchPointSetOrCleared.L,A0
 00002FD8  01A2      
 00002FDA  42B0 0800 5193          clr.l     0(A0,D0.L)
 00002FDE  5282      5194          addq.l    #1,D2
@@ -6055,7 +6055,7 @@ Date: 08 Feb 2023      Time: 20:51:43          Source: C:\CPEN412\GITHUB_STEUP\M
 00003118  584F      5330          addq.w    #4,A7
                     5331   ; GoFlag = 1;
 0000311A  23FC 0000 5332          move.l    #1,_GoFlag.L
-0000311E  0001 0803 
+0000311E  0001 0B00 
 00003122  00DC      
                     5333   ; go() ;
 00003124  4EB8 08B8 5334          jsr       _go
@@ -6238,15 +6238,15 @@ Date: 08 Feb 2023      Time: 20:51:43          Source: C:\CPEN412\GITHUB_STEUP\M
 0000329C  4E75      5502          rts
                     5503   _getch:
 0000329E  48E7 2000 5504          movem.l   D2,-(A7)
-000032A2  2439 0803 5505          move.l    __ungetbuf,D2
+000032A2  2439 0B00 5505          move.l    __ungetbuf,D2
 000032A6  00C0      
-000032A8  2039 0803 5506          move.l    __ungetbuf,D0
+000032A8  2039 0B00 5506          move.l    __ungetbuf,D0
 000032AC  00C0      
 000032AE  0C80 FFFF 5507          cmp.l     #-1,D0
 000032B2  FFFF      
 000032B4  670C      5508          beq.s     getch_1
 000032B6  23FC FFFF 5509          move.l    #-1,__ungetbuf
-000032BA  FFFF 0803 
+000032BA  FFFF 0B00 
 000032BE  00C0      
 000032C0  6010      5510          bra.s     getch_3
                     5511   getch_1:
@@ -6348,14 +6348,14 @@ Date: 08 Feb 2023      Time: 20:51:43          Source: C:\CPEN412\GITHUB_STEUP\M
 000033B2  2052      5599          move.l    (A2),A0
 000033B4  1010      5600          move.b    (A0),D0
 000033B6  6620      5601          bne.s     @vsscanf_scanread_6
-000033B8  4879 0803 5602          pea       @vsscanf_buf
+000033B8  4879 0B00 5602          pea       @vsscanf_buf
 000033BC  0546      
 000033BE  6100 1038 5603          bsr       _gets
 000033C2  584F      5604          addq.w    #4,A7
 000033C4  2480      5605          move.l    D0,(A2)
 000033C6  4879 0000 5606          pea       @vsscanf_1
 000033CA  59EA      
-000033CC  4879 0803 5607          pea       @vsscanf_buf
+000033CC  4879 0B00 5607          pea       @vsscanf_buf
 000033D0  0546      
 000033D2  6100 FF66 5608          bsr       _strcat
 000033D6  504F      5609          addq.w    #8,A7
@@ -6389,13 +6389,13 @@ Date: 08 Feb 2023      Time: 20:51:43          Source: C:\CPEN412\GITHUB_STEUP\M
                     5636   @vsscanf_scanputback_4:
 00003412  602E      5637          bra.s     @vsscanf_scanputback_6
                     5638   @vsscanf_scanputback_1:
-00003414  41F9 0803 5639          lea       @vsscanf_buf,A0
+00003414  41F9 0B00 5639          lea       @vsscanf_buf,A0
 00003418  0546      
 0000341A  2008      5640          move.l    A0,D0
 0000341C  B0B9 0000 5641          cmp.l     @vsscanf_bufx,D0
 00003420  59E6      
 00003422  6610      5642          bne.s     @vsscanf_scanputback_5
-00003424  4239 0803 5643          clr.b     @vsscanf_buf
+00003424  4239 0B00 5643          clr.b     @vsscanf_buf
 00003428  0546      
 0000342A  2F02      5644          move.l    D2,-(A7)
 0000342C  6100 103C 5645          bsr       _ungetch
@@ -6608,11 +6608,11 @@ Date: 08 Feb 2023      Time: 20:51:43          Source: C:\CPEN412\GITHUB_STEUP\M
 00003604  4E5E      5841          unlk      A6
 00003606  4E75      5842          rts
                     5843   _scanflush:
-00003608  41F9 0803 5844          lea       @vsscanf_buf,A0
+00003608  41F9 0B00 5844          lea       @vsscanf_buf,A0
 0000360C  0546      
 0000360E  23C8 0000 5845          move.l    A0,@vsscanf_bufx
 00003612  59E6      
-00003614  4239 0803 5846          clr.b     @vsscanf_buf
+00003614  4239 0B00 5846          clr.b     @vsscanf_buf
 00003618  0546      
 0000361A  4878 FFFF 5847          pea       -1
 0000361E  6100 0E4A 5848          bsr       _ungetch
@@ -8158,7 +8158,7 @@ Date: 08 Feb 2023      Time: 20:51:43          Source: C:\CPEN412\GITHUB_STEUP\M
                     7271   _ungetch:
 0000446A  4E56 0000 7272          link      A6,#0
 0000446E  23EE 0008 7273          move.l    8(A6),__ungetbuf
-00004472  0803 00C0 
+00004472  0B00 00C0 
 00004476  202E 0008 7274          move.l    8(A6),D0
 0000447A  4E5E      7275          unlk      A6
 0000447C  4E75      7276          rts
@@ -9952,7 +9952,7 @@ Date: 08 Feb 2023      Time: 20:51:43          Source: C:\CPEN412\GITHUB_STEUP\M
                     8034   *********************************************************************************************************
                     8035   
                     8036   @vsscanf_bufx:
-000059E6  0803 0546 8037          dc.l      @vsscanf_buf
+000059E6  0B00 0546 8037          dc.l      @vsscanf_buf
                     8038   @vsscanf_1:
 000059EA  0A00      8039          dc.b      10,0
                     8040   __ctype:
@@ -10038,11 +10038,11 @@ Date: 08 Feb 2023      Time: 20:51:43          Source: C:\CPEN412\GITHUB_STEUP\M
                     8065   * Section for Uninitialised Data held in ROM as constants
                     8066   *********************************************************************************************************
                     8067   
-08030000            8068                   org     RamVectorTable          Ram based vector table must be stored here otherwise InstallException Handler will not work
+0B000000            8068                   org     RamVectorTable          Ram based vector table must be stored here otherwise InstallException Handler will not work
           0000 0114 8069   DataLength      equ     DataEnd-DataStart       length of data needed to copy to Ram on bootup
                     8070   
                     8071   
-08030000            8072   bss             org       bss
+0B000000            8072   bss             org       bss
                     8073   
                     8074   *********************************************************************************************************
                     8075   * Build a ram based vector table for interrupts so we can install our own Exception Handlers in C code at run time
@@ -10051,58 +10051,58 @@ Date: 08 Feb 2023      Time: 20:51:43          Source: C:\CPEN412\GITHUB_STEUP\M
                     8078   
                     8079   
                     8080   
-08030000            8081   VInitialSP       ds.l    1      dummy as we can't really install a handler for this
-08030004            8082   VInitialPC       ds.l    1      dummy as we can't reallin install a handler for this
-08030008            8083   VBusError        ds.l    1      storage for address of Bus Error Handler
-0803000C            8084   VAddressError    ds.l    1      storage for address of Address Error Handler
-08030010            8085   VIllegalInstr    ds.l    1      storage for address of Illegal Instruction handler
-08030014            8086   VDividebyZero    ds.l    1      storage for address of divide by zero handler
-08030018            8087   VCheck           ds.l    1      ditto
-0803001C            8088   VTrapV           ds.l    1      ditto
-08030020            8089   VPrivilege       ds.l    1      ditto
-08030024            8090   VTrace           ds.l    1
-08030028            8091   VLine1010emul    ds.l    1
-0803002C            8092   VLine1111emul    ds.l    1
-08030030            8093   VUnassigned1     ds.l    1
-08030034            8094   VUnassigned2     ds.l    1
-08030038            8095   VUnassigned3     ds.l    1
-0803003C            8096   VUninit_IRQ      ds.l    1
-08030040            8097   VUnassigned4     ds.l    1
-08030044            8098   VUnassigned5     ds.l    1
-08030048            8099   VUnassigned6     ds.l    1
-0803004C            8100   VUnassigned7     ds.l    1
-08030050            8101   VUnassigned8     ds.l    1
-08030054            8102   VUnassigned9     ds.l    1
-08030058            8103   VUnassigned10    ds.l    1
-0803005C            8104   VUnassigned11    ds.l    1
-08030060            8105   VSpuriousIRQ     ds.l    1
+0B000000            8081   VInitialSP       ds.l    1      dummy as we can't really install a handler for this
+0B000004            8082   VInitialPC       ds.l    1      dummy as we can't reallin install a handler for this
+0B000008            8083   VBusError        ds.l    1      storage for address of Bus Error Handler
+0B00000C            8084   VAddressError    ds.l    1      storage for address of Address Error Handler
+0B000010            8085   VIllegalInstr    ds.l    1      storage for address of Illegal Instruction handler
+0B000014            8086   VDividebyZero    ds.l    1      storage for address of divide by zero handler
+0B000018            8087   VCheck           ds.l    1      ditto
+0B00001C            8088   VTrapV           ds.l    1      ditto
+0B000020            8089   VPrivilege       ds.l    1      ditto
+0B000024            8090   VTrace           ds.l    1
+0B000028            8091   VLine1010emul    ds.l    1
+0B00002C            8092   VLine1111emul    ds.l    1
+0B000030            8093   VUnassigned1     ds.l    1
+0B000034            8094   VUnassigned2     ds.l    1
+0B000038            8095   VUnassigned3     ds.l    1
+0B00003C            8096   VUninit_IRQ      ds.l    1
+0B000040            8097   VUnassigned4     ds.l    1
+0B000044            8098   VUnassigned5     ds.l    1
+0B000048            8099   VUnassigned6     ds.l    1
+0B00004C            8100   VUnassigned7     ds.l    1
+0B000050            8101   VUnassigned8     ds.l    1
+0B000054            8102   VUnassigned9     ds.l    1
+0B000058            8103   VUnassigned10    ds.l    1
+0B00005C            8104   VUnassigned11    ds.l    1
+0B000060            8105   VSpuriousIRQ     ds.l    1
                     8106   
                     8107   * Interrupt handlers Vector 25-31
-08030064            8108   VL1IRQ           ds.l    1       storage for 4 byte address of IRQ handler in your C program - install the handler using the C function InstallExceptionHandler()
-08030068            8109   VL2IRQ           ds.l    1       storage for 4 byte address of IRQ handler in your C program - install the handler using the C function InstallExceptionHandler()
-0803006C            8110   VL3IRQ           ds.l    1       storage for 4 byte address of IRQ handler in your C program - install the handler using the C function InstallExceptionHandler()
-08030070            8111   VL4IRQ           ds.l    1       storage for 4 byte address of IRQ handler in your C program - install the handler using the C function InstallExceptionHandler()
-08030074            8112   VL5IRQ           ds.l    1       storage for 4 byte address of IRQ handler in your C program - install the handler using the C function InstallExceptionHandler()
-08030078            8113   VL6IRQ           ds.l    1       storage for 4 byte address of IRQ handler in your C program - install the handler using the C function InstallExceptionHandler()
-0803007C            8114   VL7IRQ           ds.l    1       storage for 4 byte address of IRQ handler in your C program - install the handler using the C function InstallExceptionHandler()
+0B000064            8108   VL1IRQ           ds.l    1       storage for 4 byte address of IRQ handler in your C program - install the handler using the C function InstallExceptionHandler()
+0B000068            8109   VL2IRQ           ds.l    1       storage for 4 byte address of IRQ handler in your C program - install the handler using the C function InstallExceptionHandler()
+0B00006C            8110   VL3IRQ           ds.l    1       storage for 4 byte address of IRQ handler in your C program - install the handler using the C function InstallExceptionHandler()
+0B000070            8111   VL4IRQ           ds.l    1       storage for 4 byte address of IRQ handler in your C program - install the handler using the C function InstallExceptionHandler()
+0B000074            8112   VL5IRQ           ds.l    1       storage for 4 byte address of IRQ handler in your C program - install the handler using the C function InstallExceptionHandler()
+0B000078            8113   VL6IRQ           ds.l    1       storage for 4 byte address of IRQ handler in your C program - install the handler using the C function InstallExceptionHandler()
+0B00007C            8114   VL7IRQ           ds.l    1       storage for 4 byte address of IRQ handler in your C program - install the handler using the C function InstallExceptionHandler()
                     8115   
                     8116   * Trap Handler vectors 32-47
-08030080            8117   VTrap0           ds.l   1        storage for 4 byte address of TRAP handler in your C program - install the handler using the C function InstallExceptionHandler()
-08030084            8118   VTrap1           ds.l   1        storage for 4 byte address of TRAP handler in your C program - install the handler using the C function InstallExceptionHandler()
-08030088            8119   VTrap2           ds.l   1        storage for 4 byte address of TRAP handler in your C program - install the handler using the C function InstallExceptionHandler()
-0803008C            8120   VTrap3           ds.l   1        storage for 4 byte address of TRAP handler in your C program - install the handler using the C function InstallExceptionHandler()
-08030090            8121   VTrap4           ds.l   1        storage for 4 byte address of TRAP handler in your C program - install the handler using the C function InstallExceptionHandler()
-08030094            8122   VTrap5           ds.l   1        storage for 4 byte address of TRAP handler in your C program - install the handler using the C function InstallExceptionHandler()
-08030098            8123   VTrap6           ds.l   1        storage for 4 byte address of TRAP handler in your C program - install the handler using the C function InstallExceptionHandler()
-0803009C            8124   VTrap7           ds.l   1        storage for 4 byte address of TRAP handler in your C program - install the handler using the C function InstallExceptionHandler()
-080300A0            8125   VTrap8           ds.l   1        storage for 4 byte address of TRAP handler in your C program - install the handler using the C function InstallExceptionHandler()
-080300A4            8126   VTrap9           ds.l   1        storage for 4 byte address of TRAP handler in your C program - install the handler using the C function InstallExceptionHandler()
-080300A8            8127   VTrap10          ds.l   1        storage for 4 byte address of TRAP handler in your C program - install the handler using the C function InstallExceptionHandler()
-080300AC            8128   VTrap11          ds.l   1        storage for 4 byte address of TRAP handler in your C program - install the handler using the C function InstallExceptionHandler()
-080300B0            8129   VTrap12          ds.l   1        storage for 4 byte address of TRAP handler in your C program - install the handler using the C function InstallExceptionHandler()
-080300B4            8130   VTrap13          ds.l   1        storage for 4 byte address of TRAP handler in your C program - install the handler using the C function InstallExceptionHandler()
-080300B8            8131   VTrap14          ds.l   1        storage for 4 byte address of TRAP handler in your C program - install the handler using the C function InstallExceptionHandler()
-080300BC            8132   VTrap15          ds.l   1        storage for 4 byte address of TRAP handler in your C program - install the handler using the C function InstallExceptionHandler()
+0B000080            8117   VTrap0           ds.l   1        storage for 4 byte address of TRAP handler in your C program - install the handler using the C function InstallExceptionHandler()
+0B000084            8118   VTrap1           ds.l   1        storage for 4 byte address of TRAP handler in your C program - install the handler using the C function InstallExceptionHandler()
+0B000088            8119   VTrap2           ds.l   1        storage for 4 byte address of TRAP handler in your C program - install the handler using the C function InstallExceptionHandler()
+0B00008C            8120   VTrap3           ds.l   1        storage for 4 byte address of TRAP handler in your C program - install the handler using the C function InstallExceptionHandler()
+0B000090            8121   VTrap4           ds.l   1        storage for 4 byte address of TRAP handler in your C program - install the handler using the C function InstallExceptionHandler()
+0B000094            8122   VTrap5           ds.l   1        storage for 4 byte address of TRAP handler in your C program - install the handler using the C function InstallExceptionHandler()
+0B000098            8123   VTrap6           ds.l   1        storage for 4 byte address of TRAP handler in your C program - install the handler using the C function InstallExceptionHandler()
+0B00009C            8124   VTrap7           ds.l   1        storage for 4 byte address of TRAP handler in your C program - install the handler using the C function InstallExceptionHandler()
+0B0000A0            8125   VTrap8           ds.l   1        storage for 4 byte address of TRAP handler in your C program - install the handler using the C function InstallExceptionHandler()
+0B0000A4            8126   VTrap9           ds.l   1        storage for 4 byte address of TRAP handler in your C program - install the handler using the C function InstallExceptionHandler()
+0B0000A8            8127   VTrap10          ds.l   1        storage for 4 byte address of TRAP handler in your C program - install the handler using the C function InstallExceptionHandler()
+0B0000AC            8128   VTrap11          ds.l   1        storage for 4 byte address of TRAP handler in your C program - install the handler using the C function InstallExceptionHandler()
+0B0000B0            8129   VTrap12          ds.l   1        storage for 4 byte address of TRAP handler in your C program - install the handler using the C function InstallExceptionHandler()
+0B0000B4            8130   VTrap13          ds.l   1        storage for 4 byte address of TRAP handler in your C program - install the handler using the C function InstallExceptionHandler()
+0B0000B8            8131   VTrap14          ds.l   1        storage for 4 byte address of TRAP handler in your C program - install the handler using the C function InstallExceptionHandler()
+0B0000BC            8132   VTrap15          ds.l   1        storage for 4 byte address of TRAP handler in your C program - install the handler using the C function InstallExceptionHandler()
                     8133   
                     8134   * the remaining exceptions are unassigned in the 68000 so no need to allocate storage for them here
                     8135   
@@ -10113,9 +10113,9 @@ Date: 08 Feb 2023      Time: 20:51:43          Source: C:\CPEN412\GITHUB_STEUP\M
                     8140   *__UserA5        ds.l    1
                     8141   
                     8142   ***********************************************************************************************************
-080300C0            8143   __ungetbuf:     ds.l    1       ; ungetbuffer for stdio functions
-080300C4            8144   __allocp:       ds.l    0       ; start of allocation units
-080300C4            8145   __heap:         ds.l    0       ; pointers for malloc functions
+0B0000C0            8143   __ungetbuf:     ds.l    1       ; ungetbuffer for stdio functions
+0B0000C4            8144   __allocp:       ds.l    0       ; start of allocation units
+0B0000C4            8145   __heap:         ds.l    0       ; pointers for malloc functions
                     8146   
                     8147   *__himem:       ds.l    himem            ; highest memory location + 1
                     8148   *__stklen:      ds.l    stklen           ; default stack size
@@ -10125,83 +10125,83 @@ Date: 08 Feb 2023      Time: 20:51:43          Source: C:\CPEN412\GITHUB_STEUP\M
                     8152   *********************************************************************************************************
                     8153   
                     8154   _i:
-080300C4            8155          ds.b      4
+0B0000C4            8155          ds.b      4
                     8156   _x:
-080300C8            8157          ds.b      4
+0B0000C8            8157          ds.b      4
                     8158   _y:
-080300CC            8159          ds.b      4
+0B0000CC            8159          ds.b      4
                     8160   _z:
-080300D0            8161          ds.b      4
+0B0000D0            8161          ds.b      4
                     8162   _PortA_Count:
-080300D4            8163          ds.b      4
+0B0000D4            8163          ds.b      4
                     8164   _Trace:
-080300D8            8165          ds.b      4
+0B0000D8            8165          ds.b      4
                     8166   _GoFlag:
-080300DC            8167          ds.b      4
+0B0000DC            8167          ds.b      4
                     8168   _Echo:
-080300E0            8169          ds.b      4
+0B0000E0            8169          ds.b      4
                     8170   _d0:
-080300E4            8171          ds.b      4
+0B0000E4            8171          ds.b      4
                     8172   _d1:
-080300E8            8173          ds.b      4
+0B0000E8            8173          ds.b      4
                     8174   _d2:
-080300EC            8175          ds.b      4
+0B0000EC            8175          ds.b      4
                     8176   _d3:
-080300F0            8177          ds.b      4
+0B0000F0            8177          ds.b      4
                     8178   _d4:
-080300F4            8179          ds.b      4
+0B0000F4            8179          ds.b      4
                     8180   _d5:
-080300F8            8181          ds.b      4
+0B0000F8            8181          ds.b      4
                     8182   _d6:
-080300FC            8183          ds.b      4
+0B0000FC            8183          ds.b      4
                     8184   _d7:
-08030100            8185          ds.b      4
+0B000100            8185          ds.b      4
                     8186   _a0:
-08030104            8187          ds.b      4
+0B000104            8187          ds.b      4
                     8188   _a1:
-08030108            8189          ds.b      4
+0B000108            8189          ds.b      4
                     8190   _a2:
-0803010C            8191          ds.b      4
+0B00010C            8191          ds.b      4
                     8192   _a3:
-08030110            8193          ds.b      4
+0B000110            8193          ds.b      4
                     8194   _a4:
-08030114            8195          ds.b      4
+0B000114            8195          ds.b      4
                     8196   _a5:
-08030118            8197          ds.b      4
+0B000118            8197          ds.b      4
                     8198   _a6:
-0803011C            8199          ds.b      4
+0B00011C            8199          ds.b      4
                     8200   _PC:
-08030120            8201          ds.b      4
+0B000120            8201          ds.b      4
                     8202   _SSP:
-08030124            8203          ds.b      4
+0B000124            8203          ds.b      4
                     8204   _USP:
-08030128            8205          ds.b      4
+0B000128            8205          ds.b      4
                     8206   _SR:
-0803012C            8207          ds.b      2
+0B00012C            8207          ds.b      2
                     8208   _BreakPointAddress:
-0803012E            8209          ds.b      32
+0B00012E            8209          ds.b      32
                     8210   _BreakPointInstruction:
-0803014E            8211          ds.b      16
+0B00014E            8211          ds.b      16
                     8212   _BreakPointSetOrCleared:
-0803015E            8213          ds.b      32
+0B00015E            8213          ds.b      32
                     8214   _InstructionSize:
-0803017E            8215          ds.b      4
+0B00017E            8215          ds.b      4
                     8216   _WatchPointAddress:
-08030182            8217          ds.b      32
+0B000182            8217          ds.b      32
                     8218   _WatchPointSetOrCleared:
-080301A2            8219          ds.b      32
+0B0001A2            8219          ds.b      32
                     8220   _WatchPointString:
-080301C2            8221          ds.b      800
+0B0001C2            8221          ds.b      800
                     8222   _TempString:
-080304E2            8223          ds.b      100
+0B0004E2            8223          ds.b      100
                     8224   @vsscanf_buf:
-08030546            8225          ds.b      80
+0B000546            8225          ds.b      80
                     8226          section   heap
-08030596            8227                   align
-          0803 0596 8228   bssEnd          equ *                   end of storage space for unitialised variables
+0B000596            8227                   align
+          0B00 0596 8228   bssEnd          equ *                   end of storage space for unitialised variables
                     8229   *                                       we have to copy all initialised variable from rom to here at startup
-          0803 0596 8230   heap   equ       *
-08030596            8231                    align
+          0B00 0596 8230   heap   equ       *
+0B000596            8231                    align
           0000 0000
 
 Assembly errors: 0

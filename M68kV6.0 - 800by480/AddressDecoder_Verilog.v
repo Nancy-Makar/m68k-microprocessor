@@ -30,7 +30,7 @@ module AddressDecoder_Verilog (
 			OnChipRomSelect_H <= 1 ;								// DO NOT CHANGE - debugger expects rom at this address
 		
 		if(Address[31:18] == 14'b0000_1000_0000_00) 			// address hex 0800 0000 - 0803 FFFF Partial decoding - 256kbytes
-			OnChipRamSelect_H <= 1 ;								// DO NOT CHANGE - debugger expects memory at this address
+			DramSelect_H <= 1 ;										// DO NOT CHANGE - debugger expects memory at this address
 			
 		if(Address[31:16] == 16'b0000_0000_0100_0000)  		// address hex 0040 0000 - 0040 FFFF Partial decoding
 			IOSelect_H <= 1 ;											// DO NOT CHANGE - debugger expects IO at this address
@@ -40,7 +40,7 @@ module AddressDecoder_Verilog (
 		//
 		
 		if(Address[31:26] == 6'b1111_00)							// address hex F000 0000 - F3FF FFFF Partial decoding
-			DramSelect_H <=1;											// memory range allocated for the SDram
+			OnChipRamSelect_H <= 1 ;								// memory range allocated for static ram (previously SDRAM)
 			
 		
 		

@@ -1,12 +1,12 @@
 #include "DebugMonitor.h"
 
 // use 08030000 for a system running from sram or 0B000000 for system running from dram
-#define StartOfExceptionVectorTable 0x08030000
-//#define StartOfExceptionVectorTable 0x0B000000
+//#define StartOfExceptionVectorTable 0x08030000
+#define StartOfExceptionVectorTable 0x0B000000
 
 // use 0C000000 for dram or hex 08040000 for sram
-#define TopOfStack 0x08040000
-//#define TopOfStack 0x0C000000
+//#define TopOfStack 0x08040000
+#define TopOfStack 0x0C000000
 
 /* DO NOT INITIALISE GLOBAL VARIABLES - DO IT in MAIN() */
 unsigned int i, x, y, z, PortA_Count;
@@ -1160,7 +1160,7 @@ void menu(void)
                 printf("\r\nSingle Step  :[ON]") ;
                 printf("\r\nBreak Points :[Disabled]") ;
                 SR = SR | (unsigned short int)(0x8000) ;    // set T bit in status register
-                printf("\r\nPress 'G' to Trace Program from address $%X.....",PC) ;
+                printf("\r\nPress 'G' to Trace Program from address $%08x.....",PC) ;
                 printf("\r\nPush <RESET Button> to Stop.....") ;
                 DumpRegisters() ;
 
@@ -1439,7 +1439,7 @@ void MemoryTest(void)
         printf("\r\nEnter starting address(%X - %X inclusive): ", start_boundary, end_boundary);
         start_val = Get8HexDigits(0);
     }
-    
+
 
     // Prompt the user to enter an ending address
         printf("\r\nEnter ending address(%X - %X inclusive): ", start_boundary, end_boundary);
