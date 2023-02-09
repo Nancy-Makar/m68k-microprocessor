@@ -279,8 +279,7 @@ void DumpMemory(void)   // simple dump memory fn
 
     printf("\r\nDump Memory Block: <ESC> to Abort, <SPACE> to Continue") ;
     printf("\r\nEnter Start Address: ") ;
-    //RamPtr = Get8HexDigits(0) ;
-    RamPtr = Get7HexDigits();
+    RamPtr = Get8HexDigits(0);
 
     while(1)    {
         for(i = 0; i < 16; i ++)    {
@@ -1161,7 +1160,7 @@ void menu(void)
                 printf("\r\nSingle Step  :[ON]") ;
                 printf("\r\nBreak Points :[Disabled]") ;
                 SR = SR | (unsigned short int)(0x8000) ;    // set T bit in status register
-                printf("\r\nPress 'G' to Trace Program from address $%X.....",PC) ;
+                printf("\r\nPress 'G' to Trace Program from address $%08x.....",PC) ;
                 printf("\r\nPush <RESET Button> to Stop.....") ;
                 DumpRegisters() ;
 
@@ -1331,7 +1330,7 @@ int Get7HexDigits(void)
 void FillMemoryForMemTest(char* StartRamPtr, char* EndRamPtr, unsigned long FillData, int config)
 {
     char* start = StartRamPtr;
-    printf("\r\nFilling Addresses [$%08X - $%08X] with $%08X", StartRamPtr, EndRamPtr, FillData);
+    printf("\r\nFilling Addresses [$%08X - $%08X] with $%02X", StartRamPtr, EndRamPtr, FillData);
 
     if (config == 1) {
         while (start <= EndRamPtr){
@@ -1384,7 +1383,7 @@ void ReadMemoryForMemTest(char* StartRamPtr, char* EndRamPtr, unsigned long Fill
         while (start <= EndRamPtr) {
             if (*start != FillData)
                 printf("\r\nValue incorrect at addresses $%08X ... should be $%02X but found $%02X", start, FillData, *start);
-             printf("\r\nValue: $%02X $%02X $%02X $%02X found at Address: $%08X - $%08X", *start, *(start + 1), *(start + 2), *(start + 3), start, (start + 1), (start + 2), (start + 3));
+             printf("\r\nValue: $%02X $%02X $%02X $%02X found at Address: $%08X - $%08X", *start, *(start + 1), *(start + 2), *(start + 3), start, (start + 3));
              start += 4;
         }
     }
@@ -1394,6 +1393,8 @@ void ReadMemoryForMemTest(char* StartRamPtr, char* EndRamPtr, unsigned long Fill
 
 void MemoryTest(void)
 {
+    unsigned int start_boundary = 0xF0000000;
+    unsigned int end_boundary = 0xF3FFFFFF;
     int test_config = 0;
     int test_pattern = 0;
     char start_addr[7];
@@ -1427,32 +1428,34 @@ void MemoryTest(void)
     }
 
     // Prompt the user to enter a starting address
-    printf("\r\nEnter starting address(8020000 - 8030000 inclusive): ");
-    start_val = Get7HexDigits();
+    printf("\r\nEnter starting address(%X - %X inclusive): ", start_boundary, end_boundary);
+    start_val = Get8HexDigits(0);
     // Check for invalid start address and re-prompt if needed
     // Check for illegal address, start address must be even if writing words or long words to memory
-    while (start_val < 0x8020000 || start_val > 0x8030000 || strlen(start_addr) > 7 || (start_val % 2 != 0 && test_config != 1)) { // start address must be 7 chars and within bounds
+    while (start_val < start_boundary || start_val > end_boundary || strlen(start_addr) > 7 || (start_val % 2 != 0 && test_config != 1))
+    { // start address must be 7 chars and within bounds
         printf("\r\nInvalid starting address.. try again");
         //printf("\r\nStarting address out of bounds.. try again");
-        printf("\r\nEnter starting address(8020000 - 8030000 inclusive): ");
-        start_val = Get7HexDigits();
+        printf("\r\nEnter starting address(%X - %X inclusive): ", start_boundary, end_boundary);
+        start_val = Get8HexDigits(0);
     }
+    
 
     // Prompt the user to enter an ending address
-    printf("\r\nEnter ending address(8020000 - 8030000 inclusive): ");
-    end_val = Get7HexDigits();
-    // When writing words, the given address range should be a multiple of 2 bytes (size of a word)
-    // When writing long words, the given address range should be a multiple of 4 bytes (size of a long word)
-    while (end_val < 0x8020000 || end_val > 0x8030000 || strlen(end_addr) > 7 ||
-        end_val < start_val || ((end_val - start_val + 1) % 2 != 0 && test_config == 2) ||
-        ((end_val - start_val + 1) % 4 != 0 && test_config == 3)) { // end address must be 7 chars and within bounds
-        printf("\r\nEnding address out of bounds.. try again");
-        printf("\r\nEnter ending address(8020000 - 8030000 inclusive): ");
-        end_val = Get7HexDigits();
+        printf("\r\nEnter ending address(%X - %X inclusive): ", start_boundary, end_boundary);
+        end_val = Get8HexDigits(0);
+        // When writing words, the given address range should be a multiple of 2 bytes (size of a word)
+        // When writing long words, the given address range should be a multiple of 4 bytes (size of a long word)
+        while (end_val < start_boundary || end_val > end_boundary || strlen(end_addr) > 7 ||
+               end_val < start_val || ((end_val - start_val + 1) % 2 != 0 && test_config == 2) ||
+               ((end_val - start_val + 1) % 4 != 0 && test_config == 3))
+        { // end address must be 7 chars and within bounds
+             printf("\r\nEnding address out of bounds.. try again");
+             printf("\r\nEnter ending address(%X - %X inclusive): ", start_boundary, end_boundary);
+             end_val = Get8HexDigits(0);
     }
 
     printf("\r\nWriting to SRAM ...");
-    printf("\r\n here");
     printf("\r\n............................................................................................................");
     printf("\r\n............................................................................................................");
     printf("\r\n............................................................................................................");
@@ -1485,7 +1488,6 @@ void MemoryTest(void)
     printf("\r\nCheck SRAM content");
 
     printf("\r\nReading from SRAM ...");
-    printf("\r\nPrinting out every 400th location from SRAM ...");
     printf("\r\n............................................................................................................");
     printf("\r\n............................................................................................................");
     printf("\r\n............................................................................................................");
@@ -1592,7 +1594,7 @@ void main(void)
 
     printf("\r\n%s", BugMessage) ;
     printf("\r\n%s", CopyrightMessage) ;
-    printf("\r\nNancy Makar - 33464918 and Steven Chin - 40108540");
+    printf("\r\nNancy Makar - 33464918 and Steven Chin - 40108540 - version 1");
 
     menu();
 }

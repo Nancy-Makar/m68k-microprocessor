@@ -101,7 +101,7 @@ module M68kDramController_Verilog (
 		parameter Idle1 = 5'h04;			
 		
 		
-		// TODO - Add your own states as per your own design
+		// Our own states as per our own design
 		parameter IssueSecondNOPXXX = 5'h05;
 		parameter Refresh = 5'h06;
 		parameter IssueThirdNOPXXX = 5'h07;
@@ -258,13 +258,21 @@ module M68kDramController_Verilog (
 		CPUReset_L <= 1;												// default is reset to CPU (for the moment, though this will change when design is complete so that reset-out goes high at the end of the dram initialisation phase to allow CPU to resume)
 		FPGAWritingtoSDram_H <= 0 ;								// default is to tri-state the FPGA data lines leading to bi-directional SDRam data lines, i.e. assume a read operation
 
-		// put your current state/next state decision making logic here - here are a few states to get you started
-		// during the initialising state, the drams have to power up and we cannot access them for a specified period of time (100 us)
-		// we are going to load the timer above with a value equiv to 100us and then wait for timer to time out
-	
+		
+///////////////////////////////////////////////////////////////////////////////////////////////////
+// States associated with initialization of DRAM 
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
+// put your current state/next state decision making logic here - here are a few states to get you started
+// during the initialising state, the drams have to power up and we cannot access them for a specified period of time (100 us)
+// we are going to load the timer above with a value equiv to 100us and then wait for timer to time out
+
+		
 		if(CurrentState == InitialisingState ) begin
-			//TimerValue <= 16'h1388;									// chose a value equivalent to 100us at 50Mhz clock - you might want to shorten it to somthing small for simulation purposes
-			TimerValue <= 16'h0008;
+		// In reality, timer value should be at leats 100us, however it doesn't matter here
+		// because of teh FPGA long boot up period
+		// and for simualtion purposes we're going to use 8 cycles of 0.02us
+			TimerValue <= 16'h0008;									// chose a value equivalent to 100us at 50Mhz clock - you might want to shorten it to somthing small for simulation purposes
 			TimerLoad_H <= 1 ;										// on next edge of clock, timer will be loaded and start to time out
 			Command <= PoweringUp ;									// clock enable and chip select to the Zentel Dram chip must be held low (disabled) during a power up phase
 			NextState <= WaitingForPowerUpState ;				// once we have loaded the timer, go to a new state where we wait for the 100us to elapse
@@ -285,21 +293,19 @@ module M68kDramController_Verilog (
 			CPUReset_L <= 0;		
 			Command <= NOP;											// issue a valid NOP
 			NextState <= PrechargingAllBanks;
-
-			//DramAddress <= 13'h0400 ; // may need to issue the 400 earlier
 		end		
 		
 
 		// add your other states and conditions and outputs here
 
-		else if(CurrentState == PrechargingAllBanks) begin	 		// issue a valid NOP
+		else if(CurrentState == PrechargingAllBanks) begin	 	
 			CPUReset_L <= 0;
-			Command <= PrechargeAllBanks;											// send a valid NOP command to the dram chip
+			Command <= PrechargeAllBanks;									
 			NextState <= IssueSecondNOPXXX;
-			DramAddress <= 13'h0400 ; // may need to issue the 400 earlier
+			DramAddress <= 13'h0400 ; 									// may need to issue the 400 earlier
 		end	
 
-		else if(CurrentState == IssueSecondNOPXXX) begin	 		// issue a valid NOP
+		else if(CurrentState == IssueSecondNOPXXX) begin	 	// issue a valid NOP
 			CPUReset_L <= 0;
 			Command <= NOP ;												// send a valid NOP command to the dram chip
 			NextState <= Refresh;
@@ -308,14 +314,14 @@ module M68kDramController_Verilog (
 			TimerLoad_H <= 1 ;	
 		end
 
-		else if(CurrentState == Refresh) begin	 		// issue a valid NOP
+		else if(CurrentState == Refresh) begin	 		
 			CPUReset_L <= 0;
-			Command <= AutoRefresh ;						// send a valid NOP command to the dram chip
+			Command <= AutoRefresh ;						
 			NextState <= IssueThirdNOPXXX;
 			
 		end
 
-		else if(CurrentState == IssueThirdNOPXXX) begin	 		// issue a valid NOP
+		else if(CurrentState == IssueThirdNOPXXX) begin	 	// issue a valid NOP
 			CPUReset_L <= 0;
 			Command <= NOP ;											// send a valid NOP command to the dram chip
 			NextState <= IssueFourthNOP;
@@ -329,9 +335,9 @@ module M68kDramController_Verilog (
 
 		else if(CurrentState == IssueFifthNOP) begin	 		// issue a valid NOP
 			CPUReset_L <= 0;
-			Command <= NOP ;
+			Command <= NOP ;											// send a valid NOP command to the dram chip
 
-			if(TimerDone_H == 1) begin								// send a valid NOP command to the dram chip
+			if(TimerDone_H == 1) begin								
 				NextState <= LoadModeReg;
 			end
 			else begin
@@ -340,23 +346,23 @@ module M68kDramController_Verilog (
 			end
 		end
 
-		else if(CurrentState == LoadModeReg) begin	 		// issue a valid NOP
+		else if(CurrentState == LoadModeReg) begin	 		
 			CPUReset_L <= 0;
-			Command <= ModeRegisterSet ;							// send a valid NOP command to the dram chip
+			Command <= ModeRegisterSet ;							
 			NextState <= IssueSixthNOP;
-			DramAddress <= 13'h0220 ; // may need to issue the 220 earlier								
+			DramAddress <= 13'h0220 ; 								// may need to issue the 220 earlier								
 		end
 
 		else if(CurrentState == IssueSixthNOP) begin	 		// issue a valid NOP
 			CPUReset_L <= 0;
-			Command <= NOP  ;							// send a valid NOP command to the dram chip
+			Command <= NOP  ;											// send a valid NOP command to the dram chip
 			NextState <= IssueSeventhNOP;
 						
 		end
 
 		else if(CurrentState == IssueSeventhNOP) begin	 		// issue a valid NOP
 			CPUReset_L <= 0;
-			Command <= NOP  ;							// send a valid NOP command to the dram chip
+			Command <= NOP  ;												// send a valid NOP command to the dram chip
 			NextState <= IssueEighthNOP;
 						
 		end
@@ -364,10 +370,10 @@ module M68kDramController_Verilog (
 		else if(CurrentState == IssueEighthNOP) begin	 		// issue a valid NOP
 			CPUReset_L <= 0;
 			Command <= NOP  ;												// send a valid NOP command to the dram chip
-			//NextState <= IssueThirdNOPAfterRefresh;
 			NextState <= Idle1;
 			RefreshTimerLoad_H <= 1;
 		end
+		
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 // Main IDLE state: Enter here after initialisation and return here after every transaction, e.g. 
 // refreshing, reading, writing operations.
@@ -416,7 +422,6 @@ module M68kDramController_Verilog (
 				NextState <= IssueWriteCommand;
 		end
 	
-	
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////	
 // State associated with Memory writes where we wait for one clock cycle after a write 
@@ -442,10 +447,14 @@ module M68kDramController_Verilog (
 			DramAddress <= { 2'b00 , 1'b1, ColumnAddressFromCPU };
 			BankAddress <= BankAddressFromCPU;  
 			Command <= ReadAutoPrecharge;
-			TimerValue <= 16'h0002;									// chose a value equivalent to 100us at 50Mhz clock - you might want to shorten it to somthing small for simulation purposes
+			TimerValue <= 16'h0002;									
 			TimerLoad_H <= 1 ;
 			NextState <= WaitCAS;
 		end
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+// State where we wait for CAS latency
+///////////////////////////////////////////////////////////////////////////////////////////////////
 
 		else if (CurrentState == WaitCAS) begin
 			CPUReset_L <= 1;
@@ -454,26 +463,30 @@ module M68kDramController_Verilog (
 			DramDataLatch_H <= 1;
 
 			if(TimerDone_H == 1) 									// if timer has timed out i.e. 100us have elapsed
-				NextState <= Wait68k ;						// take CKE and CS to active and issue a 1st NOP command
+				NextState <= Wait68k ;								// take CKE and CS to active and issue a 1st NOP command
 			else
 				NextState <= WaitCAS;
-
-
 		end
-
+		
+///////////////////////////////////////////////////////////////////////////////////////////////////
+// State associated with waiting for 68k to terminate current bus cycle
+///////////////////////////////////////////////////////////////////////////////////////////////////
+		
 		else if (CurrentState == Wait68k) begin
 			CPUReset_L <= 1;
 			Command <= NOP;
 
-			if(UDS_L == 0 || LDS_L == 0) begin								// if timer has timed out i.e. 100us have elapsed
-				NextState <= Wait68k ;						// take CKE and CS to active and issue a 1st NOP command
+			if(UDS_L == 0 || LDS_L == 0) begin								
+				NextState <= Wait68k ;						
 				CPU_Dtack_L <= 0; 
 			end
 			else
 				NextState <= Idle1;
-
-
 		end
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+// States assiociated with refreshing banks periodically
+///////////////////////////////////////////////////////////////////////////////////////////////////
 
 			
 		else if(CurrentState == RechargeAllBanksBeforeRefresh) begin
@@ -509,11 +522,11 @@ module M68kDramController_Verilog (
 			RefreshTimerLoad_H <= 1;
 		end
 		
+// this last ‘else’ is a catch all to make sure we don’t create memory for any signals
 		else begin
 			CPUReset_L <= 1;
 			Command <= NOP;
 			NextState <= Idle1;
-			//NextState <= ERROR;
 		end			
 		
 	end	
