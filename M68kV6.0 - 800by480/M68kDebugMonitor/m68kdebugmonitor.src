@@ -132,13 +132,6 @@ go_main         jsr       _main
 ; void LCDline1Message(char *theMessage);
 ; void LCDline2Message(char *theMessage);
 ; int sprintf(char *out, const char *format, ...) ;
-; void ReadMemory(char* StartRamPtr, char* EndRamPtr, unsigned char FillData, int config);
-; void FillMemory(char* StartRamPtr, char* EndRamPtr, unsigned char FillData, int config);
-; int Get7HexDigits(char one, char two, char three, char four, char five, char six, char seven);
-; int Get8HexDigits(char pat);
-; int Get4HexDigits(char pat);
-; int Get2HexDigits(char pat);
-; char xtod(int c);
 ; /*****************************************************************************************
 ; **	Interrupt service routine for Timers
 ; **
@@ -496,484 +489,29 @@ _InstallExceptionHandler:
        unlk      A6
        rts
 ; }
-; /*
-; * Support functions for changing memory contents
-; */
-; // converts hex char to 4 bit binary equiv in range 0000-1111 (0-F)
-; // char assumed to be a valid hex char 0-9, a-f, A-F
-; char xtod(int c)
-; {
-_xtod:
-       link      A6,#0
-       move.l    D2,-(A7)
-       move.l    8(A6),D2
-; if ((char)(c) <= (char)('9'))
-       cmp.b     #57,D2
-       bgt.s     xtod_1
-; return c - (char)(0x30);    // 0 - 9 = 0x30 - 0x39 so convert to number by sutracting 0x30
-       move.b    D2,D0
-       sub.b     #48,D0
-       bra.s     xtod_3
-xtod_1:
-; else if ((char)(c) > (char)('F'))    // assume lower case
-       cmp.b     #70,D2
-       ble.s     xtod_4
-; return c - (char)(0x57);    // a-f = 0x61-66 so needs to be converted to 0x0A - 0x0F so subtract 0x57
-       move.b    D2,D0
-       sub.b     #87,D0
-       bra.s     xtod_3
-xtod_4:
-; else
-; return c - (char)(0x37);    // A-F = 0x41-46 so needs to be converted to 0x0A - 0x0F so subtract 0x37
-       move.b    D2,D0
-       sub.b     #55,D0
-xtod_3:
-       move.l    (A7)+,D2
-       unlk      A6
-       rts
-; }
-; int Get2HexDigits(char pat)
-; {
-_Get2HexDigits:
-       link      A6,#0
-       move.l    D2,-(A7)
-; register int i = (xtod(pat) << 4) | (xtod(pat));
-       move.b    11(A6),D1
-       ext.w     D1
-       ext.l     D1
-       move.l    D1,-(A7)
-       jsr       _xtod
-       addq.w    #4,A7
-       and.l     #255,D0
-       asl.l     #4,D0
-       move.l    D0,-(A7)
-       move.b    11(A6),D0
-       ext.w     D0
-       ext.l     D0
-       move.l    D0,-(A7)
-       jsr       _xtod
-       addq.w    #4,A7
-       move.l    D0,D1
-       move.l    (A7)+,D0
-       and.l     #255,D1
-       or.l      D1,D0
-       move.l    D0,D2
-; return i;
-       move.l    D2,D0
-       move.l    (A7)+,D2
-       unlk      A6
-       rts
-; }
-; int Get4HexDigits(char pat)
-; {
-_Get4HexDigits:
-       link      A6,#0
-; return (Get2HexDigits(pat) << 8) | (Get2HexDigits(pat));
-       move.b    11(A6),D1
-       ext.w     D1
-       ext.l     D1
-       move.l    D1,-(A7)
-       jsr       _Get2HexDigits
-       addq.w    #4,A7
-       asl.l     #8,D0
-       move.l    D0,-(A7)
-       move.b    11(A6),D0
-       ext.w     D0
-       ext.l     D0
-       move.l    D0,-(A7)
-       jsr       _Get2HexDigits
-       addq.w    #4,A7
-       move.l    D0,D1
-       move.l    (A7)+,D0
-       or.l      D1,D0
-       unlk      A6
-       rts
-; }
-; int Get8HexDigits(char pat)
-; {
-_Get8HexDigits:
-       link      A6,#0
-; return (Get4HexDigits(pat) << 16) | (Get4HexDigits(pat));
-       move.b    11(A6),D1
-       ext.w     D1
-       ext.l     D1
-       move.l    D1,-(A7)
-       jsr       _Get4HexDigits
-       addq.w    #4,A7
-       asl.l     #8,D0
-       asl.l     #8,D0
-       move.l    D0,-(A7)
-       move.b    11(A6),D0
-       ext.w     D0
-       ext.l     D0
-       move.l    D0,-(A7)
-       jsr       _Get4HexDigits
-       addq.w    #4,A7
-       move.l    D0,D1
-       move.l    (A7)+,D0
-       or.l      D1,D0
-       unlk      A6
-       rts
-; }
-; int Get7HexDigits(char one, char two, char three, char four, char five, char six, char seven)
-; {
-_Get7HexDigits:
-       link      A6,#0
-       movem.l   D2/A2,-(A7)
-       lea       _xtod.L,A2
-; register int i = (xtod(one) << 24) | (xtod(two) << 20) | (xtod(three) << 16) | (xtod(four) << 12) | (xtod(five) << 8) | (xtod(six) << 4) | (xtod(seven));
-       move.b    11(A6),D1
-       ext.w     D1
-       ext.l     D1
-       move.l    D1,-(A7)
-       jsr       (A2)
-       addq.w    #4,A7
-       and.l     #255,D0
-       asl.l     #8,D0
-       asl.l     #8,D0
-       asl.l     #8,D0
-       move.l    D0,-(A7)
-       move.b    15(A6),D0
-       ext.w     D0
-       ext.l     D0
-       move.l    D0,-(A7)
-       jsr       (A2)
-       addq.w    #4,A7
-       move.l    D0,D1
-       move.l    (A7)+,D0
-       and.l     #255,D1
-       asl.l     #8,D1
-       asl.l     #8,D1
-       asl.l     #4,D1
-       or.l      D1,D0
-       move.l    D0,-(A7)
-       move.b    19(A6),D0
-       ext.w     D0
-       ext.l     D0
-       move.l    D0,-(A7)
-       jsr       (A2)
-       addq.w    #4,A7
-       move.l    D0,D1
-       move.l    (A7)+,D0
-       and.l     #255,D1
-       asl.l     #8,D1
-       asl.l     #8,D1
-       or.l      D1,D0
-       move.l    D0,-(A7)
-       move.b    23(A6),D0
-       ext.w     D0
-       ext.l     D0
-       move.l    D0,-(A7)
-       jsr       (A2)
-       addq.w    #4,A7
-       move.l    D0,D1
-       move.l    (A7)+,D0
-       and.l     #255,D1
-       asl.l     #8,D1
-       asl.l     #4,D1
-       or.l      D1,D0
-       move.l    D0,-(A7)
-       move.b    27(A6),D0
-       ext.w     D0
-       ext.l     D0
-       move.l    D0,-(A7)
-       jsr       (A2)
-       addq.w    #4,A7
-       move.l    D0,D1
-       move.l    (A7)+,D0
-       and.l     #255,D1
-       asl.l     #8,D1
-       or.l      D1,D0
-       move.l    D0,-(A7)
-       move.b    31(A6),D0
-       ext.w     D0
-       ext.l     D0
-       move.l    D0,-(A7)
-       jsr       (A2)
-       addq.w    #4,A7
-       move.l    D0,D1
-       move.l    (A7)+,D0
-       and.l     #255,D1
-       asl.l     #4,D1
-       or.l      D1,D0
-       move.l    D0,-(A7)
-       move.b    35(A6),D0
-       ext.w     D0
-       ext.l     D0
-       move.l    D0,-(A7)
-       jsr       (A2)
-       addq.w    #4,A7
-       move.l    D0,D1
-       move.l    (A7)+,D0
-       and.l     #255,D1
-       or.l      D1,D0
-       move.l    D0,D2
-; return i;
-       move.l    D2,D0
-       movem.l   (A7)+,D2/A2
-       unlk      A6
-       rts
-; }
-; void FillMemory(char* StartRamPtr, char* EndRamPtr, unsigned char FillData, int config)
-; {
-_FillMemory:
-       link      A6,#0
-       movem.l   D2/D3/D4/D5,-(A7)
-       move.l    12(A6),D3
-       move.b    19(A6),D4
-       and.l     #255,D4
-       move.l    20(A6),D5
-; char* start = StartRamPtr;
-       move.l    8(A6),D2
-; printf("\r\nFilling Addresses [$%08X - $%08X] with $%02X", StartRamPtr, EndRamPtr, FillData);
-       and.l     #255,D4
-       move.l    D4,-(A7)
-       move.l    D3,-(A7)
-       move.l    8(A6),-(A7)
-       pea       @m68kus~1_1.L
-       jsr       _printf
-       add.w     #16,A7
-; if (config == 1) {
-       cmp.l     #1,D5
-       bne.s     FillMemory_5
-; while (start <= EndRamPtr){
-FillMemory_3:
-       cmp.l     D3,D2
-       bhi.s     FillMemory_5
-; *start++ = FillData;
-       move.l    D2,A0
-       addq.l    #1,D2
-       move.b    D4,(A0)
-       bra       FillMemory_3
-FillMemory_5:
-; }
-; }
-; if (config == 2) {
-       cmp.l     #2,D5
-       bne.s     FillMemory_10
-; while (start <= EndRamPtr) {
-FillMemory_8:
-       cmp.l     D3,D2
-       bhi.s     FillMemory_10
-; *start = FillData;
-       move.l    D2,A0
-       move.b    D4,(A0)
-; start += 2;
-       addq.l    #2,D2
-       bra       FillMemory_8
-FillMemory_10:
-; }
-; }
-; if (config == 3) {
-       cmp.l     #3,D5
-       bne.s     FillMemory_15
-; while (start <= EndRamPtr) {
-FillMemory_13:
-       cmp.l     D3,D2
-       bhi.s     FillMemory_15
-; *start = FillData;
-       move.l    D2,A0
-       move.b    D4,(A0)
-; start += 4;
-       addq.l    #4,D2
-       bra       FillMemory_13
-FillMemory_15:
-       movem.l   (A7)+,D2/D3/D4/D5
-       unlk      A6
-       rts
-; }
-; }
-; }
-; void ReadMemory(char* StartRamPtr, char* EndRamPtr, unsigned char FillData, int config)
-; {
-_ReadMemory:
-       link      A6,#-4
-       movem.l   D2/D3/D4/D5/A2,-(A7)
-       move.b    19(A6),D3
-       and.l     #255,D3
-       lea       _printf.L,A2
-       move.l    12(A6),D4
-       move.l    20(A6),D5
-; int counter = 0;
-       clr.l     -4(A6)
-; unsigned char* start = StartRamPtr;
-       move.l    8(A6),D2
-; printf("\r\nReading Addresses [$%08X - $%08X] for $%02X", StartRamPtr, EndRamPtr, FillData);
-       and.l     #255,D3
-       move.l    D3,-(A7)
-       move.l    D4,-(A7)
-       move.l    8(A6),-(A7)
-       pea       @m68kus~1_2.L
-       jsr       (A2)
-       add.w     #16,A7
-; if (config == 1) {
-       cmp.l     #1,D5
-       bne       ReadMemory_5
-; while (start <= EndRamPtr) {
-ReadMemory_3:
-       cmp.l     D4,D2
-       bhi       ReadMemory_5
-; if (*start != FillData)
-       move.l    D2,A0
-       cmp.b     (A0),D3
-       beq.s     ReadMemory_6
-; printf("\r\nValue incorrect at addresses $%08X ... should be $%02X but found $%02X", start, FillData, *start);
-       move.l    D2,A0
-       move.b    (A0),D1
-       and.l     #255,D1
-       move.l    D1,-(A7)
-       and.l     #255,D3
-       move.l    D3,-(A7)
-       move.l    D2,-(A7)
-       pea       @m68kus~1_3.L
-       jsr       (A2)
-       add.w     #16,A7
-ReadMemory_6:
-; printf("\r\nValue: $%02X found at Address: $%08X", *start, start);
-       move.l    D2,-(A7)
-       move.l    D2,A0
-       move.b    (A0),D1
-       and.l     #255,D1
-       move.l    D1,-(A7)
-       pea       @m68kus~1_4.L
-       jsr       (A2)
-       add.w     #12,A7
-; start++;
-       addq.l    #1,D2
-       bra       ReadMemory_3
-ReadMemory_5:
-; }
-; }
-; if (config == 2) {
-       cmp.l     #2,D5
-       bne       ReadMemory_12
-; while (start <= EndRamPtr) {
-ReadMemory_10:
-       cmp.l     D4,D2
-       bhi       ReadMemory_12
-; if(*start != FillData)
-       move.l    D2,A0
-       cmp.b     (A0),D3
-       beq.s     ReadMemory_13
-; printf("\r\nValue incorrect at addresses $%08X ... should be $%02X but found $%02X", start, FillData, *start);
-       move.l    D2,A0
-       move.b    (A0),D1
-       and.l     #255,D1
-       move.l    D1,-(A7)
-       and.l     #255,D3
-       move.l    D3,-(A7)
-       move.l    D2,-(A7)
-       pea       @m68kus~1_3.L
-       jsr       (A2)
-       add.w     #16,A7
-ReadMemory_13:
-; printf("\r\nValue: $%02X $%02X found at Address: $%08X - $%08X", *start, *(start+1), start, (start+1));
-       move.l    D2,D1
-       addq.l    #1,D1
-       move.l    D1,-(A7)
-       move.l    D2,-(A7)
-       move.l    D2,A0
-       move.b    1(A0),D1
-       and.l     #255,D1
-       move.l    D1,-(A7)
-       move.l    D2,A0
-       move.b    (A0),D1
-       and.l     #255,D1
-       move.l    D1,-(A7)
-       pea       @m68kus~1_5.L
-       jsr       (A2)
-       add.w     #20,A7
-; start += 2;
-       addq.l    #2,D2
-       bra       ReadMemory_10
-ReadMemory_12:
-; }
-; }
-; if (config == 3) {
-       cmp.l     #3,D5
-       bne       ReadMemory_19
-; while (start <= EndRamPtr) {
-ReadMemory_17:
-       cmp.l     D4,D2
-       bhi       ReadMemory_19
-; if (*start != FillData)
-       move.l    D2,A0
-       cmp.b     (A0),D3
-       beq.s     ReadMemory_20
-; printf("\r\nValue incorrect at addresses $%08X ... should be $%02X but found $%02X", start, FillData, *start);
-       move.l    D2,A0
-       move.b    (A0),D1
-       and.l     #255,D1
-       move.l    D1,-(A7)
-       and.l     #255,D3
-       move.l    D3,-(A7)
-       move.l    D2,-(A7)
-       pea       @m68kus~1_3.L
-       jsr       (A2)
-       add.w     #16,A7
-ReadMemory_20:
-; printf("\r\nValue: $%02X $%02X $%02X $%02X found at Address: $%08X - $%08X", *start, *(start+3), start, (start+3));
-       move.l    D2,D1
-       addq.l    #3,D1
-       move.l    D1,-(A7)
-       move.l    D2,-(A7)
-       move.l    D2,A0
-       move.b    3(A0),D1
-       and.l     #255,D1
-       move.l    D1,-(A7)
-       move.l    D2,A0
-       move.b    (A0),D1
-       and.l     #255,D1
-       move.l    D1,-(A7)
-       pea       @m68kus~1_6.L
-       jsr       (A2)
-       add.w     #20,A7
-; start += 4;
-       addq.l    #4,D2
-       bra       ReadMemory_17
-ReadMemory_19:
-       movem.l   (A7)+,D2/D3/D4/D5/A2
-       unlk      A6
-       rts
-; }
-; }
-; }
 ; /******************************************************************************************************************************
 ; * Start of user program
 ; ******************************************************************************************************************************/
 ; void main()
 ; {
 _main:
-       link      A6,#-196
-       movem.l   D2/D3/D4/A2/A3/A4/A5,-(A7)
-       lea       -8(A6),A2
+       link      A6,#-172
+       movem.l   A2/A3,-(A7)
+       lea       _InstallExceptionHandler.L,A2
        lea       _printf.L,A3
-       lea       -16(A6),A4
-       lea       _scanf.L,A5
-; unsigned int row, i = 0, count = 0, counter1 = 1;
-       clr.l     -192(A6)
-       clr.l     -188(A6)
-       move.l    #1,-184(A6)
+; unsigned int row, i=0, count=0, counter1=1;
+       clr.l     -168(A6)
+       clr.l     -164(A6)
+       move.l    #1,-160(A6)
 ; char c, text[150] ;
 ; int PassFailFlag = 1 ;
-       move.l    #1,-28(A6)
-; int test_config = 0;
-       clr.l     -24(A6)
-; int test_pattern = 0;
-       clr.l     -20(A6)
-; char start_addr[7];
-; int start_val = 0;
-       clr.l     D3
-; char end_addr[7];
-; int end_val = 0;
-       clr.l     D2
-; char digit;
-; i = x = y = z = PortA_Count = 0;
+       move.l    #1,-4(A6)
+; i = x = y = z = PortA_Count =0;
        clr.l     _PortA_Count.L
        clr.l     _z.L
        clr.l     _y.L
        clr.l     _x.L
-       clr.l     -192(A6)
+       clr.l     -168(A6)
 ; Timer1Count = Timer2Count = Timer3Count = Timer4Count = 0;
        clr.b     _Timer4Count.L
        clr.b     _Timer3Count.L
@@ -982,27 +520,27 @@ _main:
 ; InstallExceptionHandler(PIA_ISR, 25) ;          // install interrupt handler for PIAs 1 and 2 on level 1 IRQ
        pea       25
        pea       _PIA_ISR.L
-       jsr       _InstallExceptionHandler
+       jsr       (A2)
        addq.w    #8,A7
 ; InstallExceptionHandler(ACIA_ISR, 26) ;		    // install interrupt handler for ACIA on level 2 IRQ
        pea       26
        pea       _ACIA_ISR.L
-       jsr       _InstallExceptionHandler
+       jsr       (A2)
        addq.w    #8,A7
 ; InstallExceptionHandler(Timer_ISR, 27) ;		// install interrupt handler for Timers 1-4 on level 3 IRQ
        pea       27
        pea       _Timer_ISR.L
-       jsr       _InstallExceptionHandler
+       jsr       (A2)
        addq.w    #8,A7
 ; InstallExceptionHandler(Key2PressISR, 28) ;	    // install interrupt handler for Key Press 2 on DE1 board for level 4 IRQ
        pea       28
        pea       _Key2PressISR.L
-       jsr       _InstallExceptionHandler
+       jsr       (A2)
        addq.w    #8,A7
 ; InstallExceptionHandler(Key1PressISR, 29) ;	    // install interrupt handler for Key Press 1 on DE1 board for level 5 IRQ
        pea       29
        pea       _Key1PressISR.L
-       jsr       _InstallExceptionHandler
+       jsr       (A2)
        addq.w    #8,A7
 ; Timer1Data = 0x10;		// program time delay into timers 1-4
        move.b    #16,4194352
@@ -1029,929 +567,60 @@ _main:
 ; *************************************************************************************************/
 ; scanflush() ;                       // flush any text that may have been typed ahead
        jsr       _scanflush
-; /*
-; * User prompts
-; */
-; // Prompt the user to entre a test configuration
-; printf("\r\nEnter memory test configuration(1 - bytes, 2 - words, 3 - long words): ");
-       pea       @m68kus~1_7.L
+; printf("\r\nEnter Integer: ") ;
+       pea       @m68kus~1_1.L
        jsr       (A3)
        addq.w    #4,A7
-; scanf("%d", &test_config);
-       pea       -24(A6)
-       pea       @m68kus~1_8.L
-       jsr       (A5)
+; scanf("%d", &i) ;
+       pea       -168(A6)
+       pea       @m68kus~1_2.L
+       jsr       _scanf
        addq.w    #8,A7
-; // Check for invalid configuration entry and re-prompt if needed
-; while (test_config > 3 || test_config < 1) {
+; printf("You entered %d", i) ;
+       move.l    -168(A6),-(A7)
+       pea       @m68kus~1_3.L
+       jsr       (A3)
+       addq.w    #8,A7
+; sprintf(text, "Hello CPEN 412 Student") ;
+       pea       @m68kus~1_4.L
+       pea       -154(A6)
+       jsr       _sprintf
+       addq.w    #8,A7
+; LCDLine1Message(text) ;
+       pea       -154(A6)
+       jsr       _LCDLine1Message
+       addq.w    #4,A7
+; printf("\r\nHello CPEN 412 Student\r\nYour LEDs should be Flashing") ;
+       pea       @m68kus~1_5.L
+       jsr       (A3)
+       addq.w    #4,A7
+; printf("\r\nYour LCD should be displaying") ;
+       pea       @m68kus~1_6.L
+       jsr       (A3)
+       addq.w    #4,A7
+; while(1)
 main_1:
-       move.l    -24(A6),D0
-       cmp.l     #3,D0
-       bgt.s     main_4
-       move.l    -24(A6),D0
-       cmp.l     #1,D0
-       bge.s     main_3
-main_4:
-; printf("\r\nConfiguration invalid, try again");
-       pea       @m68kus~1_9.L
-       jsr       (A3)
-       addq.w    #4,A7
-; printf("\r\nEnter memory test configuration(1 - bytes, 2 - words, 3 - long words): ");
-       pea       @m68kus~1_7.L
-       jsr       (A3)
-       addq.w    #4,A7
-; scanf("%d", &test_config);
-       pea       -24(A6)
-       pea       @m68kus~1_8.L
-       jsr       (A5)
-       addq.w    #8,A7
        bra       main_1
-main_3:
-; }
-; // Prompt the user to entre a test pattern
-; printf("\r\nChoose between different memory test patterns(1 - 5, 2 - A, 3 - F, 4 - 0): ");
-       pea       @m68kus~1_10.L
-       jsr       (A3)
-       addq.w    #4,A7
-; scanf("%d", &test_pattern);
-       pea       -20(A6)
-       pea       @m68kus~1_8.L
-       jsr       (A5)
-       addq.w    #8,A7
-; // Check for invalid pattern entry and re-prompt if needed
-; while (test_pattern > 4 || test_pattern < 1) {
-main_5:
-       move.l    -20(A6),D0
-       cmp.l     #4,D0
-       bgt.s     main_8
-       move.l    -20(A6),D0
-       cmp.l     #1,D0
-       bge.s     main_7
-main_8:
-; printf("\r\nPattern invalid, try again");
-       pea       @m68kus~1_11.L
-       jsr       (A3)
-       addq.w    #4,A7
-; printf("\r\nChoose between different memory test patterns(1 - 5, 2 - A, 3 - F, 4 - 0): ");
-       pea       @m68kus~1_10.L
-       jsr       (A3)
-       addq.w    #4,A7
-; scanf("%d", &test_pattern);
-       pea       -20(A6)
-       pea       @m68kus~1_8.L
-       jsr       (A5)
-       addq.w    #8,A7
-       bra       main_5
-main_7:
-; }
-; // Prompt the user to entre a starting address
-; printf("\r\nEnter starting address(8020000 - 8030000 inclusive): ");
-       pea       @m68kus~1_12.L
-       jsr       (A3)
-       addq.w    #4,A7
-; scanf("%s", &start_addr);
-       move.l    A4,-(A7)
-       pea       @m68kus~1_13.L
-       jsr       (A5)
-       addq.w    #8,A7
-; start_val = Get7HexDigits(start_addr[0], start_addr[1], start_addr[2], start_addr[3], start_addr[4], start_addr[5], start_addr[6]);
-       move.b    6(A4),D1
-       ext.w     D1
-       ext.l     D1
-       move.l    D1,-(A7)
-       move.b    5(A4),D1
-       ext.w     D1
-       ext.l     D1
-       move.l    D1,-(A7)
-       move.b    4(A4),D1
-       ext.w     D1
-       ext.l     D1
-       move.l    D1,-(A7)
-       move.b    3(A4),D1
-       ext.w     D1
-       ext.l     D1
-       move.l    D1,-(A7)
-       move.b    2(A4),D1
-       ext.w     D1
-       ext.l     D1
-       move.l    D1,-(A7)
-       move.b    1(A4),D1
-       ext.w     D1
-       ext.l     D1
-       move.l    D1,-(A7)
-       move.b    (A4),D1
-       ext.w     D1
-       ext.l     D1
-       move.l    D1,-(A7)
-       jsr       _Get7HexDigits
-       add.w     #28,A7
-       move.l    D0,D3
-; // Check for invalid start address and re-prompt if needed
-; while (start_val < 0x8020000 || start_val > 0x8030000 || strlen(start_addr) > 7) { // start address must be 7 chars and within bounds
-main_9:
-       cmp.l     #134348800,D3
-       blt.s     main_12
-       cmp.l     #134414336,D3
-       bgt.s     main_12
-       move.l    A4,-(A7)
-       jsr       _strlen
-       addq.w    #4,A7
-       cmp.l     #7,D0
-       ble       main_11
-main_12:
-; printf("\r\nStarting address out of bounds.. try again");
-       pea       @m68kus~1_14.L
-       jsr       (A3)
-       addq.w    #4,A7
-; printf("\r\nEnter starting address(8020000 - 8030000 inclusive): ");
-       pea       @m68kus~1_12.L
-       jsr       (A3)
-       addq.w    #4,A7
-; scanf("%s", &start_addr);
-       move.l    A4,-(A7)
-       pea       @m68kus~1_13.L
-       jsr       (A5)
-       addq.w    #8,A7
-; start_val = Get7HexDigits(start_addr[0], start_addr[1], start_addr[2], start_addr[3], start_addr[4], start_addr[5], start_addr[6]);
-       move.b    6(A4),D1
-       ext.w     D1
-       ext.l     D1
-       move.l    D1,-(A7)
-       move.b    5(A4),D1
-       ext.w     D1
-       ext.l     D1
-       move.l    D1,-(A7)
-       move.b    4(A4),D1
-       ext.w     D1
-       ext.l     D1
-       move.l    D1,-(A7)
-       move.b    3(A4),D1
-       ext.w     D1
-       ext.l     D1
-       move.l    D1,-(A7)
-       move.b    2(A4),D1
-       ext.w     D1
-       ext.l     D1
-       move.l    D1,-(A7)
-       move.b    1(A4),D1
-       ext.w     D1
-       ext.l     D1
-       move.l    D1,-(A7)
-       move.b    (A4),D1
-       ext.w     D1
-       ext.l     D1
-       move.l    D1,-(A7)
-       jsr       _Get7HexDigits
-       add.w     #28,A7
-       move.l    D0,D3
-       bra       main_9
-main_11:
-; }
-; // Check for illegal address, start address must be even if writing words or long words to memory
-; while (start_val % 2 != 0 && test_config != 1) {
-main_13:
-       move.l    D3,-(A7)
-       pea       2
-       jsr       LDIV
-       move.l    4(A7),D0
-       addq.w    #8,A7
-       tst.l     D0
-       beq       main_15
-       move.l    -24(A6),D0
-       cmp.l     #1,D0
-       beq       main_15
-; printf("\r\nOdd starting address.. try again");
-       pea       @m68kus~1_15.L
-       jsr       (A3)
-       addq.w    #4,A7
-; printf("\r\nEnter starting address(8020000 - 8030000 inclusive): ");
-       pea       @m68kus~1_12.L
-       jsr       (A3)
-       addq.w    #4,A7
-; scanf("%s", &start_addr);
-       move.l    A4,-(A7)
-       pea       @m68kus~1_13.L
-       jsr       (A5)
-       addq.w    #8,A7
-; start_val = Get7HexDigits(start_addr[0], start_addr[1], start_addr[2], start_addr[3], start_addr[4], start_addr[5], start_addr[6]);
-       move.b    6(A4),D1
-       ext.w     D1
-       ext.l     D1
-       move.l    D1,-(A7)
-       move.b    5(A4),D1
-       ext.w     D1
-       ext.l     D1
-       move.l    D1,-(A7)
-       move.b    4(A4),D1
-       ext.w     D1
-       ext.l     D1
-       move.l    D1,-(A7)
-       move.b    3(A4),D1
-       ext.w     D1
-       ext.l     D1
-       move.l    D1,-(A7)
-       move.b    2(A4),D1
-       ext.w     D1
-       ext.l     D1
-       move.l    D1,-(A7)
-       move.b    1(A4),D1
-       ext.w     D1
-       ext.l     D1
-       move.l    D1,-(A7)
-       move.b    (A4),D1
-       ext.w     D1
-       ext.l     D1
-       move.l    D1,-(A7)
-       jsr       _Get7HexDigits
-       add.w     #28,A7
-       move.l    D0,D3
-       bra       main_13
-main_15:
-; }
-; // Prompt the user to entre an ending address
-; printf("\r\nEnter ending address(8020000 - 8030000 inclusive): ");
-       pea       @m68kus~1_16.L
-       jsr       (A3)
-       addq.w    #4,A7
-; scanf("%s", &end_addr);
-       move.l    A2,-(A7)
-       pea       @m68kus~1_13.L
-       jsr       (A5)
-       addq.w    #8,A7
-; end_val = Get7HexDigits(end_addr[0], end_addr[1], end_addr[2], end_addr[3], end_addr[4], end_addr[5], end_addr[6]);
-       move.b    6(A2),D1
-       ext.w     D1
-       ext.l     D1
-       move.l    D1,-(A7)
-       move.b    5(A2),D1
-       ext.w     D1
-       ext.l     D1
-       move.l    D1,-(A7)
-       move.b    4(A2),D1
-       ext.w     D1
-       ext.l     D1
-       move.l    D1,-(A7)
-       move.b    3(A2),D1
-       ext.w     D1
-       ext.l     D1
-       move.l    D1,-(A7)
-       move.b    2(A2),D1
-       ext.w     D1
-       ext.l     D1
-       move.l    D1,-(A7)
-       move.b    1(A2),D1
-       ext.w     D1
-       ext.l     D1
-       move.l    D1,-(A7)
-       move.b    (A2),D1
-       ext.w     D1
-       ext.l     D1
-       move.l    D1,-(A7)
-       jsr       _Get7HexDigits
-       add.w     #28,A7
-       move.l    D0,D2
-; while (end_val < 0x8020000 || end_val > 0x8030000 || strlen(end_addr) > 7) { // end address must be 7 chars and within bounds
-main_16:
-       cmp.l     #134348800,D2
-       blt.s     main_19
-       cmp.l     #134414336,D2
-       bgt.s     main_19
-       move.l    A2,-(A7)
-       jsr       _strlen
-       addq.w    #4,A7
-       cmp.l     #7,D0
-       ble       main_18
-main_19:
-; printf("\r\nEnding address out of bounds.. try again");
-       pea       @m68kus~1_17.L
-       jsr       (A3)
-       addq.w    #4,A7
-; printf("\r\nEnter ending address(8020000 - 8030000 inclusive): ");
-       pea       @m68kus~1_16.L
-       jsr       (A3)
-       addq.w    #4,A7
-; scanf("%s", &end_addr);
-       move.l    A2,-(A7)
-       pea       @m68kus~1_13.L
-       jsr       (A5)
-       addq.w    #8,A7
-; end_val = Get7HexDigits(end_addr[0], end_addr[1], end_addr[2], end_addr[3], end_addr[4], end_addr[5], end_addr[6]);
-       move.b    6(A2),D1
-       ext.w     D1
-       ext.l     D1
-       move.l    D1,-(A7)
-       move.b    5(A2),D1
-       ext.w     D1
-       ext.l     D1
-       move.l    D1,-(A7)
-       move.b    4(A2),D1
-       ext.w     D1
-       ext.l     D1
-       move.l    D1,-(A7)
-       move.b    3(A2),D1
-       ext.w     D1
-       ext.l     D1
-       move.l    D1,-(A7)
-       move.b    2(A2),D1
-       ext.w     D1
-       ext.l     D1
-       move.l    D1,-(A7)
-       move.b    1(A2),D1
-       ext.w     D1
-       ext.l     D1
-       move.l    D1,-(A7)
-       move.b    (A2),D1
-       ext.w     D1
-       ext.l     D1
-       move.l    D1,-(A7)
-       jsr       _Get7HexDigits
-       add.w     #28,A7
-       move.l    D0,D2
-       bra       main_16
-main_18:
-; }
-; while (end_val < start_val) {
-main_20:
-       cmp.l     D3,D2
-       bge       main_22
-; printf("\r\nInvalid ending address.. try again");
-       pea       @m68kus~1_18.L
-       jsr       (A3)
-       addq.w    #4,A7
-; printf("\r\nEnter ending address(8020000 - 8030000 inclusive): ");
-       pea       @m68kus~1_16.L
-       jsr       (A3)
-       addq.w    #4,A7
-; scanf("%s", &end_addr);
-       move.l    A2,-(A7)
-       pea       @m68kus~1_13.L
-       jsr       (A5)
-       addq.w    #8,A7
-; end_val = Get7HexDigits(end_addr[0], end_addr[1], end_addr[2], end_addr[3], end_addr[4], end_addr[5], end_addr[6]);
-       move.b    6(A2),D1
-       ext.w     D1
-       ext.l     D1
-       move.l    D1,-(A7)
-       move.b    5(A2),D1
-       ext.w     D1
-       ext.l     D1
-       move.l    D1,-(A7)
-       move.b    4(A2),D1
-       ext.w     D1
-       ext.l     D1
-       move.l    D1,-(A7)
-       move.b    3(A2),D1
-       ext.w     D1
-       ext.l     D1
-       move.l    D1,-(A7)
-       move.b    2(A2),D1
-       ext.w     D1
-       ext.l     D1
-       move.l    D1,-(A7)
-       move.b    1(A2),D1
-       ext.w     D1
-       ext.l     D1
-       move.l    D1,-(A7)
-       move.b    (A2),D1
-       ext.w     D1
-       ext.l     D1
-       move.l    D1,-(A7)
-       jsr       _Get7HexDigits
-       add.w     #28,A7
-       move.l    D0,D2
-       bra       main_20
-main_22:
-; }
-; // When writing words, the given address range should be a multiple of 2 bytes (size of a word)
-; while ((end_val - start_val + 1) % 2 != 0  && test_config == 2) {
-main_23:
-       move.l    D2,D0
-       sub.l     D3,D0
-       addq.l    #1,D0
-       move.l    D0,-(A7)
-       pea       2
-       jsr       LDIV
-       move.l    4(A7),D0
-       addq.w    #8,A7
-       tst.l     D0
-       beq       main_25
-       move.l    -24(A6),D0
-       cmp.l     #2,D0
-       bne       main_25
-; printf("\r\nInvalid address range is too small.. try again");
-       pea       @m68kus~1_19.L
-       jsr       (A3)
-       addq.w    #4,A7
-; printf("\r\nEnter ending address(8020000 - 8030000 inclusive): ");
-       pea       @m68kus~1_16.L
-       jsr       (A3)
-       addq.w    #4,A7
-; scanf("%s", &end_addr);
-       move.l    A2,-(A7)
-       pea       @m68kus~1_13.L
-       jsr       (A5)
-       addq.w    #8,A7
-; end_val = Get7HexDigits(end_addr[0], end_addr[1], end_addr[2], end_addr[3], end_addr[4], end_addr[5], end_addr[6]);
-       move.b    6(A2),D1
-       ext.w     D1
-       ext.l     D1
-       move.l    D1,-(A7)
-       move.b    5(A2),D1
-       ext.w     D1
-       ext.l     D1
-       move.l    D1,-(A7)
-       move.b    4(A2),D1
-       ext.w     D1
-       ext.l     D1
-       move.l    D1,-(A7)
-       move.b    3(A2),D1
-       ext.w     D1
-       ext.l     D1
-       move.l    D1,-(A7)
-       move.b    2(A2),D1
-       ext.w     D1
-       ext.l     D1
-       move.l    D1,-(A7)
-       move.b    1(A2),D1
-       ext.w     D1
-       ext.l     D1
-       move.l    D1,-(A7)
-       move.b    (A2),D1
-       ext.w     D1
-       ext.l     D1
-       move.l    D1,-(A7)
-       jsr       _Get7HexDigits
-       add.w     #28,A7
-       move.l    D0,D2
-       bra       main_23
-main_25:
-; }
-; // When writing long words, the given address range should be a multiple of 4 bytes (size of a long word)
-; while ((end_val - start_val + 1) % 4 != 0 && test_config == 3) {
-main_26:
-       move.l    D2,D0
-       sub.l     D3,D0
-       addq.l    #1,D0
-       move.l    D0,-(A7)
-       pea       4
-       jsr       LDIV
-       move.l    4(A7),D0
-       addq.w    #8,A7
-       tst.l     D0
-       beq       main_28
-       move.l    -24(A6),D0
-       cmp.l     #3,D0
-       bne       main_28
-; printf("\r\nInvalid range is too small.. try again");
-       pea       @m68kus~1_20.L
-       jsr       (A3)
-       addq.w    #4,A7
-; printf("\r\nEnter ending address(8020000 - 8030000 inclusive): ");
-       pea       @m68kus~1_16.L
-       jsr       (A3)
-       addq.w    #4,A7
-; scanf("%s", &end_addr);
-       move.l    A2,-(A7)
-       pea       @m68kus~1_13.L
-       jsr       (A5)
-       addq.w    #8,A7
-; end_val = Get7HexDigits(end_addr[0], end_addr[1], end_addr[2], end_addr[3], end_addr[4], end_addr[5], end_addr[6]);
-       move.b    6(A2),D1
-       ext.w     D1
-       ext.l     D1
-       move.l    D1,-(A7)
-       move.b    5(A2),D1
-       ext.w     D1
-       ext.l     D1
-       move.l    D1,-(A7)
-       move.b    4(A2),D1
-       ext.w     D1
-       ext.l     D1
-       move.l    D1,-(A7)
-       move.b    3(A2),D1
-       ext.w     D1
-       ext.l     D1
-       move.l    D1,-(A7)
-       move.b    2(A2),D1
-       ext.w     D1
-       ext.l     D1
-       move.l    D1,-(A7)
-       move.b    1(A2),D1
-       ext.w     D1
-       ext.l     D1
-       move.l    D1,-(A7)
-       move.b    (A2),D1
-       ext.w     D1
-       ext.l     D1
-       move.l    D1,-(A7)
-       jsr       _Get7HexDigits
-       add.w     #28,A7
-       move.l    D0,D2
-       bra       main_26
-main_28:
-; }
-; printf("\r\nWriting to SRAM ...");
-       pea       @m68kus~1_21.L
-       jsr       (A3)
-       addq.w    #4,A7
-; printf("\r\n............................................................................................................");
-       pea       @m68kus~1_22.L
-       jsr       (A3)
-       addq.w    #4,A7
-; printf("\r\n............................................................................................................");
-       pea       @m68kus~1_22.L
-       jsr       (A3)
-       addq.w    #4,A7
-; printf("\r\n............................................................................................................");
-       pea       @m68kus~1_22.L
-       jsr       (A3)
-       addq.w    #4,A7
-; switch (test_pattern) {
-       move.l    -20(A6),D0
-       subq.l    #1,D0
-       blo       main_29
-       cmp.l     #4,D0
-       bhs.s     main_29
-       asl.l     #1,D0
-       move.w    main_31(PC,D0.L),D0
-       jmp       main_31(PC,D0.W)
-main_31:
-       dc.w      main_32-main_31
-       dc.w      main_33-main_31
-       dc.w      main_34-main_31
-       dc.w      main_35-main_31
-main_32:
-; case 1: digit = '5';
-       moveq     #53,D4
-; break;
-       bra.s     main_30
-main_33:
-; case 2: digit = 'A';
-       moveq     #65,D4
-; break;
-       bra.s     main_30
-main_34:
-; case 3: digit = 'F';
-       moveq     #70,D4
-; break;
-       bra.s     main_30
-main_35:
-; case 4: digit = '0';
-       moveq     #48,D4
-; break;
-       bra.s     main_30
-main_29:
-; default: digit = '5';
-       moveq     #53,D4
-main_30:
-; }
-; switch (test_config) {
-       move.l    -24(A6),D0
-       cmp.l     #2,D0
-       beq       main_40
-       bgt.s     main_43
-       cmp.l     #1,D0
-       beq.s     main_39
-       bra       main_37
-main_43:
-       cmp.l     #3,D0
-       beq       main_41
-       bra       main_37
-main_39:
-; case 1: FillMemory(start_val, end_val, Get2HexDigits(digit), 1);
-       pea       1
-       move.l    D0,-(A7)
-       ext.w     D4
-       ext.l     D4
-       move.l    D4,-(A7)
-       jsr       _Get2HexDigits
-       addq.w    #4,A7
-       move.l    D0,D1
-       move.l    (A7)+,D0
-       and.l     #255,D1
-       move.l    D1,-(A7)
-       move.l    D2,-(A7)
-       move.l    D3,-(A7)
-       jsr       _FillMemory
-       add.w     #16,A7
-; break;
-       bra       main_38
-main_40:
-; case 2: FillMemory(start_val, end_val, Get4HexDigits(digit), 2);
-       pea       2
-       move.l    D0,-(A7)
-       ext.w     D4
-       ext.l     D4
-       move.l    D4,-(A7)
-       jsr       _Get4HexDigits
-       addq.w    #4,A7
-       move.l    D0,D1
-       move.l    (A7)+,D0
-       and.l     #255,D1
-       move.l    D1,-(A7)
-       move.l    D2,-(A7)
-       move.l    D3,-(A7)
-       jsr       _FillMemory
-       add.w     #16,A7
-; break;
-       bra       main_38
-main_41:
-; case 3: FillMemory(start_val, end_val, Get8HexDigits(digit), 3);
-       pea       3
-       move.l    D0,-(A7)
-       ext.w     D4
-       ext.l     D4
-       move.l    D4,-(A7)
-       jsr       _Get8HexDigits
-       addq.w    #4,A7
-       move.l    D0,D1
-       move.l    (A7)+,D0
-       and.l     #255,D1
-       move.l    D1,-(A7)
-       move.l    D2,-(A7)
-       move.l    D3,-(A7)
-       jsr       _FillMemory
-       add.w     #16,A7
-; break;
-       bra.s     main_38
-main_37:
-; default: FillMemory(start_val, end_val, Get2HexDigits(digit), 1);;
-       pea       1
-       move.l    D0,-(A7)
-       ext.w     D4
-       ext.l     D4
-       move.l    D4,-(A7)
-       jsr       _Get2HexDigits
-       addq.w    #4,A7
-       move.l    D0,D1
-       move.l    (A7)+,D0
-       and.l     #255,D1
-       move.l    D1,-(A7)
-       move.l    D2,-(A7)
-       move.l    D3,-(A7)
-       jsr       _FillMemory
-       add.w     #16,A7
-main_38:
-; }
-; printf("\r\nFinished writing to SRAM .");
-       pea       @m68kus~1_23.L
-       jsr       (A3)
-       addq.w    #4,A7
-; printf("\r\nCheck SRAM content");
-       pea       @m68kus~1_24.L
-       jsr       (A3)
-       addq.w    #4,A7
-; printf("\r\nReading from SRAM ...");
-       pea       @m68kus~1_25.L
-       jsr       (A3)
-       addq.w    #4,A7
-; printf("\r\nPrinting out every 10k location from SRAM ...");
-       pea       @m68kus~1_26.L
-       jsr       (A3)
-       addq.w    #4,A7
-; printf("\r\n............................................................................................................");
-       pea       @m68kus~1_22.L
-       jsr       (A3)
-       addq.w    #4,A7
-; printf("\r\n............................................................................................................");
-       pea       @m68kus~1_22.L
-       jsr       (A3)
-       addq.w    #4,A7
-; printf("\r\n............................................................................................................");
-       pea       @m68kus~1_22.L
-       jsr       (A3)
-       addq.w    #4,A7
-; printf("\r\n....................... begin reading");
-       pea       @m68kus~1_27.L
-       jsr       (A3)
-       addq.w    #4,A7
-; switch (test_config) {
-       move.l    -24(A6),D0
-       cmp.l     #2,D0
-       beq       main_47
-       bgt.s     main_50
-       cmp.l     #1,D0
-       beq.s     main_46
-       bra       main_44
-main_50:
-       cmp.l     #3,D0
-       beq       main_48
-       bra       main_44
-main_46:
-; case 1: ReadMemory(start_val, end_val, Get2HexDigits(digit), 1);
-       pea       1
-       move.l    D0,-(A7)
-       ext.w     D4
-       ext.l     D4
-       move.l    D4,-(A7)
-       jsr       _Get2HexDigits
-       addq.w    #4,A7
-       move.l    D0,D1
-       move.l    (A7)+,D0
-       and.l     #255,D1
-       move.l    D1,-(A7)
-       move.l    D2,-(A7)
-       move.l    D3,-(A7)
-       jsr       _ReadMemory
-       add.w     #16,A7
-; break;
-       bra       main_45
-main_47:
-; case 2: ReadMemory(start_val, end_val, Get4HexDigits(digit), 2);
-       pea       2
-       move.l    D0,-(A7)
-       ext.w     D4
-       ext.l     D4
-       move.l    D4,-(A7)
-       jsr       _Get4HexDigits
-       addq.w    #4,A7
-       move.l    D0,D1
-       move.l    (A7)+,D0
-       and.l     #255,D1
-       move.l    D1,-(A7)
-       move.l    D2,-(A7)
-       move.l    D3,-(A7)
-       jsr       _ReadMemory
-       add.w     #16,A7
-; break;
-       bra       main_45
-main_48:
-; case 3: ReadMemory(start_val, end_val, Get8HexDigits(digit), 3);
-       pea       3
-       move.l    D0,-(A7)
-       ext.w     D4
-       ext.l     D4
-       move.l    D4,-(A7)
-       jsr       _Get8HexDigits
-       addq.w    #4,A7
-       move.l    D0,D1
-       move.l    (A7)+,D0
-       and.l     #255,D1
-       move.l    D1,-(A7)
-       move.l    D2,-(A7)
-       move.l    D3,-(A7)
-       jsr       _ReadMemory
-       add.w     #16,A7
-; break;
-       bra.s     main_45
-main_44:
-; default: ReadMemory(start_val, end_val, Get2HexDigits(digit), 1);;
-       pea       1
-       move.l    D0,-(A7)
-       ext.w     D4
-       ext.l     D4
-       move.l    D4,-(A7)
-       jsr       _Get2HexDigits
-       addq.w    #4,A7
-       move.l    D0,D1
-       move.l    (A7)+,D0
-       and.l     #255,D1
-       move.l    D1,-(A7)
-       move.l    D2,-(A7)
-       move.l    D3,-(A7)
-       jsr       _ReadMemory
-       add.w     #16,A7
-main_45:
-; }
-; printf("\r\nFinished reading from SRAM ...");
-       pea       @m68kus~1_28.L
-       jsr       (A3)
-       addq.w    #4,A7
-; printf("\r\nend of program ...");
-       pea       @m68kus~1_29.L
-       jsr       (A3)
-       addq.w    #4,A7
-; printf("\r\n............................................................................................................");
-       pea       @m68kus~1_22.L
-       jsr       (A3)
-       addq.w    #4,A7
-; printf("\r\n............................................................................................................");
-       pea       @m68kus~1_22.L
-       jsr       (A3)
-       addq.w    #4,A7
-; // printf("\r\nEnter Integer: ") ;
-; // scanf("%d", &i) ;
-; // printf("You entered %d", i) ;
-; // sprintf(text, "Hello CPEN 412 Student") ;
-; // LCDLine1Message(text) ;
-; // printf("\r\nHello CPEN 412 Student\r\nYour LEDs should be Flashing") ;
-; // printf("\r\nYour LCD should be displaying") ;
-; while(1);
-main_51:
-       bra       main_51
+; ;
 ; // programs should NOT exit as there is nothing to Exit TO !!!!!!
 ; // There is no OS - just press the reset button to end program and call debug
 ; }
-ULDIV:
-       link    A6,#0
-       movem.l D0/D1,-(A7)
-       move.l  8(A6),D1
-       move.l  12(A6),D0
-       bra.s   ldiv_3
-LDIV:
-       link    A6,#0
-       movem.l D0/D1,-(A7)
-       move.l  8(A6),D1
-       move.l  12(A6),D0
-       tst.l   D0
-       bpl.s   ldiv_1
-       neg.l   D0
-       tst.l   D1
-       bpl.s   ldiv_2
-       neg.l   D1
-       bsr.s   dodiv
-       neg.l   D1
-       bra.s   ldiv_4
-ldiv_1:
-       tst.l   D1
-       bpl.s   ldiv_3
-       neg.l   D1
-       bsr.s   dodiv
-       neg.l   D0
-       bra.s   ldiv_4
-ldiv_2:
-       bsr.s   dodiv
-       neg.l   D0
-       neg.l   D1
-       bra.s   ldiv_4
-ldiv_3:
-       bsr.s   dodiv
-ldiv_4:
-       move.l  D0,8(A6)
-       move.l  D1,12(A6)
-       movem.l (A7)+,D0/D1
-       unlk    A6
-       rts
-dodiv:
-       cmpi.l  #$FFFF,D1
-       bhi.s   dodiv_2
-       cmpi.l  #$FFFF,D0
-       bhi.s   dodiv_1
-       divu    D1,D0
-       move.l  D0,D1
-       clr.w   D1
-       swap    D1
-       andi.l  #$FFFF,D0
-       rts
-dodiv_1:
-       movem.w D0/D2,-(A7)
-       clr.w   D0
-       swap    D0
-       divu    D1,D0
-       move.w  D0,D2
-       move.w  (A7)+,D0
-       divu    D1,D0
-       swap    D0
-       clr.l   D1
-       move.w  D0,D1
-       move.w  D2,D0
-       swap    D0
-       move.w  (A7)+,D2
-       rts
-dodiv_2:
-       movem.l D2/D3/D4,-(A7)
-       move.l  D1,D2
-       clr.w   D2
-       swap    D2
-       addq.l  #1,D2
-       move.l  D0,D3
-       move.l  D1,D4
-       move.l  D2,D1
-       bsr.s   dodiv_1
-       move.l  D4,D1
-       divu    D2,D1
-       divu    D1,D0
-       andi.l  #$FFFF,D0
-dodiv_3:
-       move.l  D4,D1
-       move.l  D4,D2
-       swap    D2
-       mulu    D0,D1
-       mulu    D0,D2
-       swap    D2
-       add.l   D2,D1
-       sub.l   D3,D1
-       bhi.s   dodiv_4
-       neg.l   D1
-       cmp.l   D1,D4
-       bhi.s   dodiv_5
-       addq.l  #1,D0
-       bra.s   dodiv_3
-dodiv_4:
-       subq.l  #1,D0
-       bra.s   dodiv_3
-dodiv_5:
-       movem.l (A7)+,D2/D3/D4
-       rts
-_strlen:
-       move.l    (4,A7),A0
-       move.l    A0,A1
-strlen_1:
-       tst.b     (A1)+
-       bne       strlen_1
-       move.l    A1,D0
-       sub.l     A0,D0
-       subq.l    #1,D0
+_sprintf:
+       link      A6,#-4
+       movem.l   D2,-(A7)
+       lea       12(A6),A0
+       addq.w    #4,A0
+       move.l    A0,D2
+       move.l    D2,-(A7)
+       move.l    12(A6),-(A7)
+       move.l    8(A6),-(A7)
+       bsr       _vsprintf
+       add.w     #12,A7
+       move.l    D0,-4(A6)
+       clr.l     D2
+       move.l    -4(A6),D0
+       movem.l   (A7)+,D2
+       unlk      A6
        rts
 _scanf:
        link      A6,#-4
@@ -2849,172 +1518,6 @@ _printf:
        movem.l   (A7)+,D2
        unlk      A6
        rts
-ULMUL:
-       link    A6,#0
-       movem.l D0/D1,-(A7)
-       move.l  8(A6),D1
-       move.l  12(A6),D0
-       bra.s   lmul_3
-LMUL:
-       link    A6,#0
-       movem.l D0/D1,-(A7)
-       move.l  8(A6),D1
-       move.l  12(A6),D0
-       tst.l   D0
-       bpl.s   lmul_1
-       neg.l   D0
-       tst.l   D1
-       bpl.s   lmul_2
-       neg.l   D1
-       bra.s   lmul_3
-lmul_1:
-       tst.l   D1
-       bpl.s   lmul_3
-       neg.l   D1
-lmul_2:
-       bsr.s   domul
-       neg.l   D1
-       negx.l  D0
-       bra.s   lmul_4
-lmul_3:
-       bsr.s   domul
-lmul_4:
-       move.l  D1,8(A6)
-       movem.l (A7)+,D0/D1
-       unlk    A6
-       rts
-domul:
-       cmpi.l  #$FFFF,D1
-       bhi.s   domul_1
-       cmpi.l  #$FFFF,D0
-       bhi.s   domul_2
-       mulu    D0,D1
-       rts
-domul_1:
-       cmpi.l  #$FFFF,D0
-       bhi.s   domul_4
-       bra.s   domul_3
-domul_2
-       exg     D0,D1
-domul_3:
-       move.l  D2,-(A7)
-       move.l  D1,D2
-       swap    D2
-       mulu    D0,D1
-       mulu    D0,D2
-       swap    D2
-       clr.w   D2
-       add.l   D2,D1
-       move.l  (A7)+,D2
-       rts
-domul_4:
-       movem.l D2/D3,-(A7)
-       move.l  D1,D2
-       move.l  D1,D3
-       mulu    D0,D1
-       swap    D2
-       mulu    D0,D2
-       swap    D0
-       mulu    D0,D3
-       add.l   D3,D2
-       swap    D2
-       clr.w   D2
-       add.l   D2,D1
-       movem.l (A7)+,D2/D3
-       rts
-_gets:
-       link      A6,#0
-       movem.l   D2/D3/D4/A2,-(A7)
-       lea       _putch,A2
-       move.l    8(A6),D4
-       move.l    D4,D2
-gets_1:
-       bsr       _getch
-       move.l    D0,D3
-       cmp.l     #10,D0
-       beq       gets_3
-       cmp.l     #8,D3
-       beq.s     gets_4
-       move.l    D2,A0
-       addq.l    #1,D2
-       move.b    D3,(A0)
-       ext.w     D3
-       ext.l     D3
-       move.l    D3,-(A7)
-       jsr       (A2)
-       addq.w    #4,A7
-       bra.s     gets_6
-gets_4:
-       cmp.l     D4,D2
-       bls.s     gets_6
-       pea       8
-       jsr       (A2)
-       addq.w    #4,A7
-       pea       32
-       jsr       (A2)
-       addq.w    #4,A7
-       pea       8
-       jsr       (A2)
-       addq.w    #4,A7
-       subq.l    #1,D2
-gets_6:
-       bra       gets_1
-gets_3:
-       pea       10
-       jsr       (A2)
-       addq.w    #4,A7
-       move.l    D2,A0
-       clr.b     (A0)
-       move.l    D4,D0
-       movem.l   (A7)+,D2/D3/D4/A2
-       unlk      A6
-       rts
-_tolower:
-       link      A6,#0
-       movem.l   D2,-(A7)
-       move.l    8(A6),D2
-       cmp.l     #65,D2
-       blt.s     tolower_1
-       cmp.l     #90,D2
-       bgt.s     tolower_1
-       or.l      #32,D2
-tolower_1:
-       move.l    D2,D0
-       movem.l   (A7)+,D2
-       unlk      A6
-       rts
-_strcat:
-       move.l    (4,A7),A0	
-       move.l    (8,A7),A1	
-       move.l    A0,D0		
-strcat_0:
-       tst.b     (A0)+
-       bne       strcat_0
-       subq      #1,A0
-strcat_1:
-       move.b    (A1)+,(A0)+
-       bne       strcat_1
-       rts
-_toupper:
-       link      A6,#0
-       movem.l   D2,-(A7)
-       move.l    8(A6),D2
-       cmp.l     #97,D2
-       blt.s     toupper_1
-       cmp.l     #122,D2
-       bgt.s     toupper_1
-       and.l     #95,D2
-toupper_1:
-       move.l    D2,D0
-       movem.l   (A7)+,D2
-       unlk      A6
-       rts
-_ungetch:
-       link      A6,#0
-       move.l    8(A6),__ungetbuf
-       move.l    8(A6),D0
-       unlk      A6
-       rts
 @vsprintf_copy:
        link      A6,#0
        move.l    8(A6),A0
@@ -3709,40 +2212,171 @@ vsprintf_126:
        movem.l   (A7)+,D2/D3/D4/D5/D6/D7/A2/A3/A4/A5
        unlk      A6
        rts
-_putch:
+ULMUL:
+       link    A6,#0
+       movem.l D0/D1,-(A7)
+       move.l  8(A6),D1
+       move.l  12(A6),D0
+       bra.s   lmul_3
+LMUL:
+       link    A6,#0
+       movem.l D0/D1,-(A7)
+       move.l  8(A6),D1
+       move.l  12(A6),D0
+       tst.l   D0
+       bpl.s   lmul_1
+       neg.l   D0
+       tst.l   D1
+       bpl.s   lmul_2
+       neg.l   D1
+       bra.s   lmul_3
+lmul_1:
+       tst.l   D1
+       bpl.s   lmul_3
+       neg.l   D1
+lmul_2:
+       bsr.s   domul
+       neg.l   D1
+       negx.l  D0
+       bra.s   lmul_4
+lmul_3:
+       bsr.s   domul
+lmul_4:
+       move.l  D1,8(A6)
+       movem.l (A7)+,D0/D1
+       unlk    A6
+       rts
+domul:
+       cmpi.l  #$FFFF,D1
+       bhi.s   domul_1
+       cmpi.l  #$FFFF,D0
+       bhi.s   domul_2
+       mulu    D0,D1
+       rts
+domul_1:
+       cmpi.l  #$FFFF,D0
+       bhi.s   domul_4
+       bra.s   domul_3
+domul_2
+       exg     D0,D1
+domul_3:
+       move.l  D2,-(A7)
+       move.l  D1,D2
+       swap    D2
+       mulu    D0,D1
+       mulu    D0,D2
+       swap    D2
+       clr.w   D2
+       add.l   D2,D1
+       move.l  (A7)+,D2
+       rts
+domul_4:
+       movem.l D2/D3,-(A7)
+       move.l  D1,D2
+       move.l  D1,D3
+       mulu    D0,D1
+       swap    D2
+       mulu    D0,D2
+       swap    D0
+       mulu    D0,D3
+       add.l   D3,D2
+       swap    D2
+       clr.w   D2
+       add.l   D2,D1
+       movem.l (A7)+,D2/D3
+       rts
+_gets:
+       link      A6,#0
+       movem.l   D2/D3/D4/A2,-(A7)
+       lea       _putch,A2
+       move.l    8(A6),D4
+       move.l    D4,D2
+gets_1:
+       bsr       _getch
+       move.l    D0,D3
+       cmp.l     #10,D0
+       beq       gets_3
+       cmp.l     #8,D3
+       beq.s     gets_4
+       move.l    D2,A0
+       addq.l    #1,D2
+       move.b    D3,(A0)
+       ext.w     D3
+       ext.l     D3
+       move.l    D3,-(A7)
+       jsr       (A2)
+       addq.w    #4,A7
+       bra.s     gets_6
+gets_4:
+       cmp.l     D4,D2
+       bls.s     gets_6
+       pea       8
+       jsr       (A2)
+       addq.w    #4,A7
+       pea       32
+       jsr       (A2)
+       addq.w    #4,A7
+       pea       8
+       jsr       (A2)
+       addq.w    #4,A7
+       subq.l    #1,D2
+gets_6:
+       bra       gets_1
+gets_3:
+       pea       10
+       jsr       (A2)
+       addq.w    #4,A7
+       move.l    D2,A0
+       clr.b     (A0)
+       move.l    D4,D0
+       movem.l   (A7)+,D2/D3/D4/A2
+       unlk      A6
+       rts
+_tolower:
        link      A6,#0
        movem.l   D2,-(A7)
        move.l    8(A6),D2
-       cmp.l     #10,D2
-       bne.s     putch_1
-       pea       13
-       bsr       __putch
-       addq.w    #4,A7
-putch_1:
-       move.l    D2,-(A7)
-       bsr       __putch
-       addq.w    #4,A7
+       cmp.l     #65,D2
+       blt.s     tolower_1
+       cmp.l     #90,D2
+       bgt.s     tolower_1
+       or.l      #32,D2
+tolower_1:
        move.l    D2,D0
        movem.l   (A7)+,D2
        unlk      A6
        rts
-_getch:
+_strcat:
+       move.l    (4,A7),A0	
+       move.l    (8,A7),A1	
+       move.l    A0,D0		
+strcat_0:
+       tst.b     (A0)+
+       bne       strcat_0
+       subq      #1,A0
+strcat_1:
+       move.b    (A1)+,(A0)+
+       bne       strcat_1
+       rts
+_toupper:
+       link      A6,#0
        movem.l   D2,-(A7)
-       move.l    __ungetbuf,D2
-       move.l    __ungetbuf,D0
-       cmp.l     #-1,D0
-       beq.s     getch_1
-       move.l    #-1,__ungetbuf
-       bra.s     getch_3
-getch_1:
-       bsr       __getch
-       move.l    D0,D2
-       cmp.l     #13,D0
-       bne.s     getch_3
-       moveq     #10,D2
-getch_3:
+       move.l    8(A6),D2
+       cmp.l     #97,D2
+       blt.s     toupper_1
+       cmp.l     #122,D2
+       bgt.s     toupper_1
+       and.l     #95,D2
+toupper_1:
        move.l    D2,D0
        movem.l   (A7)+,D2
+       unlk      A6
+       rts
+_ungetch:
+       link      A6,#0
+       move.l    8(A6),__ungetbuf
+       move.l    8(A6),D0
+       unlk      A6
        rts
 @itoa_convert:
        link      A6,#0
@@ -3871,6 +2505,51 @@ _itoa:
        add.w     #12,A7
        unlk      A6
        rts
+_strlen:
+       move.l    (4,A7),A0
+       move.l    A0,A1
+strlen_1:
+       tst.b     (A1)+
+       bne       strlen_1
+       move.l    A1,D0
+       sub.l     A0,D0
+       subq.l    #1,D0
+       rts
+_putch:
+       link      A6,#0
+       movem.l   D2,-(A7)
+       move.l    8(A6),D2
+       cmp.l     #10,D2
+       bne.s     putch_1
+       pea       13
+       bsr       __putch
+       addq.w    #4,A7
+putch_1:
+       move.l    D2,-(A7)
+       bsr       __putch
+       addq.w    #4,A7
+       move.l    D2,D0
+       movem.l   (A7)+,D2
+       unlk      A6
+       rts
+_getch:
+       movem.l   D2,-(A7)
+       move.l    __ungetbuf,D2
+       move.l    __ungetbuf,D0
+       cmp.l     #-1,D0
+       beq.s     getch_1
+       move.l    #-1,__ungetbuf
+       bra.s     getch_3
+getch_1:
+       bsr       __getch
+       move.l    D0,D2
+       cmp.l     #13,D0
+       bne.s     getch_3
+       moveq     #10,D2
+getch_3:
+       move.l    D2,D0
+       movem.l   (A7)+,D2
+       rts
 _strcpy:
        move.l    (4,A7),A0
        move.l    (8,A7),A1
@@ -3879,146 +2558,132 @@ strcpy_1:
        move.b    (A1)+,(A0)+
        bne       strcpy_1
        rts
+ULDIV:
+       link    A6,#0
+       movem.l D0/D1,-(A7)
+       move.l  8(A6),D1
+       move.l  12(A6),D0
+       bra.s   ldiv_3
+LDIV:
+       link    A6,#0
+       movem.l D0/D1,-(A7)
+       move.l  8(A6),D1
+       move.l  12(A6),D0
+       tst.l   D0
+       bpl.s   ldiv_1
+       neg.l   D0
+       tst.l   D1
+       bpl.s   ldiv_2
+       neg.l   D1
+       bsr.s   dodiv
+       neg.l   D1
+       bra.s   ldiv_4
+ldiv_1:
+       tst.l   D1
+       bpl.s   ldiv_3
+       neg.l   D1
+       bsr.s   dodiv
+       neg.l   D0
+       bra.s   ldiv_4
+ldiv_2:
+       bsr.s   dodiv
+       neg.l   D0
+       neg.l   D1
+       bra.s   ldiv_4
+ldiv_3:
+       bsr.s   dodiv
+ldiv_4:
+       move.l  D0,8(A6)
+       move.l  D1,12(A6)
+       movem.l (A7)+,D0/D1
+       unlk    A6
+       rts
+dodiv:
+       cmpi.l  #$FFFF,D1
+       bhi.s   dodiv_2
+       cmpi.l  #$FFFF,D0
+       bhi.s   dodiv_1
+       divu    D1,D0
+       move.l  D0,D1
+       clr.w   D1
+       swap    D1
+       andi.l  #$FFFF,D0
+       rts
+dodiv_1:
+       movem.w D0/D2,-(A7)
+       clr.w   D0
+       swap    D0
+       divu    D1,D0
+       move.w  D0,D2
+       move.w  (A7)+,D0
+       divu    D1,D0
+       swap    D0
+       clr.l   D1
+       move.w  D0,D1
+       move.w  D2,D0
+       swap    D0
+       move.w  (A7)+,D2
+       rts
+dodiv_2:
+       movem.l D2/D3/D4,-(A7)
+       move.l  D1,D2
+       clr.w   D2
+       swap    D2
+       addq.l  #1,D2
+       move.l  D0,D3
+       move.l  D1,D4
+       move.l  D2,D1
+       bsr.s   dodiv_1
+       move.l  D4,D1
+       divu    D2,D1
+       divu    D1,D0
+       andi.l  #$FFFF,D0
+dodiv_3:
+       move.l  D4,D1
+       move.l  D4,D2
+       swap    D2
+       mulu    D0,D1
+       mulu    D0,D2
+       swap    D2
+       add.l   D2,D1
+       sub.l   D3,D1
+       bhi.s   dodiv_4
+       neg.l   D1
+       cmp.l   D1,D4
+       bhi.s   dodiv_5
+       addq.l  #1,D0
+       bra.s   dodiv_3
+dodiv_4:
+       subq.l  #1,D0
+       bra.s   dodiv_3
+dodiv_5:
+       movem.l (A7)+,D2/D3/D4
+       rts
        section   const
                 align
 
 
 @m68kus~1_1:
-       dc.b      13,10,70,105,108,108,105,110,103,32,65,100,100
-       dc.b      114,101,115,115,101,115,32,91,36,37,48,56,88
-       dc.b      32,45,32,36,37,48,56,88,93,32,119,105,116,104
-       dc.b      32,36,37,48,50,88,0
+       dc.b      13,10,69,110,116,101,114,32,73,110,116,101,103
+       dc.b      101,114,58,32,0
 @m68kus~1_2:
-       dc.b      13,10,82,101,97,100,105,110,103,32,65,100,100
-       dc.b      114,101,115,115,101,115,32,91,36,37,48,56,88
-       dc.b      32,45,32,36,37,48,56,88,93,32,102,111,114,32
-       dc.b      36,37,48,50,88,0
-@m68kus~1_3:
-       dc.b      13,10,86,97,108,117,101,32,105,110,99,111,114
-       dc.b      114,101,99,116,32,97,116,32,97,100,100,114,101
-       dc.b      115,115,101,115,32,36,37,48,56,88,32,46,46,46
-       dc.b      32,115,104,111,117,108,100,32,98,101,32,36,37
-       dc.b      48,50,88,32,98,117,116,32,102,111,117,110,100
-       dc.b      32,36,37,48,50,88,0
-@m68kus~1_4:
-       dc.b      13,10,86,97,108,117,101,58,32,36,37,48,50,88
-       dc.b      32,102,111,117,110,100,32,97,116,32,65,100,100
-       dc.b      114,101,115,115,58,32,36,37,48,56,88,0
-@m68kus~1_5:
-       dc.b      13,10,86,97,108,117,101,58,32,36,37,48,50,88
-       dc.b      32,36,37,48,50,88,32,102,111,117,110,100,32
-       dc.b      97,116,32,65,100,100,114,101,115,115,58,32,36
-       dc.b      37,48,56,88,32,45,32,36,37,48,56,88,0
-@m68kus~1_6:
-       dc.b      13,10,86,97,108,117,101,58,32,36,37,48,50,88
-       dc.b      32,36,37,48,50,88,32,36,37,48,50,88,32,36,37
-       dc.b      48,50,88,32,102,111,117,110,100,32,97,116,32
-       dc.b      65,100,100,114,101,115,115,58,32,36,37,48,56
-       dc.b      88,32,45,32,36,37,48,56,88,0
-@m68kus~1_7:
-       dc.b      13,10,69,110,116,101,114,32,109,101,109,111
-       dc.b      114,121,32,116,101,115,116,32,99,111,110,102
-       dc.b      105,103,117,114,97,116,105,111,110,40,49,32
-       dc.b      45,32,98,121,116,101,115,44,32,50,32,45,32,119
-       dc.b      111,114,100,115,44,32,51,32,45,32,108,111,110
-       dc.b      103,32,119,111,114,100,115,41,58,32,0
-@m68kus~1_8:
        dc.b      37,100,0
-@m68kus~1_9:
-       dc.b      13,10,67,111,110,102,105,103,117,114,97,116
-       dc.b      105,111,110,32,105,110,118,97,108,105,100,44
-       dc.b      32,116,114,121,32,97,103,97,105,110,0
-@m68kus~1_10:
-       dc.b      13,10,67,104,111,111,115,101,32,98,101,116,119
-       dc.b      101,101,110,32,100,105,102,102,101,114,101,110
-       dc.b      116,32,109,101,109,111,114,121,32,116,101,115
-       dc.b      116,32,112,97,116,116,101,114,110,115,40,49
-       dc.b      32,45,32,53,44,32,50,32,45,32,65,44,32,51,32
-       dc.b      45,32,70,44,32,52,32,45,32,48,41,58,32,0
-@m68kus~1_11:
-       dc.b      13,10,80,97,116,116,101,114,110,32,105,110,118
-       dc.b      97,108,105,100,44,32,116,114,121,32,97,103,97
-       dc.b      105,110,0
-@m68kus~1_12:
-       dc.b      13,10,69,110,116,101,114,32,115,116,97,114,116
-       dc.b      105,110,103,32,97,100,100,114,101,115,115,40
-       dc.b      56,48,50,48,48,48,48,32,45,32,56,48,51,48,48
-       dc.b      48,48,32,105,110,99,108,117,115,105,118,101
-       dc.b      41,58,32,0
-@m68kus~1_13:
-       dc.b      37,115,0
-@m68kus~1_14:
-       dc.b      13,10,83,116,97,114,116,105,110,103,32,97,100
-       dc.b      100,114,101,115,115,32,111,117,116,32,111,102
-       dc.b      32,98,111,117,110,100,115,46,46,32,116,114,121
-       dc.b      32,97,103,97,105,110,0
-@m68kus~1_15:
-       dc.b      13,10,79,100,100,32,115,116,97,114,116,105,110
-       dc.b      103,32,97,100,100,114,101,115,115,46,46,32,116
-       dc.b      114,121,32,97,103,97,105,110,0
-@m68kus~1_16:
-       dc.b      13,10,69,110,116,101,114,32,101,110,100,105
-       dc.b      110,103,32,97,100,100,114,101,115,115,40,56
-       dc.b      48,50,48,48,48,48,32,45,32,56,48,51,48,48,48
-       dc.b      48,32,105,110,99,108,117,115,105,118,101,41
-       dc.b      58,32,0
-@m68kus~1_17:
-       dc.b      13,10,69,110,100,105,110,103,32,97,100,100,114
-       dc.b      101,115,115,32,111,117,116,32,111,102,32,98
-       dc.b      111,117,110,100,115,46,46,32,116,114,121,32
-       dc.b      97,103,97,105,110,0
-@m68kus~1_18:
-       dc.b      13,10,73,110,118,97,108,105,100,32,101,110,100
-       dc.b      105,110,103,32,97,100,100,114,101,115,115,46
-       dc.b      46,32,116,114,121,32,97,103,97,105,110,0
-@m68kus~1_19:
-       dc.b      13,10,73,110,118,97,108,105,100,32,97,100,100
-       dc.b      114,101,115,115,32,114,97,110,103,101,32,105
-       dc.b      115,32,116,111,111,32,115,109,97,108,108,46
-       dc.b      46,32,116,114,121,32,97,103,97,105,110,0
-@m68kus~1_20:
-       dc.b      13,10,73,110,118,97,108,105,100,32,114,97,110
-       dc.b      103,101,32,105,115,32,116,111,111,32,115,109
-       dc.b      97,108,108,46,46,32,116,114,121,32,97,103,97
-       dc.b      105,110,0
-@m68kus~1_21:
-       dc.b      13,10,87,114,105,116,105,110,103,32,116,111
-       dc.b      32,83,82,65,77,32,46,46,46,0
-@m68kus~1_22:
-       dc.b      13,10,46,46,46,46,46,46,46,46,46,46,46,46,46
-       dc.b      46,46,46,46,46,46,46,46,46,46,46,46,46,46,46
-       dc.b      46,46,46,46,46,46,46,46,46,46,46,46,46,46,46
-       dc.b      46,46,46,46,46,46,46,46,46,46,46,46,46,46,46
-       dc.b      46,46,46,46,46,46,46,46,46,46,46,46,46,46,46
-       dc.b      46,46,46,46,46,46,46,46,46,46,46,46,46,46,46
-       dc.b      46,46,46,46,46,46,46,46,46,46,46,46,46,46,46
-       dc.b      46,46,46,46,46,0
-@m68kus~1_23:
-       dc.b      13,10,70,105,110,105,115,104,101,100,32,119
-       dc.b      114,105,116,105,110,103,32,116,111,32,83,82
-       dc.b      65,77,32,46,0
-@m68kus~1_24:
-       dc.b      13,10,67,104,101,99,107,32,83,82,65,77,32,99
-       dc.b      111,110,116,101,110,116,0
-@m68kus~1_25:
-       dc.b      13,10,82,101,97,100,105,110,103,32,102,114,111
-       dc.b      109,32,83,82,65,77,32,46,46,46,0
-@m68kus~1_26:
-       dc.b      13,10,80,114,105,110,116,105,110,103,32,111
-       dc.b      117,116,32,101,118,101,114,121,32,49,48,107
-       dc.b      32,108,111,99,97,116,105,111,110,32,102,114
-       dc.b      111,109,32,83,82,65,77,32,46,46,46,0
-@m68kus~1_27:
-       dc.b      13,10,46,46,46,46,46,46,46,46,46,46,46,46,46
-       dc.b      46,46,46,46,46,46,46,46,46,46,32,98,101,103
-       dc.b      105,110,32,114,101,97,100,105,110,103,0
-@m68kus~1_28:
-       dc.b      13,10,70,105,110,105,115,104,101,100,32,114
-       dc.b      101,97,100,105,110,103,32,102,114,111,109,32
-       dc.b      83,82,65,77,32,46,46,46,0
-@m68kus~1_29:
-       dc.b      13,10,101,110,100,32,111,102,32,112,114,111
-       dc.b      103,114,97,109,32,46,46,46,0
+@m68kus~1_3:
+       dc.b      89,111,117,32,101,110,116,101,114,101,100,32
+       dc.b      37,100,0
+@m68kus~1_4:
+       dc.b      72,101,108,108,111,32,67,80,69,78,32,52,49,50
+       dc.b      32,83,116,117,100,101,110,116,0
+@m68kus~1_5:
+       dc.b      13,10,72,101,108,108,111,32,67,80,69,78,32,52
+       dc.b      49,50,32,83,116,117,100,101,110,116,13,10,89
+       dc.b      111,117,114,32,76,69,68,115,32,115,104,111,117
+       dc.b      108,100,32,98,101,32,70,108,97,115,104,105,110
+       dc.b      103,0
+@m68kus~1_6:
+       dc.b      13,10,89,111,117,114,32,76,67,68,32,115,104
+       dc.b      111,117,108,100,32,98,101,32,100,105,115,112
+       dc.b      108,97,121,105,110,103,0
        section   data
                 align
 

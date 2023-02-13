@@ -6,7 +6,7 @@ JedecChain;
 	P ActionCode(Ign)
 		Device PartName(SOCVHPS) MfrSpec(OpMask(0));
 	P ActionCode(Cfg)
-		Device PartName(5CSEMA5F31) Path("C:/CPEN412/github_steup/M68kV6.0 - 800by480/") File("MC68K.sof") MfrSpec(OpMask(1));
+		Device PartName(5CSEMA5F31) Path("C:/CPEN412/Lab1/M68kV6.0 - 800by480/") File("MC68K.sof") MfrSpec(OpMask(1));
 
 ChainEnd;
 

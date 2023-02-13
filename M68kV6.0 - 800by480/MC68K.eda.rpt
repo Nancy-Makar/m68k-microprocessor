@@ -1,5 +1,5 @@
 EDA Netlist Writer report for MC68K
-Thu Feb 09 17:21:37 2023
+Tue Jan 24 17:56:30 2023
 Quartus Prime Version 18.1.0 Build 625 09/12/2018 SJ Lite Edition
 
 
@@ -36,7 +36,7 @@ refer to the applicable agreement for further details.
 +-------------------------------------------------------------------+
 ; EDA Netlist Writer Summary                                        ;
 +---------------------------+---------------------------------------+
-; EDA Netlist Writer Status ; Successful - Thu Feb 09 17:21:37 2023 ;
+; EDA Netlist Writer Status ; Successful - Tue Jan 24 17:56:30 2023 ;
 ; Revision Name             ; MC68K                                 ;
 ; Top-level Entity Name     ; MC68K                                 ;
 ; Family                    ; Cyclone V                             ;
@@ -66,13 +66,13 @@ refer to the applicable agreement for further details.
 +---------------------------------------------------------------------------------------------------+------------------------+
 
 
-+---------------------------------------------------------------------------+
-; Simulation Generated Files                                                ;
-+---------------------------------------------------------------------------+
-; Generated Files                                                           ;
-+---------------------------------------------------------------------------+
-; C:/CPEN412/github_steup/M68kV6.0 - 800by480/simulation/modelsim/MC68K.vho ;
-+---------------------------------------------------------------------------+
++-------------------------------------------------------------------+
+; Simulation Generated Files                                        ;
++-------------------------------------------------------------------+
+; Generated Files                                                   ;
++-------------------------------------------------------------------+
+; C:/CPEN412/Lab1/M68kV6.0 - 800by480/simulation/modelsim/MC68K.vho ;
++-------------------------------------------------------------------+
 
 
 +-----------------------------+
@@ -81,15 +81,15 @@ refer to the applicable agreement for further details.
 Info: *******************************************************************
 Info: Running Quartus Prime EDA Netlist Writer
     Info: Version 18.1.0 Build 625 09/12/2018 SJ Lite Edition
-    Info: Processing started: Thu Feb 09 17:21:31 2023
+    Info: Processing started: Tue Jan 24 17:56:25 2023
 Info: Command: quartus_eda --read_settings_files=off --write_settings_files=off MC68K -c MC68K
 Warning (18236): Number of processors has not been specified which may cause overloading on shared machines.  Set the global assignment NUM_PARALLEL_PROCESSORS in your QSF to an appropriate value for best performance.
 Warning (10905): Generated the EDA functional simulation netlist because it is the only supported netlist type for this device.
-Info (204019): Generated file MC68K.vho in folder "C:/CPEN412/github_steup/M68kV6.0 - 800by480/simulation/modelsim/" for EDA simulation tool
+Info (204019): Generated file MC68K.vho in folder "C:/CPEN412/Lab1/M68kV6.0 - 800by480/simulation/modelsim/" for EDA simulation tool
 Info: Quartus Prime EDA Netlist Writer was successful. 0 errors, 2 warnings
-    Info: Peak virtual memory: 4954 megabytes
-    Info: Processing ended: Thu Feb 09 17:21:37 2023
-    Info: Elapsed time: 00:00:06
-    Info: Total CPU time (on all processors): 00:00:06
+    Info: Peak virtual memory: 4949 megabytes
+    Info: Processing ended: Tue Jan 24 17:56:30 2023
+    Info: Elapsed time: 00:00:05
+    Info: Total CPU time (on all processors): 00:00:05
 
 
