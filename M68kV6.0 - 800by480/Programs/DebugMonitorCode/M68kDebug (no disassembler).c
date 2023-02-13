@@ -1380,21 +1380,31 @@ void ReadMemoryForMemTest(char* StartRamPtr, char* EndRamPtr, unsigned long Fill
     }
 
     if (config == 3) {
+        int count = 0;
+        int noError = 1;
         while (start <= EndRamPtr) {
-            if (*start != FillData)
+            if (*start != FillData){
                 printf("\r\nValue incorrect at addresses $%08X ... should be $%02X but found $%02X", start, FillData, *start);
-             printf("\r\nValue: $%02X $%02X $%02X $%02X found at Address: $%08X - $%08X", *start, *(start + 1), *(start + 2), *(start + 3), start, (start + 3));
+                noError = 0;
+            }
+            if(count == 10000) {
+                count = 0;
+                printf("\r\nValue: $%02X $%02X $%02X $%02X found at Address: $%08X - $%08X", *start, *(start + 1), *(start + 2), *(start + 3), start, (start + 3));
+             }
              start += 4;
+             count++;
         }
-    }
+        if (noError)
+            printf("\r\nTest passed successfully. Note: the sample data are printed every 10000 addresses");
 
+    }
 
 }
 
 void MemoryTest(void)
 {
-    unsigned int start_boundary = 0xF0000000;
-    unsigned int end_boundary = 0xF3FFFFFF;
+    unsigned int start_boundary = 0x09000000;
+    unsigned int end_boundary = 0x097FFFFF;
     int test_config = 0;
     int test_pattern = 0;
     char start_addr[7];
@@ -1428,30 +1438,30 @@ void MemoryTest(void)
     }
 
     // Prompt the user to enter a starting address
-    printf("\r\nEnter starting address(%X - %X inclusive): ", start_boundary, end_boundary);
+    printf("\r\nEnter starting address(%08X - %08X inclusive): ", start_boundary, end_boundary);
     start_val = Get8HexDigits(0);
     // Check for invalid start address and re-prompt if needed
     // Check for illegal address, start address must be even if writing words or long words to memory
-    while (start_val < start_boundary || start_val > end_boundary || strlen(start_addr) > 7 || (start_val % 2 != 0 && test_config != 1))
+    while (start_val < start_boundary || start_val > end_boundary || (start_val % 2 != 0 && test_config != 1))
     { // start address must be 7 chars and within bounds
         printf("\r\nInvalid starting address.. try again");
         //printf("\r\nStarting address out of bounds.. try again");
-        printf("\r\nEnter starting address(%X - %X inclusive): ", start_boundary, end_boundary);
+        printf("\r\nEnter starting address(%08X - %08X inclusive): ", start_boundary, end_boundary);
         start_val = Get8HexDigits(0);
     }
 
 
     // Prompt the user to enter an ending address
-        printf("\r\nEnter ending address(%X - %X inclusive): ", start_boundary, end_boundary);
+        printf("\r\nEnter ending address(%08X - %08X inclusive): ", start_boundary, end_boundary);
         end_val = Get8HexDigits(0);
         // When writing words, the given address range should be a multiple of 2 bytes (size of a word)
         // When writing long words, the given address range should be a multiple of 4 bytes (size of a long word)
-        while (end_val < start_boundary || end_val > end_boundary || strlen(end_addr) > 7 ||
+        while (end_val < start_boundary || end_val > end_boundary ||
                end_val < start_val || ((end_val - start_val + 1) % 2 != 0 && test_config == 2) ||
                ((end_val - start_val + 1) % 4 != 0 && test_config == 3))
         { // end address must be 7 chars and within bounds
              printf("\r\nEnding address out of bounds.. try again");
-             printf("\r\nEnter ending address(%X - %X inclusive): ", start_boundary, end_boundary);
+             printf("\r\nEnter ending address(%08X - %08X inclusive): ", start_boundary, end_boundary);
              end_val = Get8HexDigits(0);
     }
 
@@ -1594,7 +1604,7 @@ void main(void)
 
     printf("\r\n%s", BugMessage) ;
     printf("\r\n%s", CopyrightMessage) ;
-    printf("\r\nNancy Makar - 33464918 and Steven Chin - 40108540 - version 1");
+    printf("\r\nNancy Makar - 33464918 and Steven Chin - 40108540");
 
     menu();
 }
