@@ -4,20 +4,19 @@ editor if you plan to continue editing the block that represents it in
 the Block Editor! File corruption is VERY likely to occur.
 */
 /*
-Copyright (C) 1991-2015 Altera Corporation. All rights reserved.
-Your use of Altera Corporation's design tools, logic functions 
+Copyright (C) 2018  Intel Corporation. All rights reserved.
+Your use of Intel Corporation's design tools, logic functions 
 and other software and tools, and its AMPP partner logic 
 functions, and any output files from any of the foregoing 
 (including device programming or simulation files), and any 
 associated documentation or information are expressly subject 
-to the terms and conditions of the Altera Program License 
-Subscription Agreement, the Altera Quartus II License Agreement,
-the Altera MegaCore Function License Agreement, or other 
-applicable license agreement, including, without limitation, 
-that your use is for the sole purpose of programming logic 
-devices manufactured by Altera and sold by Altera or its 
-authorized distributors.  Please refer to the applicable 
-agreement for further details.
+to the terms and conditions of the Intel Program License 
+Subscription Agreement, the Intel Quartus Prime License Agreement,
+the Intel FPGA IP License Agreement, or other applicable license
+agreement, including, without limitation, that your use is for
+the sole purpose of programming logic devices manufactured by
+Intel and sold by Intel or its authorized distributors.  Please
+refer to the applicable agreement for further details.
 */
 //#pragma file_not_in_maxplusii_format
 (header "graphic" (version "1.4"))
@@ -1145,6 +1144,7 @@ agreement for further details.
 		(line (pt 82 8)(pt 78 12))
 		(line (pt 78 12)(pt 82 8))
 	)
+	(annotation_block (location)(rect 2280 1456 2352 1480))
 )
 (pin
 	(output)
@@ -3477,10 +3477,6 @@ agreement for further details.
 	(pt -176 224)
 )
 (connector
-	(pt -272 240)
-	(pt -176 240)
-)
-(connector
 	(pt -240 272)
 	(pt -176 272)
 )
@@ -4401,14 +4397,6 @@ agreement for further details.
 	(pt 576 -664)
 )
 (connector
-	(pt -272 -664)
-	(pt -272 240)
-)
-(connector
-	(pt -272 240)
-	(pt -272 1304)
-)
-(connector
 	(pt 1360 280)
 	(pt 2080 280)
 )
@@ -4498,10 +4486,6 @@ agreement for further details.
 (connector
 	(pt 1920 -80)
 	(pt 1920 112)
-)
-(connector
-	(pt 1904 -64)
-	(pt 1904 96)
 )
 (connector
 	(pt 600 2728)
@@ -5505,12 +5489,40 @@ agreement for further details.
 	(pt 2080 -32)
 )
 (connector
+	(pt -272 -664)
+	(pt -272 1304)
+)
+(connector
+	(pt -176 240)
+	(pt -200 240)
+)
+(connector
+	(pt -200 -152)
+	(pt -200 240)
+)
+(connector
+	(pt 1096 -152)
+	(pt -200 -152)
+)
+(connector
+	(pt 1904 80)
+	(pt 1904 -64)
+)
+(connector
+	(pt 1904 80)
+	(pt 1096 80)
+)
+(connector
 	(pt 1760 -64)
 	(pt 1904 -64)
 )
 (connector
 	(pt 1904 -64)
 	(pt 2080 -64)
+)
+(connector
+	(pt 1096 80)
+	(pt 1096 -152)
 )
 (junction (pt 1280 224))
 (junction (pt 1376 224))
@@ -5584,7 +5596,6 @@ agreement for further details.
 (junction (pt 1248 -664))
 (junction (pt 576 -664))
 (junction (pt -272 -664))
-(junction (pt -272 240))
 (junction (pt 1224 656))
 (junction (pt 1112 688))
 (junction (pt 1096 720))
