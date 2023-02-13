@@ -45,21 +45,6 @@ module Dtack_Generator_Verilog (
 			
 			if(CanBusSelect_H == 1)					// if canbus is being selected and for example it needed wait states
 				DtackOut_L <= CanBusDtack_L;		// copy the dtack signal from the can controller and give this as the dtack to the 68k
-				
-			/*
-			It’s important that when the 68k accesses Dram (i.e. the address decoder is 
-			producing a dram select signal), the Dtack generator supplies the 68k with the 
-			Dtack produced by the Dram controller itself not some default dtack. 
-			The reason for this (and not simply producing a Dtack to 68k regardless of 
-			circumstance) is that if the Dram controller is performing a Dram refresh, the 68k 
-			must be made to wait until that refresh has completed and the Dram controller 
-			state machine has then entered one of it’s “read or write to Dram” states (see 
-			Part B). Failure to appreciate this, will likely mean your 68k will not work when 
-			you switch from Sram to Dram later. Here’s the pseudo code for the Dtack 
-			generator
-			*/
-			 else if(DramSelect_H == 1)
-				DtackOut_L <= DramDtack_L;
 		end
 	end
 endmodule

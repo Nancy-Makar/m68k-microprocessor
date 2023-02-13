@@ -64,11 +64,7 @@ module M68kDramController_Verilog (
 		
 		reg  FPGAWritingtoSDram_H;								// When '1' enables FPGA data out lines leading to SDRAM to allow writing, otherwise they are set to Tri-State "Z"
 		reg  CPU_Dtack_L;											// Dtack back to CPU
-		reg  CPUReset_L;
-		
-		wire [12:0] RowAddressFromCPU = Address[23:11];
-		wire [9:0] ColumnAddressFromCPU = Address[10:1];
-		wire [1:0] BankAddressFromCPU = Address[25:24];
+		reg  CPUReset_L;		
 
 		// 5 bit Commands to the SDRam
 
@@ -95,35 +91,13 @@ module M68kDramController_Verilog (
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////-
 	
 		parameter InitialisingState = 5'h00;				// power on initialising state
-		parameter WaitingForPowerUpState = 5'h01;		// waiting for power up state to complete
+		parameter WaitingForPowerUpState = 5'h01	;		// waiting for power up state to complete
 		parameter IssueFirstNOP = 5'h02;						// issuing 1st NOP after power up
 		parameter PrechargingAllBanks = 5'h03;
-		parameter Idle1 = 5'h04;			
+		parameter Idle = 5'h04;			
 		
 		
-		// Our own states as per our own design
-		parameter IssueSecondNOPXXX = 5'h05;
-		parameter Refresh = 5'h06;
-		parameter IssueThirdNOPXXX = 5'h07;
-		parameter IssueFourthNOP = 5'h08;
-		parameter IssueFifthNOP = 5'h09;
-		parameter LoadModeReg = 5'h0a;
-		parameter IssueSixthNOP = 5'h0b;
-		parameter IssueSeventhNOP = 5'h0c;
-		parameter IssueEighthNOP = 5'h0d;
-		parameter RechargeAllBanksBeforeRefresh = 5'h0e;
-		parameter IssueAutoRefresh = 5'h0f;
-		parameter IssueNOPBeforeRefresh = 5'h10;
-		parameter IssueFirstNOPAfterRefresh = 5'h11;
-		parameter IssueSecondNOPAfterRefresh = 5'h12;
-		parameter IssueThirdNOPAfterRefresh = 5'h13;
-		parameter IssueReadCommand = 5'h14;
-		parameter IssueWriteCommand = 5'h15;
-		parameter IssueWaitAfterWriteCommand = 5'h16;
-		parameter WaitCAS = 5'h17;
-		parameter Wait68k = 5'h18;
-		
-		parameter ERROR = 5'hFFFFF;
+		// TODO - Add your own states as per your own design
 		
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -159,7 +133,6 @@ module M68kDramController_Verilog (
 		if(RefreshTimer == 16'd0) 								// if timer has counted down to 0
 			RefreshTimerDone_H <= 1 ;						// output '1' to indicate time has elapsed
 	end
-
 	
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////-
 // concurrent process state registers
@@ -168,9 +141,9 @@ module M68kDramController_Verilog (
 
    always@(posedge Clock, negedge Reset_L)
 	begin
-		if(Reset_L == 0) begin 							// asynchronous reset
+		if(Reset_L == 0) 							// asynchronous reset
 			CurrentState <= InitialisingState ;
-		end
+			
 		else 	begin									// state can change only on low-to-high transition of clock
 			CurrentState <= NextState;		
 
@@ -245,43 +218,30 @@ module M68kDramController_Verilog (
 		NextState <= InitialisingState ;							// assume next state will always be idle state unless overridden the value used here is not important, we cimple have to assign something to prevent storage on the signal so anything will do
 		
 		TimerValue <= 16'h0000;										// no timer value 
-		RefreshTimerValue <= 16'h0177;	 	// for testing purposes, change this timer value to a lower value
-		//7.5 us = 375 cycles, 177 in hex
-		//RefreshTimerValue <= 16'h0006;
+		RefreshTimerValue <= 16'h0000 ;							// no refresh timer value
 		TimerLoad_H <= 0;												// don't load Timer
 		RefreshTimerLoad_H <= 0 ;									// don't load refresh timer
 		DramAddress <= 13'h0000 ;									// no particular dram address
 		BankAddress <= 2'b00 ;										// no particular dram bank address
 		DramDataLatch_H <= 0;										// don't latch data yet
-		CPU_Dtack_L <= 1;												// don't acknowledge back to 68000
+		CPU_Dtack_L <= 1 ;											// don't acknowledge back to 68000
 		SDramWriteData <= 16'h0000 ;								// nothing to write in particular
-		CPUReset_L <= 1;												// default is reset to CPU (for the moment, though this will change when design is complete so that reset-out goes high at the end of the dram initialisation phase to allow CPU to resume)
+		CPUReset_L <= 0 ;												// default is reset to CPU (for the moment, though this will change when design is complete so that reset-out goes high at the end of the dram initialisation phase to allow CPU to resume)
 		FPGAWritingtoSDram_H <= 0 ;								// default is to tri-state the FPGA data lines leading to bi-directional SDRam data lines, i.e. assume a read operation
 
-		
-///////////////////////////////////////////////////////////////////////////////////////////////////
-// States associated with initialization of DRAM 
-///////////////////////////////////////////////////////////////////////////////////////////////////
-
-// put your current state/next state decision making logic here - here are a few states to get you started
-// during the initialising state, the drams have to power up and we cannot access them for a specified period of time (100 us)
-// we are going to load the timer above with a value equiv to 100us and then wait for timer to time out
-
-		
+		// put your current state/next state decision making logic here - here are a few states to get you started
+		// during the initialising state, the drams have to power up and we cannot access them for a specified period of time (100 us)
+		// we are going to load the timer above with a value equiv to 100us and then wait for timer to time out
+	
 		if(CurrentState == InitialisingState ) begin
-		// In reality, timer value should be at leats 100us, however it doesn't matter here
-		// because of teh FPGA long boot up period
-		// and for simualtion purposes we're going to use 8 cycles of 0.02us
-			TimerValue <= 16'h0008;									// chose a value equivalent to 100us at 50Mhz clock - you might want to shorten it to somthing small for simulation purposes
+			TimerValue <= 16'h0000;									// chose a value equivalent to 100us at 50Mhz clock - you might want to shorten it to somthing small for simulation purposes
 			TimerLoad_H <= 1 ;										// on next edge of clock, timer will be loaded and start to time out
 			Command <= PoweringUp ;									// clock enable and chip select to the Zentel Dram chip must be held low (disabled) during a power up phase
 			NextState <= WaitingForPowerUpState ;				// once we have loaded the timer, go to a new state where we wait for the 100us to elapse
-			CPUReset_L <= 0;
 		end
 		
 		else if(CurrentState == WaitingForPowerUpState) begin
-			Command <= PoweringUp;									// no DRam clock enable or CS while witing for 100us timer
-			CPUReset_L <= 0;
+			Command <= PoweringUp ;									// no DRam clock enable or CS while witing for 100us timer
 			
 			if(TimerDone_H == 1) 									// if timer has timed out i.e. 100us have elapsed
 				NextState <= IssueFirstNOP ;						// take CKE and CS to active and issue a 1st NOP command
@@ -289,246 +249,13 @@ module M68kDramController_Verilog (
 				NextState <= WaitingForPowerUpState ;			// otherwise stay here until power up time delay finished
 		end
 		
-		else if(CurrentState == IssueFirstNOP) begin	 
-			CPUReset_L <= 0;		
-			Command <= NOP;											// issue a valid NOP
+		else if(CurrentState == IssueFirstNOP) begin	 		// issue a valid NOP
+			Command <= NOP ;											// send a valid NOP command to the dram chip
 			NextState <= PrechargingAllBanks;
 		end		
 		
 
 		// add your other states and conditions and outputs here
-
-		else if(CurrentState == PrechargingAllBanks) begin	 	
-			CPUReset_L <= 0;
-			Command <= PrechargeAllBanks;									
-			NextState <= IssueSecondNOPXXX;
-			DramAddress <= 13'h0400 ; 									// may need to issue the 400 earlier
-		end	
-
-		else if(CurrentState == IssueSecondNOPXXX) begin	 	// issue a valid NOP
-			CPUReset_L <= 0;
-			Command <= NOP ;												// send a valid NOP command to the dram chip
-			NextState <= Refresh;
-
-			TimerValue <= 16'h0027;
-			TimerLoad_H <= 1 ;	
-		end
-
-		else if(CurrentState == Refresh) begin	 		
-			CPUReset_L <= 0;
-			Command <= AutoRefresh ;						
-			NextState <= IssueThirdNOPXXX;
-			
-		end
-
-		else if(CurrentState == IssueThirdNOPXXX) begin	 	// issue a valid NOP
-			CPUReset_L <= 0;
-			Command <= NOP ;											// send a valid NOP command to the dram chip
-			NextState <= IssueFourthNOP;
-		end
-
-		else if(CurrentState == IssueFourthNOP) begin	 	// issue a valid NOP
-			CPUReset_L <= 0;
-			Command <= NOP ;											// send a valid NOP command to the dram chip
-			NextState <= IssueFifthNOP;
-		end
-
-		else if(CurrentState == IssueFifthNOP) begin	 		// issue a valid NOP
-			CPUReset_L <= 0;
-			Command <= NOP ;											// send a valid NOP command to the dram chip
-
-			if(TimerDone_H == 1) begin								
-				NextState <= LoadModeReg;
-			end
-			else begin
-				NextState <= Refresh;
-				
-			end
-		end
-
-		else if(CurrentState == LoadModeReg) begin	 		
-			CPUReset_L <= 0;
-			Command <= ModeRegisterSet ;							
-			NextState <= IssueSixthNOP;
-			DramAddress <= 13'h0220 ; 								// may need to issue the 220 earlier								
-		end
-
-		else if(CurrentState == IssueSixthNOP) begin	 		// issue a valid NOP
-			CPUReset_L <= 0;
-			Command <= NOP  ;											// send a valid NOP command to the dram chip
-			NextState <= IssueSeventhNOP;
-						
-		end
-
-		else if(CurrentState == IssueSeventhNOP) begin	 		// issue a valid NOP
-			CPUReset_L <= 0;
-			Command <= NOP  ;												// send a valid NOP command to the dram chip
-			NextState <= IssueEighthNOP;
-						
-		end
-
-		else if(CurrentState == IssueEighthNOP) begin	 		// issue a valid NOP
-			CPUReset_L <= 0;
-			Command <= NOP  ;												// send a valid NOP command to the dram chip
-			NextState <= Idle1;
-			RefreshTimerLoad_H <= 1;
-		end
 		
-///////////////////////////////////////////////////////////////////////////////////////////////////
-// Main IDLE state: Enter here after initialisation and return here after every transaction, e.g. 
-// refreshing, reading, writing operations.
-///////////////////////////////////////////////////////////////////////////////////////////////////		
-		
-		else if(CurrentState == Idle1) begin
-			CPUReset_L <= 1;
-			Command <= NOP;
-			
-			if (RefreshTimerDone_H == 1)
-				NextState <= RechargeAllBanksBeforeRefresh;
-			else if(DramSelect_L == 0 && AS_L == 0) begin	// if CPU is accessing dram (i.e. DramSelect_L = '0' and AS_L = '0')
-				DramAddress <= RowAddressFromCPU;				// Issue a 13 bit Row Address to the Sdram from CPU
-				BankAddress <= BankAddressFromCPU;				// Issue a 2 bit Bank Address to the Sdram
-				Command <= BankActivate;							// Issue a BankActivate command to the sdram
-
-				// if CPU is attempting to READ from sdram
-				if(WE_L == 1) 
-					NextState <= IssueReadCommand;					
-				else
-					NextState <= IssueWriteCommand;
-			end
-			
-			else 
-				NextState <= Idle1;
-		end
-		
-///////////////////////////////////////////////////////////////////////////////////////////////////
-// State associated with a 68k write where we wait for 68k’s UDS or LDS or both to go low
-///////////////////////////////////////////////////////////////////////////////////////////////////
-		
-		else if (CurrentState == IssueWriteCommand) begin
-			CPUReset_L <= 1;
-			
-			if(UDS_L == 0 || LDS_L == 0) begin
-				DramAddress <= { 2'b00 , 1'b1, ColumnAddressFromCPU };	// issue an 10 bit Column address  (make sure A10 on Sdram = 1 for precharge all banks operation)
-				BankAddress <= BankAddressFromCPU;  							// ask the TA about this: issue a 2 bit Bank Address (the same value we issued in idle state when starting the write operation)
-				Command <= WriteAutoPrecharge;
-				CPU_Dtack_L <= 0; 											  		// issue a CPU_Dtack_L back to the 68k’s dtack generator
-				FPGAWritingtoSDram_H <= 1;									  		// turn on the sdram controller bi-directional data lines so we can drive data into sdram memory 
-				SDramWriteData	<= DataIn;	
-				NextState <= IssueWaitAfterWriteCommand;
-			end
-			
-			else
-				NextState <= IssueWriteCommand;
-		end
-	
-
-///////////////////////////////////////////////////////////////////////////////////////////////////	
-// State associated with Memory writes where we wait for one clock cycle after a write 
-///////////////////////////////////////////////////////////////////////////////////////////////////
-
-		else if (CurrentState == IssueWaitAfterWriteCommand) begin
-			CPUReset_L <= 1;
-			CPU_Dtack_L <= 0; 
-			Command <= NOP;
-			FPGAWritingtoSDram_H <= 1;
-			SDramWriteData	<= DataIn;
-			NextState <= Wait68k;
-		end
-
-
-///////////////////////////////////////////////////////////////////////////////////////////////////
-// State associated with issuing Read command (i.e. CAS) during a 68k Read
-///////////////////////////////////////////////////////////////////////////////////////////////////
-		
-		// Write the code for the read operation starting here
-		else if (CurrentState == IssueReadCommand) begin
-			CPUReset_L <= 1;
-			DramAddress <= { 2'b00 , 1'b1, ColumnAddressFromCPU };
-			BankAddress <= BankAddressFromCPU;  
-			Command <= ReadAutoPrecharge;
-			TimerValue <= 16'h0002;									
-			TimerLoad_H <= 1 ;
-			NextState <= WaitCAS;
-		end
-
-///////////////////////////////////////////////////////////////////////////////////////////////////
-// State where we wait for CAS latency
-///////////////////////////////////////////////////////////////////////////////////////////////////
-
-		else if (CurrentState == WaitCAS) begin
-			CPUReset_L <= 1;
-			CPU_Dtack_L <= 0; 
-			Command <= NOP;
-			DramDataLatch_H <= 1;
-
-			if(TimerDone_H == 1) 									// if timer has timed out i.e. 100us have elapsed
-				NextState <= Wait68k ;								// take CKE and CS to active and issue a 1st NOP command
-			else
-				NextState <= WaitCAS;
-		end
-		
-///////////////////////////////////////////////////////////////////////////////////////////////////
-// State associated with waiting for 68k to terminate current bus cycle
-///////////////////////////////////////////////////////////////////////////////////////////////////
-		
-		else if (CurrentState == Wait68k) begin
-			CPUReset_L <= 1;
-			Command <= NOP;
-
-			if(UDS_L == 0 || LDS_L == 0) begin								
-				NextState <= Wait68k ;						
-				CPU_Dtack_L <= 0; 
-			end
-			else
-				NextState <= Idle1;
-		end
-
-///////////////////////////////////////////////////////////////////////////////////////////////////
-// States assiociated with refreshing banks periodically
-///////////////////////////////////////////////////////////////////////////////////////////////////
-
-			
-		else if(CurrentState == RechargeAllBanksBeforeRefresh) begin
-			Command <= PrechargeAllBanks;
-			NextState <= IssueNOPBeforeRefresh;
-
-			DramAddress <= 13'h0400 ; // may need to issue the 400 earlier
-		end
-		
-		else if(CurrentState == IssueNOPBeforeRefresh) begin
-			Command <= NOP;
-			NextState <= IssueAutoRefresh;
-		end
-		
-		else if(CurrentState == IssueAutoRefresh) begin
-			Command <= AutoRefresh;
-			NextState <= IssueFirstNOPAfterRefresh;
-		end
-		
-		else if(CurrentState == IssueFirstNOPAfterRefresh) begin
-			Command <= NOP;
-			NextState <= IssueSecondNOPAfterRefresh;
-		end
-		
-		else if(CurrentState == IssueSecondNOPAfterRefresh) begin
-			Command <= NOP;
-			NextState <= IssueThirdNOPAfterRefresh;
-		end
-		
-		else if(CurrentState == IssueThirdNOPAfterRefresh) begin
-			Command <= NOP;
-			NextState <= Idle1;
-			RefreshTimerLoad_H <= 1;
-		end
-		
-// this last ‘else’ is a catch all to make sure we don’t create memory for any signals
-		else begin
-			CPUReset_L <= 1;
-			Command <= NOP;
-			NextState <= Idle1;
-		end			
-		
-	end	
+	end	// always@ block
 endmodule
-
