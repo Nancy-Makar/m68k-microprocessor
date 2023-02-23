@@ -96,4 +96,3 @@ int WriteSPIChar(int c)
 	WaitForSPITransmitComplete();
 	return SPI_Data;
 }
-s
