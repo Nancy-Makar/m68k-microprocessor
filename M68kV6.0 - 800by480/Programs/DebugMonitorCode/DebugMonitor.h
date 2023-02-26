@@ -139,7 +139,7 @@ int  TestForWriteFifoEmpty(void);
 int  ReadSPIChar(void);
 void SPI_Init(void);
 void WaitForSPITransmitComplete(void);
-int  WriteSPIChar(int c);
+char  WriteSPIChar(char c);
 void SetSPIFlashWriteEnableLatch(void);
 void ClearSPIFlashWriteEnableLatch(void);
 void WriteSPIFlashStatusReg(int Status);

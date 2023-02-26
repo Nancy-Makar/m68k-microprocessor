@@ -8,6 +8,18 @@
 //#define TopOfStack 0x08040000
 #define TopOfStack 0x0C000000
 
+/*************************************************************
+** SPI Controller registers
+**************************************************************/
+// SPI Registers
+
+// these two macros enable or disable the flash memory chip enable off SSN_O[7..0]
+// in this case we assume there is only 1 device connected to SSN_O[0] so we can
+// write hex FE to the SPI_CS to enable it (the enable on the flash chip is active low)
+// and write FF to disable it
+#define Enable_SPI_CS() SPI_CS = 0xFE
+#define Disable_SPI_CS() SPI_CS = 0xFF
+
 /* DO NOT INITIALISE GLOBAL VARIABLES - DO IT in MAIN() */
 unsigned int i, x, y, z, PortA_Count;
 int     Trace, GoFlag, Echo;                       // used in tracing/single stepping
@@ -1401,7 +1413,7 @@ void ReadMemoryForMemTest(char* StartRamPtr, char* EndRamPtr, unsigned long Fill
 
 }
 
-void MemoryTest(void)
+void MemoryTestAss2(void)
 {
     unsigned int start_boundary = 0x09000000;
     unsigned int end_boundary = 0x097FFFFF;
@@ -1522,6 +1534,216 @@ void MemoryTest(void)
 
 }
 
+void MemoryTest(void) {
+    int test;
+ printf("\r\nType 0 to Initialise,  1 to Read, 2 to Write and 3 to Reset");
+   test = (int)(xtod(_getch()));
+
+   if (test == 0) {
+    SPI_Init();
+   }
+   else if(test == 1) {
+        int value;
+        Enable_SPI_CS();
+
+        value = WriteSPIChar(0x03);
+        printf("\r\nWrote the read command. Data register value: %02X", value);
+        value = WriteSPIChar(0x00);
+        printf("\r\nWrote the address to read from. Data register value: %02X", value);
+        value = WriteSPIChar(0x00);
+        printf("\r\nWrote the address to read from. Data register value: %02X", value);
+        value = WriteSPIChar(0x01);
+        printf("\r\nWrote the address to read from. Data register value: %02X", value);
+        value = WriteSPIChar(0x03);
+        printf("\r\nWrote a dummy byte. Data register value: %02X", value);
+        value = WriteSPIChar(0x03);
+        printf("\r\nWrote a dummy byte. Data register value: %02X", value);
+        Disable_SPI_CS();
+   }
+
+
+   else if(test == 2) {
+        int value;
+        // Enable write
+        Enable_SPI_CS();
+        value = WriteSPIChar(0x06);
+        Disable_SPI_CS();
+
+        // Erase Chip
+        Enable_SPI_CS();
+        value = WriteSPIChar(0xc7);
+        Disable_SPI_CS();
+
+        // Poll for status regsiter
+        Enable_SPI_CS();
+        value = WriteSPIChar(0x05);
+        value = WriteSPIChar(0xee);
+        while (SPI_Data & 0x01 == 1) {
+
+            value = WriteSPIChar(0xee);
+            printf("\r\n\nHere (1)\n\n %02X", SPI_Data);
+        }
+        Disable_SPI_CS();
+
+        Enable_SPI_CS();
+        value = WriteSPIChar(0x02);
+        printf("\r\nWrote the write command. Data register value: %02X", value);
+        value = WriteSPIChar(0x00);
+        printf("\r\nWrote the address to write to. Data register value: %02X", value);
+        value = WriteSPIChar(0x00);
+        printf("\r\nWrote the address to write to. Data register value: %02X", value);
+        value = WriteSPIChar(0x01);
+        printf("\r\nWrote the address to write to. Data register value: %02X with status %02X", value);
+        value = WriteSPIChar(0x15);
+        printf("\r\nWrote a byte. Data register value: %02X with status %02X", value);
+        Disable_SPI_CS();
+
+        Enable_SPI_CS();
+        value = WriteSPIChar(0x05);
+        value = WriteSPIChar(0xee);
+        while (SPI_Data & 0x01 == 1) {
+
+            value = WriteSPIChar(0xee);
+            printf("\r\n\nHere (1)\n\n %02X", SPI_Data);
+        }
+        Disable_SPI_CS();
+        /**
+        Enable_SPI_CS();
+        value = WriteSPIChar(0x02);
+        printf("\r\nWrote the write command. Data register value: %08X", value);
+        value = WriteSPIChar(0x00);
+        printf("\r\nWrote the address to write to. Data register value: %08X", value);
+        value = WriteSPIChar(0x00);
+        printf("\r\nWrote the address to write to. Data register value: %08X", value);
+        value = WriteSPIChar(0x01);
+        printf("\r\nWrote the address to write to. Data register value: %08X with status %08X", value);
+        value = WriteSPIChar(0x03);
+        printf("\r\nWrote a byte. Data register value: %08X with status %08X", value);
+        Disable_SPI_CS();
+        Enable_SPI_CS();
+        value = WriteSPIChar(0x02);
+        printf("\r\nWrote the write command. Data register value: %08X", value);
+        value = WriteSPIChar(0x00);
+        printf("\r\nWrote the address to write to. Data register value: %08X", value);
+        value = WriteSPIChar(0x00);
+        printf("\r\nWrote the address to write to. Data register value: %08X", value);
+        value = WriteSPIChar(0x02);
+        printf("\r\nWrote the address to write to. Data register value: %08X with status %08X", value);
+        value = WriteSPIChar(0x04);
+        printf("\r\nWrote a byte. Data register value: %08X with status %08X", value);
+        Disable_SPI_CS();
+        **/
+   }
+   else if(test == 3) {
+        int value;
+        Enable_SPI_CS();
+        value = WriteSPIChar(0x66);
+        printf("\r\nWrote the 0x66 command. Data register value: %02X with status %02X", value);
+        value = WriteSPIChar(0x99);
+        printf("\r\nWrote the 0x99 command. Data register value: %02X", value);
+        Disable_SPI_CS();
+   }
+   else if (test == 4) {
+        int value;
+        Enable_SPI_CS();
+        value = WriteSPIChar(0x06);
+        value = WriteSPIChar(0xc7);
+        Disable_SPI_CS();
+
+   }
+
+}
+
+
+
+/******************************************************************************************
+** The following code is for the SPI controller
+*******************************************************************************************/
+// return true if the SPI has finished transmitting a byte (to say the Flash chip) return false otherwise
+// this can be used in a polling algorithm to know when the controller is busy or idle.
+int TestForSPITransmitDataComplete(void)
+{
+	/* TODO replace 0 below with a test for status register SPIF bit and if set, return true */
+
+	return (SPI_Status >= 0x80);
+}
+
+/************************************************************************************
+** initialises the SPI controller chip to set speed, interrupt capability etc.
+************************************************************************************/
+void SPI_Init(void)
+{
+
+	// TODO
+	//
+	//  Program the SPI Control, EXT, CS and Status registers to initialise the SPI controller
+	//  Don't forget to call this routine from main() before you do anything else with SPI
+	//
+	//  Here are some settings we want to create
+	//
+	//  Control Reg     - interrupts disabled, core enabled, Master mode, Polarity and Phase of clock = [0,0], speed =  divide by 32 = approx 700Khz
+	//  Ext Reg         - in conjunction with control reg, sets speed above and also sets interrupt flag after every completed transfer (each byte)
+	//  SPI_CS Reg      - control selection of slave SPI chips via their CS# signals
+	//  Status Reg      - status of SPI controller chip and used to clear any write collision and interrupt on transmit complete flag
+
+	/* setting up control register */
+	if ((SPI_Control & 0x20) == 0)
+		SPI_Control = 0x53; // writing a 0 to reserved bit at position 5
+	else
+		SPI_Control = 0x73; // writing a 1 to reserved bit at position 5
+
+	/* setting up extension register */
+	SPI_Ext = SPI_Ext & 0x3c;
+
+	/* enable chip */
+	Enable_SPI_CS();
+
+	/* setting up status register */
+	SPI_Status = SPI_Status | 0xc0;
+	// TODO: figure out what value to write to reserved bits, is there a way to maintain the value of the reerved bit?
+	// TODO: How to write to individual bit positions
+	// assume data can be changed in such a way such that the reserved bits are not updated, may need to read the data first
+}
+
+/************************************************************************************
+** return ONLY when the SPI controller has finished transmitting a byte
+************************************************************************************/
+void WaitForSPITransmitComplete(void)
+{
+
+    printf("\r\n Waiting on SPI_Status, its value is %02x", SPI_Status);
+	// TODO : poll the status register SPIF bit looking for completion of transmission
+	// once transmission is complete, clear the write collision and interrupt on transmit complete flags in the status register (read documentation)
+	// just in case they were set
+	printf("\r\n");
+	while (SPI_Status < 0x80)
+	{
+	   printf(".");
+	}
+	SPI_Status = SPI_Status | 0xc0;
+}
+
+/************************************************************************************
+** Write a byte to the SPI flash chip via the controller and returns (reads) whatever was
+** given back by SPI device at the same time (removes the read byte from the FIFO)
+************************************************************************************/
+char WriteSPIChar(char c)
+{
+
+
+	// todo - write the byte in parameter 'c' to the SPI data register, this will start it transmitting to the flash device
+	// wait for completion of transmission
+	// return the received data from Flash chip (which may not be relevent depending upon what we are doing)
+	// by reading fom the SPI controller Data Register.
+	// note however that in order to get data from an SPI slave device (e.g. flash) chip we have to write a dummy byte to it
+	//
+	// modify '0' below to return back read byte from data register
+	//
+
+	SPI_Data = c;
+	WaitForSPITransmitComplete();
+	return SPI_Data;
+}
 void main(void)
 {
     char c ;
@@ -1529,6 +1751,9 @@ void main(void)
 
     char *BugMessage = "DE1-68k Bug V1.77";
     char *CopyrightMessage = "Copyright (C) PJ Davies 2016";
+
+    int test;
+    char value;
 
     KillAllBreakPoints() ;
 
@@ -1605,6 +1830,9 @@ void main(void)
     printf("\r\n%s", BugMessage) ;
     printf("\r\n%s", CopyrightMessage) ;
     printf("\r\nNancy Makar - 33464918 and Steven Chin - 40108540");
+
+
+
 
     menu();
 }
