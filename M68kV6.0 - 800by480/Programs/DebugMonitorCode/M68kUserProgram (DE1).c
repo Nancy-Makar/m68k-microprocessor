@@ -89,6 +89,23 @@
 #define PIA2_PortB_data     *(volatile unsigned char *)(0x00400064)         // combined data and data direction register share same address
 #define PIA2_PortB_Control *(volatile unsigned char *)(0x00400066)
 
+/* SPI declarations*/
+/*************************************************************
+** SPI Controller registers
+**************************************************************/
+// SPI Registers
+#define SPI_Control         (*(volatile unsigned char *)(0x00408020))
+#define SPI_Status          (*(volatile unsigned char *)(0x00408022))
+#define SPI_Data            (*(volatile unsigned char *)(0x00408024))
+#define SPI_Ext             (*(volatile unsigned char *)(0x00408026))
+#define SPI_CS              (*(volatile unsigned char *)(0x00408028))
+// these two macros enable or disable the flash memory chip enable off SSN_O[7..0]
+// in this case we assume there is only 1 device connected to SSN_O[0] so we can
+// write hex FE to the SPI_CS to enable it (the enable on the flash chip is active low)
+// and write FF to disable it
+#define   Enable_SPI_CS()             SPI_CS = 0xFE
+#define   Disable_SPI_CS()            SPI_CS = 0xFF
+/* end */
 
 /*********************************************************************************************************************************
 (( DO NOT initialise global variables here, do it main even if you want 0
@@ -118,6 +135,10 @@ int Get8HexDigits(char pat);
 int Get4HexDigits(char pat);
 int Get2HexDigits(char pat);
 char xtod(int c);
+void enableWrite(void);
+int WriteSPIChar(int c);
+int WriteSPI(int num);
+void pollSPI(void);
 
 /*****************************************************************************************
 **	Interrupt service routine for Timers
@@ -349,6 +370,9 @@ int Get2HexDigits(char pat)
 {
     register int i = (xtod(pat) << 4) | (xtod(pat));
 
+    //if (CheckSumPtr)
+      //  *CheckSumPtr += i;
+
     return i;
 }
 
@@ -366,72 +390,295 @@ int Get7HexDigits(char one, char two, char three, char four, char five, char six
 {
     register int i = (xtod(one) << 24) | (xtod(two) << 20) | (xtod(three) << 16) | (xtod(four) << 12) | (xtod(five) << 8) | (xtod(six) << 4) | (xtod(seven));
 
+    //if (CheckSumPtr)
+      //  *CheckSumPtr += i;
+
     return i;
 }
 
-void FillMemory(char* StartRamPtr, char* EndRamPtr, unsigned char FillData, int config)
+
+/* SPI functions */
+/******************************************************************************************
+** The following code is for the SPI controller
+*******************************************************************************************/
+// return true if the SPI has finished transmitting a byte (to say the Flash chip) return false otherwise
+// this can be used in a polling algorithm to know when the controller is busy or idle.
+int TestForSPITransmitDataComplete(void) {
+    /* TODO replace 0 below with a test for status register SPIF bit and if set, return true */
+
+    return (SPI_Status >= 0x80);
+}
+
+/************************************************************************************
+** initialises the SPI controller chip to set speed, interrupt capability etc.
+************************************************************************************/
+void SPI_Init(void)
 {
-    char* start = StartRamPtr;
-    printf("\r\nFilling Addresses [$%08X - $%08X] with $%02X", StartRamPtr, EndRamPtr, FillData);
+    //TODO
+    //
+    // Program the SPI Control, EXT, CS and Status registers to initialise the SPI controller
+    // Don't forget to call this routine from main() before you do anything else with SPI
+    //
+    // Here are some settings we want to create
+    //
+    // Control Reg     - interrupts disabled, core enabled, Master mode, Polarity and Phase of clock = [0,0], speed =  divide by 32 = approx 700Khz
+    // Ext Reg         - in conjunction with control reg, sets speed above and also sets interrupt flag after every completed transfer (each byte)
+    // SPI_CS Reg      - control selection of slave SPI chips via their CS# signals
+    // Status Reg      - status of SPI controller chip and used to clear any write collision and interrupt on transmit complete flag
 
-    if (config == 1) {
-        while (start <= EndRamPtr){
-            *start++ = FillData;
-            }
-    }
+    /* setting up control register */
+    if ((SPI_Control & 0x20) == 0)
+        SPI_Control = 0x53; //writing a 0 to reserved bit at position 5
+    else
+        SPI_Control = 0x73; //writing a 1 to reserved bit at position 5
 
-    if (config == 2) {
-        while (start <= EndRamPtr) {
-            *start = FillData;
-            start += 2;
-        }
-    }
 
-    if (config == 3) {
-        while (start <= EndRamPtr) {
-            *start = FillData;
-            start += 4;
-        }
-    }
+    /* setting up extension register */
+    SPI_Ext = SPI_Ext & 0x3c;
+
+
+    /* enable chip */
+   // Enable_SPI_CS();
+    Disable_SPI_CS(); //change to disable
+
+
+    /* setting up status register */
+   // SPI_Status = SPI_Status & 0x3f;
+
+    SPI_Status = 0xff;
+
+    //TODO: figure out what value to write to reserved bits, is there a way to maintain the value of the reerved bit?
+    //TODO: How to write to individual bit positions
+    //assume data can be changed in such a way such that the reserved bits are not updated, may need to read the data first
 
 
 }
 
-void ReadMemory(char* StartRamPtr, char* EndRamPtr, unsigned char FillData, int config)
+/************************************************************************************
+** return ONLY when the SPI controller has finished transmitting a byte
+************************************************************************************/
+void WaitForSPITransmitComplete(void)
 {
-    int counter = 0;
-    unsigned char* start = StartRamPtr;
+    // TODO : poll the status register SPIF bit looking for completion of transmission
+    // once transmission is complete, clear the write collision and interrupt on transmit complete flags in the status register (read documentation)
+    // just in case they were set
 
-    printf("\r\nReading Addresses [$%08X - $%08X] for $%02X", StartRamPtr, EndRamPtr, FillData);
+    /* loop for polling */
+    while (TestForSPITransmitDataComplete() == 0) {
+        //do nothing
+    }
 
-    if (config == 1) {
-        while (start <= EndRamPtr) {
-            if (*start != FillData)
-                printf("\r\nValue incorrect at addresses $%08X ... should be $%02X but found $%02X", start, FillData, *start);
-            printf("\r\nValue: $%02X found at Address: $%08X", *start, start);
-            start++;
+    /* clear bits in the status register */
+   // SPI_Status = SPI_Status & 0x3f;
+
+    SPI_Status = 0xff;
+
+}
+
+/************************************************************************************
+** Write a byte to the SPI flash chip via the controller and returns (reads) whatever was
+** given back by SPI device at the same time (removes the read byte from the FIFO)
+************************************************************************************/
+int WriteSPIChar(int c) //change int to char to take into account 1 byte
+{
+    // todo - write the byte in parameter 'c' to the SPI data register, this will start it transmitting to the flash device
+    // wait for completion of transmission
+    // return the received data from Flash chip (which may not be relevent depending upon what we are doing)
+    // by reading fom the SPI controller Data Register.
+    // note however that in order to get data from an SPI slave device (e.g. flash) chip we have to write a dummy byte to it
+    //
+    // modify '0' below to return back read byte from data register
+    //
+
+    int ret, upper, mid, lower, dummy;
+
+   // eraseChip();
+
+
+    printf("\r\n\nEnter upper byte: ");
+    upper = Get2HexDigitsVoid();
+    printf("\r\n\nUPPER BYTE: %x ", upper);
+
+    printf("\r\n\nEnter mid byte: ");
+    mid = Get2HexDigitsVoid();
+    printf("\r\n\nMID BYTE: %x ", mid);
+
+    printf("\r\n\nEnter lower byte: ");
+    lower = Get2HexDigitsVoid();
+    printf("\r\n\nLOWER BYTE: %x ", lower);
+
+    enableWrite();
+
+    //5: write to flash
+    printf("5: write to flash \n\n");
+    Enable_SPI_CS(); //enable cs#
+    WriteSPI(0x02);
+    WriteSPI(upper);
+    WriteSPI(mid);
+    WriteSPI(lower);
+    WriteSPI(c);
+    Disable_SPI_CS(); //disable cs#
+
+
+    pollSPI();
+
+    //7: reading flash chip for verification
+    printf("7: reading flash chip for verification \n\n");
+    Enable_SPI_CS(); //enable cs#
+    WriteSPI(0x03);
+    WriteSPI(upper);
+    WriteSPI(mid);
+    WriteSPI(lower);
+    /* collecting data into var */
+    ret = WriteSPI(0xee);
+    printf("\r\n\nret: %x ", ret);
+    Disable_SPI_CS(); // disable cs#
+
+    return ret;
+}
+
+int readSPI(void) {
+    int ret, upper, mid, lower, dummy;
+
+    printf("\r\n\nEnter upper byte:");
+    upper = Get2HexDigitsVoid();
+    printf("\r\n\nUPPER BYTE: %x", upper);
+
+    printf("\r\n\nEnter mid byte:");
+    mid = Get2HexDigitsVoid();
+    printf("\r\n\nMID BYTE: %x", mid);
+
+    printf("\r\n\nEnter lower byte:");
+    lower = Get2HexDigitsVoid();
+    printf("\r\n\nLOWER BYTE: %x", lower);
+
+    // reading flash chip for verification
+    printf("\r\nReading flash chip for verification");
+    Enable_SPI_CS(); //enable cs#
+    WriteSPI(0x03);
+    WriteSPI(upper);
+    WriteSPI(mid);
+    WriteSPI(lower);
+    /* collecting data into var */
+    ret = WriteSPI(0xee);
+    printf("\r\n\nret: %x ", ret);
+    Disable_SPI_CS(); // disable cs#
+
+    return ret;
+}
+
+void enableWrite(void) {
+    //enable write
+    Enable_SPI_CS(); //enable cs#
+    WriteSPI(0x06);
+    Disable_SPI_CS(); //disable cs#
+}
+
+void pollSPI(void) {
+    int status;
+    //poll flash chip to see if rdy
+    printf("\r\nPolling flash chip to see if ready \n\n");
+    Enable_SPI_CS(); //enable cs#
+    WriteSPI(0x05);
+    status = WriteSPI(0xee);
+    while (status & 0x01 == 1) {
+        status = WriteSPI(0xee);
+    }
+    Disable_SPI_CS(); // disable cs#
+}
+
+void eraseChip(void) {
+    //enable write
+    enableWrite();
+
+    //erase chip
+    printf("\r\nErase chip");
+    Enable_SPI_CS(); //enable cs#
+    WriteSPI(0xc7);
+    Disable_SPI_CS(); // disable cs#
+
+    //poll spi
+    pollSPI();
+}
+
+int WriteSPI(int num) {
+    SPI_Data = num;
+    WaitForSPITransmitComplete();
+    return SPI_Data;
+}
+
+void menueSPI(void) {
+    int option, val_to_pass, ret;
+   // char pat;
+
+    while (1) {
+        scanflush();
+
+        printf("\r\n\nEnter SPI operation(1 - Erase Chip, 2 - Write to SPI, 3 - Read from SPI): ");
+        option = xtod(_getch());
+        printf("\r\n\nSPI operation: %x ", option);
+
+        switch (option) {
+        case 1:
+            printf("\r\nChip erase operation selected");
+            eraseChip();
+            printf("\r\nEnd of erase operation ...");
+            break;
+        case 2:
+            printf("\r\n\nWrite operation selected \n\n");
+            printf("\r\n\nEnter a value for write: ");
+            val_to_pass = Get2HexDigitsVoid();
+            printf("\r\nValue to write: %x", val_to_pass);
+            ret = WriteSPIChar(val_to_pass);
+            printf("\r\nValue returned: %x", ret);
+            printf("\r\nend of write operation ...");
+            break;
+        case 3:
+            printf("\r\n\nRead operation selected");
+            ret = readSPI();
+            printf("\r\n\nValue returned: %x ", ret);
+            printf("\r\n\nend of read operation ...");
+            break;
+        default:
+            printf("\r\n\nInvalid operation ...");
+            printf("\r\n\nTry again!!!!!");
         }
     }
 
-    if (config == 2) {
-        while (start <= EndRamPtr) {
-            if(*start != FillData)
-                printf("\r\nValue incorrect at addresses $%08X ... should be $%02X but found $%02X", start, FillData, *start);
-            printf("\r\nValue: $%02X $%02X found at Address: $%08X - $%08X", *start, *(start+1), start, (start+1));
-            start += 2;
-        }
-    }
+}
 
-    if (config == 3) {
-        while (start <= EndRamPtr) {
-            if (*start != FillData)
-                printf("\r\nValue incorrect at addresses $%08X ... should be $%02X but found $%02X", start, FillData, *start);
-            printf("\r\nValue: $%02X $%02X $%02X $%02X found at Address: $%08X - $%08X", *start, *(start+3), start, (start+3));
-            start += 4;
-        }
-    }
+void executeSPI(void) {
+    printf("\r\nIntializing SPI\n");
+    SPI_Init();
+    menueSPI();
+}
 
 
+void readID(void) {
+    int man, dev, dev2;
+     int dummy;
+    printf("READING ID !!!!!!  \n\n");
+    Enable_SPI_CS(); //enable cs#
+    WriteSPI(0x90);
+    WriteSPI(0x00);
+    WriteSPI(0x00);
+    WriteSPI(0x00);
+    man = WriteSPI(0xee);
+    dev = WriteSPI(0xee);
+    Disable_SPI_CS(); //disable cs#
+
+    printf("\r\n\nMan: %x ", man);
+    printf("\r\n\nDev: %x ", dev);
+}
+/* end */
+
+/* other spare functions */
+int Get2HexDigitsVoid(void)
+{
+    register int i = (xtod(_getch()) << 4) | (xtod(_getch()));
+
+
+    return i;
 }
 
 /******************************************************************************************************************************
@@ -440,18 +687,21 @@ void ReadMemory(char* StartRamPtr, char* EndRamPtr, unsigned char FillData, int 
 
 void main()
 {
-    unsigned int row, i = 0, count = 0, counter1 = 1;
+    unsigned int row, i=0, count=0, counter1=1;
     char c, text[150] ;
+
 	int PassFailFlag = 1 ;
-    int test_config = 0;
-    int test_pattern = 0;
+
+    int test_config=0;
+    int test_pattern=0;
     char start_addr[7];
     int start_val = 0;
     char end_addr[7];
     int end_val = 0;
-    char digit;
 
-    i = x = y = z = PortA_Count = 0;
+    int val_to_pass, ret;
+
+    i = x = y = z = PortA_Count =0;
     Timer1Count = Timer2Count = Timer3Count = Timer4Count = 0;
 
     InstallExceptionHandler(PIA_ISR, 25) ;          // install interrupt handler for PIAs 1 and 2 on level 1 IRQ
@@ -480,149 +730,13 @@ void main()
     scanflush() ;                       // flush any text that may have been typed ahead
 
     /*
-    * User prompts
+    * SPI Program HERE
     */
-
-    // Prompt the user to entre a test configuration
-    printf("\r\nEnter memory test configuration(1 - bytes, 2 - words, 3 - long words): ");
-    scanf("%d", &test_config);
-    // Check for invalid configuration entry and re-prompt if needed
-    while (test_config > 3 || test_config < 1) {
-        printf("\r\nConfiguration invalid, try again");
-        printf("\r\nEnter memory test configuration(1 - bytes, 2 - words, 3 - long words): ");
-        scanf("%d", &test_config);
-    }
-
-    // Prompt the user to entre a test pattern
-    printf("\r\nChoose between different memory test patterns(1 - 5, 2 - A, 3 - F, 4 - 0): ");
-    scanf("%d", &test_pattern);
-    // Check for invalid pattern entry and re-prompt if needed
-    while (test_pattern > 4 || test_pattern < 1) {
-        printf("\r\nPattern invalid, try again");
-        printf("\r\nChoose between different memory test patterns(1 - 5, 2 - A, 3 - F, 4 - 0): ");
-        scanf("%d", &test_pattern);
-    }
-
-    // Prompt the user to entre a starting address
-    printf("\r\nEnter starting address(8020000 - 8030000 inclusive): ");
-    scanf("%s", &start_addr);
-    start_val = Get7HexDigits(start_addr[0], start_addr[1], start_addr[2], start_addr[3], start_addr[4], start_addr[5], start_addr[6]);
-    // Check for invalid start address and re-prompt if needed
-    while (start_val < 0x8020000 || start_val > 0x8030000 || strlen(start_addr) > 7) { // start address must be 7 chars and within bounds
-        printf("\r\nStarting address out of bounds.. try again");
-        printf("\r\nEnter starting address(8020000 - 8030000 inclusive): ");
-        scanf("%s", &start_addr);
-        start_val = Get7HexDigits(start_addr[0], start_addr[1], start_addr[2], start_addr[3], start_addr[4], start_addr[5], start_addr[6]);
-    }
-    // Check for illegal address, start address must be even if writing words or long words to memory
-    while (start_val % 2 != 0 && test_config != 1) {
-        printf("\r\nOdd starting address.. try again");
-        printf("\r\nEnter starting address(8020000 - 8030000 inclusive): ");
-        scanf("%s", &start_addr);
-        start_val = Get7HexDigits(start_addr[0], start_addr[1], start_addr[2], start_addr[3], start_addr[4], start_addr[5], start_addr[6]);
-    }
+    executeSPI();
 
 
-    // Prompt the user to entre an ending address
-    printf("\r\nEnter ending address(8020000 - 8030000 inclusive): ");
-    scanf("%s", &end_addr);
-    end_val = Get7HexDigits(end_addr[0], end_addr[1], end_addr[2], end_addr[3], end_addr[4], end_addr[5], end_addr[6]);
-    while (end_val < 0x8020000 || end_val > 0x8030000 || strlen(end_addr) > 7) { // end address must be 7 chars and within bounds
-        printf("\r\nEnding address out of bounds.. try again");
-        printf("\r\nEnter ending address(8020000 - 8030000 inclusive): ");
-        scanf("%s", &end_addr);
-        end_val = Get7HexDigits(end_addr[0], end_addr[1], end_addr[2], end_addr[3], end_addr[4], end_addr[5], end_addr[6]);
-    }
-    while (end_val < start_val) {
-        printf("\r\nInvalid ending address.. try again");
-        printf("\r\nEnter ending address(8020000 - 8030000 inclusive): ");
-        scanf("%s", &end_addr);
-        end_val = Get7HexDigits(end_addr[0], end_addr[1], end_addr[2], end_addr[3], end_addr[4], end_addr[5], end_addr[6]);
-    }
-    // When writing words, the given address range should be a multiple of 2 bytes (size of a word)
-    while ((end_val - start_val + 1) % 2 != 0  && test_config == 2) {
-        printf("\r\nInvalid address range is too small.. try again");
-        printf("\r\nEnter ending address(8020000 - 8030000 inclusive): ");
-        scanf("%s", &end_addr);
-        end_val = Get7HexDigits(end_addr[0], end_addr[1], end_addr[2], end_addr[3], end_addr[4], end_addr[5], end_addr[6]);
-    }
-    // When writing long words, the given address range should be a multiple of 4 bytes (size of a long word)
-    while ((end_val - start_val + 1) % 4 != 0 && test_config == 3) {
-        printf("\r\nInvalid range is too small.. try again");
-        printf("\r\nEnter ending address(8020000 - 8030000 inclusive): ");
-        scanf("%s", &end_addr);
-        end_val = Get7HexDigits(end_addr[0], end_addr[1], end_addr[2], end_addr[3], end_addr[4], end_addr[5], end_addr[6]);
-    }
-
-    printf("\r\nWriting to SRAM ...");
-    printf("\r\n............................................................................................................");
-    printf("\r\n............................................................................................................");
-    printf("\r\n............................................................................................................");
-
-    switch (test_pattern) {
-        case 1: digit = '5';
-                break;
-        case 2: digit = 'A';
-                break;
-        case 3: digit = 'F';
-                break;
-        case 4: digit = '0';
-                break;
-        default: digit = '5';
-    }
-
-
-    switch (test_config) {
-        case 1: FillMemory(start_val, end_val, Get2HexDigits(digit), 1);
-                break;
-        case 2: FillMemory(start_val, end_val, Get4HexDigits(digit), 2);
-                break;
-        case 3: FillMemory(start_val, end_val, Get8HexDigits(digit), 3);
-                break;
-        default: FillMemory(start_val, end_val, Get2HexDigits(digit), 1);;
-    }
-
-
-    printf("\r\nFinished writing to SRAM .");
-    printf("\r\nCheck SRAM content");
-
-    printf("\r\nReading from SRAM ...");
-    printf("\r\nPrinting out every 10k location from SRAM ...");
-    printf("\r\n............................................................................................................");
-    printf("\r\n............................................................................................................");
-    printf("\r\n............................................................................................................");
-    printf("\r\n....................... begin reading");
-
-
-    switch (test_config) {
-        case 1: ReadMemory(start_val, end_val, Get2HexDigits(digit), 1);
-                break;
-        case 2: ReadMemory(start_val, end_val, Get4HexDigits(digit), 2);
-                break;
-        case 3: ReadMemory(start_val, end_val, Get8HexDigits(digit), 3);
-                break;
-        default: ReadMemory(start_val, end_val, Get2HexDigits(digit), 1);;
-    }
-
-
-    printf("\r\nFinished reading from SRAM ...");
-    printf("\r\nend of program ...");
-    printf("\r\n............................................................................................................");
-    printf("\r\n............................................................................................................");
-
-
-
-   // printf("\r\nEnter Integer: ") ;
-   // scanf("%d", &i) ;
-   // printf("You entered %d", i) ;
-
-   // sprintf(text, "Hello CPEN 412 Student") ;
-   // LCDLine1Message(text) ;
-
-   // printf("\r\nHello CPEN 412 Student\r\nYour LEDs should be Flashing") ;
-   // printf("\r\nYour LCD should be displaying") ;
-
-    while(1);
+    while(1)
+        ;
 
    // programs should NOT exit as there is nothing to Exit TO !!!!!!
    // There is no OS - just press the reset button to end program and call debug

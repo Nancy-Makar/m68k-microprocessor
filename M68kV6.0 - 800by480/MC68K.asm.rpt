@@ -1,5 +1,5 @@
 Assembler report for MC68K
-Thu Feb 09 17:20:47 2023
+Tue Feb 28 21:35:32 2023
 Quartus Prime Version 18.1.0 Build 625 09/12/2018 SJ Lite Edition
 
 
@@ -38,7 +38,7 @@ refer to the applicable agreement for further details.
 +---------------------------------------------------------------+
 ; Assembler Summary                                             ;
 +-----------------------+---------------------------------------+
-; Assembler Status      ; Successful - Thu Feb 09 17:20:47 2023 ;
+; Assembler Status      ; Successful - Tue Feb 28 21:35:32 2023 ;
 ; Revision Name         ; MC68K                                 ;
 ; Top-level Entity Name ; MC68K                                 ;
 ; Family                ; Cyclone V                             ;
@@ -77,8 +77,8 @@ refer to the applicable agreement for further details.
 +----------------+----------------------------------------------------------------+
 ; Option         ; Setting                                                        ;
 +----------------+----------------------------------------------------------------+
-; JTAG usercode  ; 0x06C77EFF                                                     ;
-; Checksum       ; 0x06C77EFF                                                     ;
+; JTAG usercode  ; 0x06D35ED2                                                     ;
+; Checksum       ; 0x06D35ED2                                                     ;
 +----------------+----------------------------------------------------------------+
 
 
@@ -88,14 +88,14 @@ refer to the applicable agreement for further details.
 Info: *******************************************************************
 Info: Running Quartus Prime Assembler
     Info: Version 18.1.0 Build 625 09/12/2018 SJ Lite Edition
-    Info: Processing started: Thu Feb 09 17:20:24 2023
+    Info: Processing started: Tue Feb 28 21:35:17 2023
 Info: Command: quartus_asm --read_settings_files=off --write_settings_files=off MC68K -c MC68K
 Warning (18236): Number of processors has not been specified which may cause overloading on shared machines.  Set the global assignment NUM_PARALLEL_PROCESSORS in your QSF to an appropriate value for best performance.
 Info (115030): Assembler is generating device programming files
 Info: Quartus Prime Assembler was successful. 0 errors, 1 warning
     Info: Peak virtual memory: 4911 megabytes
-    Info: Processing ended: Thu Feb 09 17:20:47 2023
-    Info: Elapsed time: 00:00:23
-    Info: Total CPU time (on all processors): 00:00:22
+    Info: Processing ended: Tue Feb 28 21:35:32 2023
+    Info: Elapsed time: 00:00:15
+    Info: Total CPU time (on all processors): 00:00:15
 
 

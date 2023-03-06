@@ -139,8 +139,8 @@ int  TestForWriteFifoEmpty(void);
 int  ReadSPIChar(void);
 void SPI_Init(void);
 void WaitForSPITransmitComplete(void);
-int  WriteSPIChar(int c);
-void SetSPIFlashWriteEnableLatch(void);
+char WriteSPIChar(char c);
+void WriteToFlash(char c, unsigned char lowerByteOfAddress, unsigned char midByteOfAddress, unsigned char upperByteOfAddress);
 void ClearSPIFlashWriteEnableLatch(void);
 void WriteSPIFlashStatusReg(int Status);
 int  ReadSPIFlashStatusReg(void);
@@ -152,6 +152,9 @@ int  SPIFlashRead(int AddressOffset);
 void WriteSPIFlashData(int FlashAddress, unsigned char *MemoryAddress, int size);
 void EraseSPIFlashChip(void);
 void EraseSPIFlashSector(int SectorNumber) ;
+void ReadDataFromFlash(unsigned char LowerByteOfAddress, int n);
+void EraseChip(void);
+void CompareDataFromFlashToRam(unsigned char LowerByteOfAddress, int n);
 
 
 // other prototypes
