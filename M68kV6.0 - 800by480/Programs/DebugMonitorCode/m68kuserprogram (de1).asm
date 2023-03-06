@@ -1,4 +1,4 @@
-; C:\CPEN412\LAB1\M68KV6.0 - 800BY480\PROGRAMS\DEBUGMONITORCODE\M68KUSERPROGRAM (DE1).C - Compiled by CC68K  Version 5.00 (c) 1991-2005  Peter J. Fondse
+; C:\CPEN412\GITHUB_STEUP\M68KV6.0 - 800BY480\PROGRAMS\DEBUGMONITORCODE\M68KUSERPROGRAM (DE1).C - Compiled by CC68K  Version 5.00 (c) 1991-2005  Peter J. Fondse
 ; #include <stdio.h>
 ; #include <string.h>
 ; #include <ctype.h>
@@ -70,6 +70,23 @@
 ; #define PIA2_PortA_Control *(volatile unsigned char *)(0x00400062)
 ; #define PIA2_PortB_data     *(volatile unsigned char *)(0x00400064)         // combined data and data direction register share same address
 ; #define PIA2_PortB_Control *(volatile unsigned char *)(0x00400066)
+; /* SPI declarations*/
+; /*************************************************************
+; ** SPI Controller registers
+; **************************************************************/
+; // SPI Registers
+; #define SPI_Control         (*(volatile unsigned char *)(0x00408020))
+; #define SPI_Status          (*(volatile unsigned char *)(0x00408022))
+; #define SPI_Data            (*(volatile unsigned char *)(0x00408024))
+; #define SPI_Ext             (*(volatile unsigned char *)(0x00408026))
+; #define SPI_CS              (*(volatile unsigned char *)(0x00408028))
+; // these two macros enable or disable the flash memory chip enable off SSN_O[7..0]
+; // in this case we assume there is only 1 device connected to SSN_O[0] so we can
+; // write hex FE to the SPI_CS to enable it (the enable on the flash chip is active low)
+; // and write FF to disable it
+; #define   Enable_SPI_CS()             SPI_CS = 0xFE
+; #define   Disable_SPI_CS()            SPI_CS = 0xFF
+; /* end */
 ; /*********************************************************************************************************************************
 ; (( DO NOT initialise global variables here, do it main even if you want 0
 ; (( it's a limitation of the compiler
@@ -96,6 +113,10 @@
 ; int Get4HexDigits(char pat);
 ; int Get2HexDigits(char pat);
 ; char xtod(int c);
+; void enableWrite(void);
+; int WriteSPIChar(int c);
+; int WriteSPI(int num);
+; void pollSPI(void);
 ; /*****************************************************************************************
 ; **	Interrupt service routine for Timers
 ; **
@@ -535,6 +556,8 @@ _Get2HexDigits:
        and.l     #255,D1
        or.l      D1,D0
        move.l    D0,D2
+; //if (CheckSumPtr)
+; //  *CheckSumPtr += i;
 ; return i;
        move.l    D2,D0
        move.l    (A7)+,D2
@@ -688,237 +711,652 @@ _Get7HexDigits:
        and.l     #255,D1
        or.l      D1,D0
        move.l    D0,D2
+; //if (CheckSumPtr)
+; //  *CheckSumPtr += i;
 ; return i;
        move.l    D2,D0
        movem.l   (A7)+,D2/A2
        unlk      A6
        rts
 ; }
-; void FillMemory(char* StartRamPtr, char* EndRamPtr, unsigned char FillData, int config)
-; {
-       xdef      _FillMemory
-_FillMemory:
-       link      A6,#0
-       movem.l   D2/D3/D4/D5,-(A7)
-       move.l    12(A6),D3
-       move.b    19(A6),D4
-       and.l     #255,D4
-       move.l    20(A6),D5
-; char* start = StartRamPtr;
-       move.l    8(A6),D2
-; printf("\r\nFilling Addresses [$%08X - $%08X] with $%02X", StartRamPtr, EndRamPtr, FillData);
-       and.l     #255,D4
-       move.l    D4,-(A7)
-       move.l    D3,-(A7)
-       move.l    8(A6),-(A7)
-       pea       @m68kus~1_1.L
-       jsr       _printf
-       add.w     #16,A7
-; if (config == 1) {
-       cmp.l     #1,D5
-       bne.s     FillMemory_5
-; while (start <= EndRamPtr){
-FillMemory_3:
-       cmp.l     D3,D2
-       bhi.s     FillMemory_5
-; *start++ = FillData;
-       move.l    D2,A0
-       addq.l    #1,D2
-       move.b    D4,(A0)
-       bra       FillMemory_3
-FillMemory_5:
-; }
-; }
-; if (config == 2) {
-       cmp.l     #2,D5
-       bne.s     FillMemory_10
-; while (start <= EndRamPtr) {
-FillMemory_8:
-       cmp.l     D3,D2
-       bhi.s     FillMemory_10
-; *start = FillData;
-       move.l    D2,A0
-       move.b    D4,(A0)
-; start += 2;
-       addq.l    #2,D2
-       bra       FillMemory_8
-FillMemory_10:
-; }
-; }
-; if (config == 3) {
-       cmp.l     #3,D5
-       bne.s     FillMemory_15
-; while (start <= EndRamPtr) {
-FillMemory_13:
-       cmp.l     D3,D2
-       bhi.s     FillMemory_15
-; *start = FillData;
-       move.l    D2,A0
-       move.b    D4,(A0)
-; start += 4;
-       addq.l    #4,D2
-       bra       FillMemory_13
-FillMemory_15:
-       movem.l   (A7)+,D2/D3/D4/D5
-       unlk      A6
+; /* SPI functions */
+; /******************************************************************************************
+; ** The following code is for the SPI controller
+; *******************************************************************************************/
+; // return true if the SPI has finished transmitting a byte (to say the Flash chip) return false otherwise
+; // this can be used in a polling algorithm to know when the controller is busy or idle.
+; int TestForSPITransmitDataComplete(void) {
+       xdef      _TestForSPITransmitDataComplete
+_TestForSPITransmitDataComplete:
+; /* TODO replace 0 below with a test for status register SPIF bit and if set, return true */
+; return (SPI_Status >= 0x80);
+       move.b    4227106,D0
+       and.w     #255,D0
+       cmp.w     #128,D0
+       blo.s     TestForSPITransmitDataComplete_1
+       moveq     #1,D0
+       bra.s     TestForSPITransmitDataComplete_2
+TestForSPITransmitDataComplete_1:
+       clr.l     D0
+TestForSPITransmitDataComplete_2:
        rts
 ; }
-; }
-; }
-; void ReadMemory(char* StartRamPtr, char* EndRamPtr, unsigned char FillData, int config)
+; /************************************************************************************
+; ** initialises the SPI controller chip to set speed, interrupt capability etc.
+; ************************************************************************************/
+; void SPI_Init(void)
 ; {
-       xdef      _ReadMemory
-_ReadMemory:
+       xdef      _SPI_Init
+_SPI_Init:
+; //TODO
+; //
+; // Program the SPI Control, EXT, CS and Status registers to initialise the SPI controller
+; // Don't forget to call this routine from main() before you do anything else with SPI
+; //
+; // Here are some settings we want to create
+; //
+; // Control Reg     - interrupts disabled, core enabled, Master mode, Polarity and Phase of clock = [0,0], speed =  divide by 32 = approx 700Khz
+; // Ext Reg         - in conjunction with control reg, sets speed above and also sets interrupt flag after every completed transfer (each byte)
+; // SPI_CS Reg      - control selection of slave SPI chips via their CS# signals
+; // Status Reg      - status of SPI controller chip and used to clear any write collision and interrupt on transmit complete flag
+; /* setting up control register */
+; if ((SPI_Control & 0x20) == 0)
+       move.b    4227104,D0
+       and.b     #32,D0
+       bne.s     SPI_Init_1
+; SPI_Control = 0x53; //writing a 0 to reserved bit at position 5
+       move.b    #83,4227104
+       bra.s     SPI_Init_2
+SPI_Init_1:
+; else
+; SPI_Control = 0x73; //writing a 1 to reserved bit at position 5
+       move.b    #115,4227104
+SPI_Init_2:
+; /* setting up extension register */
+; SPI_Ext = SPI_Ext & 0x3c;
+       move.b    4227110,D0
+       and.b     #60,D0
+       move.b    D0,4227110
+; /* enable chip */
+; // Enable_SPI_CS();
+; Disable_SPI_CS(); //change to disable
+       move.b    #255,4227112
+; /* setting up status register */
+; // SPI_Status = SPI_Status & 0x3f;
+; SPI_Status = 0xff;
+       move.b    #255,4227106
+       rts
+; //TODO: figure out what value to write to reserved bits, is there a way to maintain the value of the reerved bit?
+; //TODO: How to write to individual bit positions
+; //assume data can be changed in such a way such that the reserved bits are not updated, may need to read the data first
+; }
+; /************************************************************************************
+; ** return ONLY when the SPI controller has finished transmitting a byte
+; ************************************************************************************/
+; void WaitForSPITransmitComplete(void)
+; {
+       xdef      _WaitForSPITransmitComplete
+_WaitForSPITransmitComplete:
+; // TODO : poll the status register SPIF bit looking for completion of transmission
+; // once transmission is complete, clear the write collision and interrupt on transmit complete flags in the status register (read documentation)
+; // just in case they were set
+; /* loop for polling */
+; while (TestForSPITransmitDataComplete() == 0) {
+WaitForSPITransmitComplete_1:
+       jsr       _TestForSPITransmitDataComplete
+       tst.l     D0
+       bne.s     WaitForSPITransmitComplete_3
+; //do nothing
+; }
+       bra       WaitForSPITransmitComplete_1
+WaitForSPITransmitComplete_3:
+; /* clear bits in the status register */
+; // SPI_Status = SPI_Status & 0x3f;
+; SPI_Status = 0xff;
+       move.b    #255,4227106
+       rts
+; }
+; /************************************************************************************
+; ** Write a byte to the SPI flash chip via the controller and returns (reads) whatever was
+; ** given back by SPI device at the same time (removes the read byte from the FIFO)
+; ************************************************************************************/
+; int WriteSPIChar(int c) //change int to char to take into account 1 byte
+; {
+       xdef      _WriteSPIChar
+_WriteSPIChar:
        link      A6,#-4
-       movem.l   D2/D3/D4/D5/A2,-(A7)
-       move.b    19(A6),D3
-       and.l     #255,D3
-       lea       _printf.L,A2
-       move.l    12(A6),D4
-       move.l    20(A6),D5
-; int counter = 0;
-       clr.l     -4(A6)
-; unsigned char* start = StartRamPtr;
-       move.l    8(A6),D2
-; printf("\r\nReading Addresses [$%08X - $%08X] for $%02X", StartRamPtr, EndRamPtr, FillData);
-       and.l     #255,D3
-       move.l    D3,-(A7)
+       movem.l   D2/D3/D4/D5/A2/A3/A4,-(A7)
+       lea       _WriteSPI.L,A2
+       lea       _printf.L,A3
+       lea       _Get2HexDigitsVoid.L,A4
+; // todo - write the byte in parameter 'c' to the SPI data register, this will start it transmitting to the flash device
+; // wait for completion of transmission
+; // return the received data from Flash chip (which may not be relevent depending upon what we are doing)
+; // by reading fom the SPI controller Data Register.
+; // note however that in order to get data from an SPI slave device (e.g. flash) chip we have to write a dummy byte to it
+; //
+; // modify '0' below to return back read byte from data register
+; //
+; int ret, upper, mid, lower, dummy;
+; // eraseChip();
+; printf("\r\n\nEnter upper byte: ");
+       pea       @m68kus~1_1.L
+       jsr       (A3)
+       addq.w    #4,A7
+; upper = Get2HexDigitsVoid();
+       jsr       (A4)
+       move.l    D0,D4
+; printf("\r\n\nUPPER BYTE: %x ", upper);
        move.l    D4,-(A7)
-       move.l    8(A6),-(A7)
        pea       @m68kus~1_2.L
-       jsr       (A2)
-       add.w     #16,A7
-; if (config == 1) {
-       cmp.l     #1,D5
-       bne       ReadMemory_5
-; while (start <= EndRamPtr) {
-ReadMemory_3:
-       cmp.l     D4,D2
-       bhi       ReadMemory_5
-; if (*start != FillData)
-       move.l    D2,A0
-       cmp.b     (A0),D3
-       beq.s     ReadMemory_6
-; printf("\r\nValue incorrect at addresses $%08X ... should be $%02X but found $%02X", start, FillData, *start);
-       move.l    D2,A0
-       move.b    (A0),D1
-       and.l     #255,D1
-       move.l    D1,-(A7)
-       and.l     #255,D3
-       move.l    D3,-(A7)
-       move.l    D2,-(A7)
+       jsr       (A3)
+       addq.w    #8,A7
+; printf("\r\n\nEnter mid byte: ");
        pea       @m68kus~1_3.L
-       jsr       (A2)
-       add.w     #16,A7
-ReadMemory_6:
-; printf("\r\nValue: $%02X found at Address: $%08X", *start, start);
-       move.l    D2,-(A7)
-       move.l    D2,A0
-       move.b    (A0),D1
-       and.l     #255,D1
-       move.l    D1,-(A7)
+       jsr       (A3)
+       addq.w    #4,A7
+; mid = Get2HexDigitsVoid();
+       jsr       (A4)
+       move.l    D0,D3
+; printf("\r\n\nMID BYTE: %x ", mid);
+       move.l    D3,-(A7)
        pea       @m68kus~1_4.L
-       jsr       (A2)
-       add.w     #12,A7
-; start++;
-       addq.l    #1,D2
-       bra       ReadMemory_3
-ReadMemory_5:
-; }
-; }
-; if (config == 2) {
-       cmp.l     #2,D5
-       bne       ReadMemory_12
-; while (start <= EndRamPtr) {
-ReadMemory_10:
-       cmp.l     D4,D2
-       bhi       ReadMemory_12
-; if(*start != FillData)
-       move.l    D2,A0
-       cmp.b     (A0),D3
-       beq.s     ReadMemory_13
-; printf("\r\nValue incorrect at addresses $%08X ... should be $%02X but found $%02X", start, FillData, *start);
-       move.l    D2,A0
-       move.b    (A0),D1
-       and.l     #255,D1
-       move.l    D1,-(A7)
-       and.l     #255,D3
-       move.l    D3,-(A7)
-       move.l    D2,-(A7)
-       pea       @m68kus~1_3.L
-       jsr       (A2)
-       add.w     #16,A7
-ReadMemory_13:
-; printf("\r\nValue: $%02X $%02X found at Address: $%08X - $%08X", *start, *(start+1), start, (start+1));
-       move.l    D2,D1
-       addq.l    #1,D1
-       move.l    D1,-(A7)
-       move.l    D2,-(A7)
-       move.l    D2,A0
-       move.b    1(A0),D1
-       and.l     #255,D1
-       move.l    D1,-(A7)
-       move.l    D2,A0
-       move.b    (A0),D1
-       and.l     #255,D1
-       move.l    D1,-(A7)
+       jsr       (A3)
+       addq.w    #8,A7
+; printf("\r\n\nEnter lower byte: ");
        pea       @m68kus~1_5.L
-       jsr       (A2)
-       add.w     #20,A7
-; start += 2;
-       addq.l    #2,D2
-       bra       ReadMemory_10
-ReadMemory_12:
-; }
-; }
-; if (config == 3) {
-       cmp.l     #3,D5
-       bne       ReadMemory_19
-; while (start <= EndRamPtr) {
-ReadMemory_17:
-       cmp.l     D4,D2
-       bhi       ReadMemory_19
-; if (*start != FillData)
-       move.l    D2,A0
-       cmp.b     (A0),D3
-       beq.s     ReadMemory_20
-; printf("\r\nValue incorrect at addresses $%08X ... should be $%02X but found $%02X", start, FillData, *start);
-       move.l    D2,A0
-       move.b    (A0),D1
-       and.l     #255,D1
-       move.l    D1,-(A7)
-       and.l     #255,D3
-       move.l    D3,-(A7)
+       jsr       (A3)
+       addq.w    #4,A7
+; lower = Get2HexDigitsVoid();
+       jsr       (A4)
+       move.l    D0,D2
+; printf("\r\n\nLOWER BYTE: %x ", lower);
        move.l    D2,-(A7)
-       pea       @m68kus~1_3.L
-       jsr       (A2)
-       add.w     #16,A7
-ReadMemory_20:
-; printf("\r\nValue: $%02X $%02X $%02X $%02X found at Address: $%08X - $%08X", *start, *(start+3), start, (start+3));
-       move.l    D2,D1
-       addq.l    #3,D1
-       move.l    D1,-(A7)
-       move.l    D2,-(A7)
-       move.l    D2,A0
-       move.b    3(A0),D1
-       and.l     #255,D1
-       move.l    D1,-(A7)
-       move.l    D2,A0
-       move.b    (A0),D1
-       and.l     #255,D1
-       move.l    D1,-(A7)
        pea       @m68kus~1_6.L
+       jsr       (A3)
+       addq.w    #8,A7
+; enableWrite();
+       jsr       _enableWrite
+; //5: write to flash
+; printf("5: write to flash \n\n");
+       pea       @m68kus~1_7.L
+       jsr       (A3)
+       addq.w    #4,A7
+; Enable_SPI_CS(); //enable cs#
+       move.b    #254,4227112
+; WriteSPI(0x02);
+       pea       2
        jsr       (A2)
-       add.w     #20,A7
-; start += 4;
-       addq.l    #4,D2
-       bra       ReadMemory_17
-ReadMemory_19:
-       movem.l   (A7)+,D2/D3/D4/D5/A2
+       addq.w    #4,A7
+; WriteSPI(upper);
+       move.l    D4,-(A7)
+       jsr       (A2)
+       addq.w    #4,A7
+; WriteSPI(mid);
+       move.l    D3,-(A7)
+       jsr       (A2)
+       addq.w    #4,A7
+; WriteSPI(lower);
+       move.l    D2,-(A7)
+       jsr       (A2)
+       addq.w    #4,A7
+; WriteSPI(c);
+       move.l    8(A6),-(A7)
+       jsr       (A2)
+       addq.w    #4,A7
+; Disable_SPI_CS(); //disable cs#
+       move.b    #255,4227112
+; pollSPI();
+       jsr       _pollSPI
+; //7: reading flash chip for verification
+; printf("7: reading flash chip for verification \n\n");
+       pea       @m68kus~1_8.L
+       jsr       (A3)
+       addq.w    #4,A7
+; Enable_SPI_CS(); //enable cs#
+       move.b    #254,4227112
+; WriteSPI(0x03);
+       pea       3
+       jsr       (A2)
+       addq.w    #4,A7
+; WriteSPI(upper);
+       move.l    D4,-(A7)
+       jsr       (A2)
+       addq.w    #4,A7
+; WriteSPI(mid);
+       move.l    D3,-(A7)
+       jsr       (A2)
+       addq.w    #4,A7
+; WriteSPI(lower);
+       move.l    D2,-(A7)
+       jsr       (A2)
+       addq.w    #4,A7
+; /* collecting data into var */
+; ret = WriteSPI(0xee);
+       pea       238
+       jsr       (A2)
+       addq.w    #4,A7
+       move.l    D0,D5
+; printf("\r\n\nret: %x ", ret);
+       move.l    D5,-(A7)
+       pea       @m68kus~1_9.L
+       jsr       (A3)
+       addq.w    #8,A7
+; Disable_SPI_CS(); // disable cs#
+       move.b    #255,4227112
+; return ret;
+       move.l    D5,D0
+       movem.l   (A7)+,D2/D3/D4/D5/A2/A3/A4
        unlk      A6
        rts
 ; }
+; int readSPI(void) {
+       xdef      _readSPI
+_readSPI:
+       link      A6,#-4
+       movem.l   D2/D3/D4/D5/A2/A3/A4,-(A7)
+       lea       _printf.L,A2
+       lea       _WriteSPI.L,A3
+       lea       _Get2HexDigitsVoid.L,A4
+; int ret, upper, mid, lower, dummy;
+; printf("\r\n\nEnter upper byte:");
+       pea       @m68kus~1_10.L
+       jsr       (A2)
+       addq.w    #4,A7
+; upper = Get2HexDigitsVoid();
+       jsr       (A4)
+       move.l    D0,D5
+; printf("\r\n\nUPPER BYTE: %x", upper);
+       move.l    D5,-(A7)
+       pea       @m68kus~1_11.L
+       jsr       (A2)
+       addq.w    #8,A7
+; printf("\r\n\nEnter mid byte:");
+       pea       @m68kus~1_12.L
+       jsr       (A2)
+       addq.w    #4,A7
+; mid = Get2HexDigitsVoid();
+       jsr       (A4)
+       move.l    D0,D4
+; printf("\r\n\nMID BYTE: %x", mid);
+       move.l    D4,-(A7)
+       pea       @m68kus~1_13.L
+       jsr       (A2)
+       addq.w    #8,A7
+; printf("\r\n\nEnter lower byte:");
+       pea       @m68kus~1_14.L
+       jsr       (A2)
+       addq.w    #4,A7
+; lower = Get2HexDigitsVoid();
+       jsr       (A4)
+       move.l    D0,D3
+; printf("\r\n\nLOWER BYTE: %x", lower);
+       move.l    D3,-(A7)
+       pea       @m68kus~1_15.L
+       jsr       (A2)
+       addq.w    #8,A7
+; // reading flash chip for verification
+; printf("\r\nReading flash chip for verification");
+       pea       @m68kus~1_16.L
+       jsr       (A2)
+       addq.w    #4,A7
+; Enable_SPI_CS(); //enable cs#
+       move.b    #254,4227112
+; WriteSPI(0x03);
+       pea       3
+       jsr       (A3)
+       addq.w    #4,A7
+; WriteSPI(upper);
+       move.l    D5,-(A7)
+       jsr       (A3)
+       addq.w    #4,A7
+; WriteSPI(mid);
+       move.l    D4,-(A7)
+       jsr       (A3)
+       addq.w    #4,A7
+; WriteSPI(lower);
+       move.l    D3,-(A7)
+       jsr       (A3)
+       addq.w    #4,A7
+; /* collecting data into var */
+; ret = WriteSPI(0xee);
+       pea       238
+       jsr       (A3)
+       addq.w    #4,A7
+       move.l    D0,D2
+; printf("\r\n\nret: %x ", ret);
+       move.l    D2,-(A7)
+       pea       @m68kus~1_9.L
+       jsr       (A2)
+       addq.w    #8,A7
+; Disable_SPI_CS(); // disable cs#
+       move.b    #255,4227112
+; return ret;
+       move.l    D2,D0
+       movem.l   (A7)+,D2/D3/D4/D5/A2/A3/A4
+       unlk      A6
+       rts
 ; }
+; void enableWrite(void) {
+       xdef      _enableWrite
+_enableWrite:
+; //enable write
+; Enable_SPI_CS(); //enable cs#
+       move.b    #254,4227112
+; WriteSPI(0x06);
+       pea       6
+       jsr       _WriteSPI
+       addq.w    #4,A7
+; Disable_SPI_CS(); //disable cs#
+       move.b    #255,4227112
+       rts
+; }
+; void pollSPI(void) {
+       xdef      _pollSPI
+_pollSPI:
+       movem.l   D2/A2,-(A7)
+       lea       _WriteSPI.L,A2
+; int status;
+; //poll flash chip to see if rdy
+; printf("\r\nPolling flash chip to see if ready \n\n");
+       pea       @m68kus~1_17.L
+       jsr       _printf
+       addq.w    #4,A7
+; Enable_SPI_CS(); //enable cs#
+       move.b    #254,4227112
+; WriteSPI(0x05);
+       pea       5
+       jsr       (A2)
+       addq.w    #4,A7
+; status = WriteSPI(0xee);
+       pea       238
+       jsr       (A2)
+       addq.w    #4,A7
+       move.l    D0,D2
+; while (status & 0x01 == 1) {
+pollSPI_1:
+       move.l    D2,D0
+       and.l     #1,D0
+       beq.s     pollSPI_3
+; status = WriteSPI(0xee);
+       pea       238
+       jsr       (A2)
+       addq.w    #4,A7
+       move.l    D0,D2
+       bra       pollSPI_1
+pollSPI_3:
+; }
+; Disable_SPI_CS(); // disable cs#
+       move.b    #255,4227112
+       movem.l   (A7)+,D2/A2
+       rts
+; }
+; void eraseChip(void) {
+       xdef      _eraseChip
+_eraseChip:
+; //enable write
+; enableWrite();
+       jsr       _enableWrite
+; //erase chip
+; printf("\r\nErase chip");
+       pea       @m68kus~1_18.L
+       jsr       _printf
+       addq.w    #4,A7
+; Enable_SPI_CS(); //enable cs#
+       move.b    #254,4227112
+; WriteSPI(0xc7);
+       pea       199
+       jsr       _WriteSPI
+       addq.w    #4,A7
+; Disable_SPI_CS(); // disable cs#
+       move.b    #255,4227112
+; //poll spi
+; pollSPI();
+       jsr       _pollSPI
+       rts
+; }
+; int WriteSPI(int num) {
+       xdef      _WriteSPI
+_WriteSPI:
+       link      A6,#0
+; SPI_Data = num;
+       move.l    8(A6),D0
+       move.b    D0,4227108
+; WaitForSPITransmitComplete();
+       jsr       _WaitForSPITransmitComplete
+; return SPI_Data;
+       move.b    4227108,D0
+       and.l     #255,D0
+       unlk      A6
+       rts
+; }
+; void menueSPI(void) {
+       xdef      _menueSPI
+_menueSPI:
+       movem.l   D2/D3/D4/A2,-(A7)
+       lea       _printf.L,A2
+; int option, val_to_pass, ret;
+; // char pat;
+; while (1) {
+menueSPI_1:
+; scanflush();
+       jsr       _scanflush
+; printf("\r\n\nEnter SPI operation(1 - Erase Chip, 2 - Write to SPI, 3 - Read from SPI): ");
+       pea       @m68kus~1_19.L
+       jsr       (A2)
+       addq.w    #4,A7
+; option = xtod(_getch());
+       move.l    D0,-(A7)
+       jsr       __getch
+       move.l    D0,D1
+       move.l    (A7)+,D0
+       move.l    D1,-(A7)
+       jsr       _xtod
+       addq.w    #4,A7
+       and.l     #255,D0
+       move.l    D0,D4
+; printf("\r\n\nSPI operation: %x ", option);
+       move.l    D4,-(A7)
+       pea       @m68kus~1_20.L
+       jsr       (A2)
+       addq.w    #8,A7
+; switch (option) {
+       cmp.l     #2,D4
+       beq.s     menueSPI_7
+       bgt.s     menueSPI_10
+       cmp.l     #1,D4
+       beq.s     menueSPI_6
+       bra       menueSPI_4
+menueSPI_10:
+       cmp.l     #3,D4
+       beq       menueSPI_8
+       bra       menueSPI_4
+menueSPI_6:
+; case 1:
+; printf("\r\nChip erase operation selected");
+       pea       @m68kus~1_21.L
+       jsr       (A2)
+       addq.w    #4,A7
+; eraseChip();
+       jsr       _eraseChip
+; printf("\r\nEnd of erase operation ...");
+       pea       @m68kus~1_22.L
+       jsr       (A2)
+       addq.w    #4,A7
+; break;
+       bra       menueSPI_5
+menueSPI_7:
+; case 2:
+; printf("\r\n\nWrite operation selected \n\n");
+       pea       @m68kus~1_23.L
+       jsr       (A2)
+       addq.w    #4,A7
+; printf("\r\n\nEnter a value for write: ");
+       pea       @m68kus~1_24.L
+       jsr       (A2)
+       addq.w    #4,A7
+; val_to_pass = Get2HexDigitsVoid();
+       jsr       _Get2HexDigitsVoid
+       move.l    D0,D3
+; printf("\r\nValue to write: %x", val_to_pass);
+       move.l    D3,-(A7)
+       pea       @m68kus~1_25.L
+       jsr       (A2)
+       addq.w    #8,A7
+; ret = WriteSPIChar(val_to_pass);
+       move.l    D3,-(A7)
+       jsr       _WriteSPIChar
+       addq.w    #4,A7
+       move.l    D0,D2
+; printf("\r\nValue returned: %x", ret);
+       move.l    D2,-(A7)
+       pea       @m68kus~1_26.L
+       jsr       (A2)
+       addq.w    #8,A7
+; printf("\r\nend of write operation ...");
+       pea       @m68kus~1_27.L
+       jsr       (A2)
+       addq.w    #4,A7
+; break;
+       bra       menueSPI_5
+menueSPI_8:
+; case 3:
+; printf("\r\n\nRead operation selected");
+       pea       @m68kus~1_28.L
+       jsr       (A2)
+       addq.w    #4,A7
+; ret = readSPI();
+       jsr       _readSPI
+       move.l    D0,D2
+; printf("\r\n\nValue returned: %x ", ret);
+       move.l    D2,-(A7)
+       pea       @m68kus~1_29.L
+       jsr       (A2)
+       addq.w    #8,A7
+; printf("\r\n\nend of read operation ...");
+       pea       @m68kus~1_30.L
+       jsr       (A2)
+       addq.w    #4,A7
+; break;
+       bra.s     menueSPI_5
+menueSPI_4:
+; default:
+; printf("\r\n\nInvalid operation ...");
+       pea       @m68kus~1_31.L
+       jsr       (A2)
+       addq.w    #4,A7
+; printf("\r\n\nTry again!!!!!");
+       pea       @m68kus~1_32.L
+       jsr       (A2)
+       addq.w    #4,A7
+menueSPI_5:
+       bra       menueSPI_1
+; }
+; }
+; }
+; void executeSPI(void) {
+       xdef      _executeSPI
+_executeSPI:
+; printf("\r\nIntializing SPI\n");
+       pea       @m68kus~1_33.L
+       jsr       _printf
+       addq.w    #4,A7
+; SPI_Init();
+       jsr       _SPI_Init
+; menueSPI();
+       jsr       _menueSPI
+       rts
+; }
+; void readID(void) {
+       xdef      _readID
+_readID:
+       link      A6,#-16
+       movem.l   A2/A3,-(A7)
+       lea       _WriteSPI.L,A2
+       lea       _printf.L,A3
+; int man, dev, dev2;
+; int dummy;
+; printf("READING ID !!!!!!  \n\n");
+       pea       @m68kus~1_34.L
+       jsr       (A3)
+       addq.w    #4,A7
+; Enable_SPI_CS(); //enable cs#
+       move.b    #254,4227112
+; WriteSPI(0x90);
+       pea       144
+       jsr       (A2)
+       addq.w    #4,A7
+; WriteSPI(0x00);
+       clr.l     -(A7)
+       jsr       (A2)
+       addq.w    #4,A7
+; WriteSPI(0x00);
+       clr.l     -(A7)
+       jsr       (A2)
+       addq.w    #4,A7
+; WriteSPI(0x00);
+       clr.l     -(A7)
+       jsr       (A2)
+       addq.w    #4,A7
+; man = WriteSPI(0xee);
+       pea       238
+       jsr       (A2)
+       addq.w    #4,A7
+       move.l    D0,-16(A6)
+; dev = WriteSPI(0xee);
+       pea       238
+       jsr       (A2)
+       addq.w    #4,A7
+       move.l    D0,-12(A6)
+; Disable_SPI_CS(); //disable cs#
+       move.b    #255,4227112
+; printf("\r\n\nMan: %x ", man);
+       move.l    -16(A6),-(A7)
+       pea       @m68kus~1_35.L
+       jsr       (A3)
+       addq.w    #8,A7
+; printf("\r\n\nDev: %x ", dev);
+       move.l    -12(A6),-(A7)
+       pea       @m68kus~1_36.L
+       jsr       (A3)
+       addq.w    #8,A7
+       movem.l   (A7)+,A2/A3
+       unlk      A6
+       rts
+; }
+; /* end */
+; /* other spare functions */
+; int Get2HexDigitsVoid(void)
+; {
+       xdef      _Get2HexDigitsVoid
+_Get2HexDigitsVoid:
+       move.l    D2,-(A7)
+; register int i = (xtod(_getch()) << 4) | (xtod(_getch()));
+       move.l    D0,-(A7)
+       jsr       __getch
+       move.l    D0,D1
+       move.l    (A7)+,D0
+       move.l    D1,-(A7)
+       jsr       _xtod
+       addq.w    #4,A7
+       and.l     #255,D0
+       asl.l     #4,D0
+       move.l    D0,-(A7)
+       move.l    D1,-(A7)
+       jsr       __getch
+       move.l    (A7)+,D1
+       move.l    D0,-(A7)
+       jsr       _xtod
+       addq.w    #4,A7
+       move.l    D0,D1
+       move.l    (A7)+,D0
+       and.l     #255,D1
+       or.l      D1,D0
+       move.l    D0,D2
+; return i;
+       move.l    D2,D0
+       move.l    (A7)+,D2
+       rts
 ; }
 ; /******************************************************************************************************************************
 ; * Start of user program
@@ -927,36 +1365,33 @@ ReadMemory_19:
 ; {
        xdef      _main
 _main:
-       link      A6,#-196
-       movem.l   D2/D3/D4/A2/A3/A4/A5,-(A7)
-       lea       -8(A6),A2
-       lea       _printf.L,A3
-       lea       -16(A6),A4
-       lea       _scanf.L,A5
-; unsigned int row, i = 0, count = 0, counter1 = 1;
-       clr.l     -192(A6)
-       clr.l     -188(A6)
-       move.l    #1,-184(A6)
+       link      A6,#-212
+       move.l    A2,-(A7)
+       lea       _InstallExceptionHandler.L,A2
+; unsigned int row, i=0, count=0, counter1=1;
+       clr.l     -208(A6)
+       clr.l     -204(A6)
+       move.l    #1,-200(A6)
 ; char c, text[150] ;
 ; int PassFailFlag = 1 ;
-       move.l    #1,-28(A6)
-; int test_config = 0;
-       clr.l     -24(A6)
-; int test_pattern = 0;
-       clr.l     -20(A6)
+       move.l    #1,-44(A6)
+; int test_config=0;
+       clr.l     -40(A6)
+; int test_pattern=0;
+       clr.l     -36(A6)
 ; char start_addr[7];
 ; int start_val = 0;
-       clr.l     D3
+       clr.l     -24(A6)
 ; char end_addr[7];
 ; int end_val = 0;
-       clr.l     D2
-; char digit;
-; i = x = y = z = PortA_Count = 0;
+       clr.l     -12(A6)
+; int val_to_pass, ret;
+; i = x = y = z = PortA_Count =0;
        clr.l     _PortA_Count.L
        clr.l     _z.L
        clr.l     _y.L
        clr.l     _x.L
-       clr.l     -192(A6)
+       clr.l     -208(A6)
 ; Timer1Count = Timer2Count = Timer3Count = Timer4Count = 0;
        clr.b     _Timer4Count.L
        clr.b     _Timer3Count.L
@@ -965,27 +1400,27 @@ _main:
 ; InstallExceptionHandler(PIA_ISR, 25) ;          // install interrupt handler for PIAs 1 and 2 on level 1 IRQ
        pea       25
        pea       _PIA_ISR.L
-       jsr       _InstallExceptionHandler
+       jsr       (A2)
        addq.w    #8,A7
 ; InstallExceptionHandler(ACIA_ISR, 26) ;		    // install interrupt handler for ACIA on level 2 IRQ
        pea       26
        pea       _ACIA_ISR.L
-       jsr       _InstallExceptionHandler
+       jsr       (A2)
        addq.w    #8,A7
 ; InstallExceptionHandler(Timer_ISR, 27) ;		// install interrupt handler for Timers 1-4 on level 3 IRQ
        pea       27
        pea       _Timer_ISR.L
-       jsr       _InstallExceptionHandler
+       jsr       (A2)
        addq.w    #8,A7
 ; InstallExceptionHandler(Key2PressISR, 28) ;	    // install interrupt handler for Key Press 2 on DE1 board for level 4 IRQ
        pea       28
        pea       _Key2PressISR.L
-       jsr       _InstallExceptionHandler
+       jsr       (A2)
        addq.w    #8,A7
 ; InstallExceptionHandler(Key1PressISR, 29) ;	    // install interrupt handler for Key Press 1 on DE1 board for level 5 IRQ
        pea       29
        pea       _Key1PressISR.L
-       jsr       _InstallExceptionHandler
+       jsr       (A2)
        addq.w    #8,A7
 ; Timer1Data = 0x10;		// program time delay into timers 1-4
        move.b    #16,4194352
@@ -1013,955 +1448,139 @@ _main:
 ; scanflush() ;                       // flush any text that may have been typed ahead
        jsr       _scanflush
 ; /*
-; * User prompts
+; * SPI Program HERE
 ; */
-; // Prompt the user to entre a test configuration
-; printf("\r\nEnter memory test configuration(1 - bytes, 2 - words, 3 - long words): ");
-       pea       @m68kus~1_7.L
-       jsr       (A3)
-       addq.w    #4,A7
-; scanf("%d", &test_config);
-       pea       -24(A6)
-       pea       @m68kus~1_8.L
-       jsr       (A5)
-       addq.w    #8,A7
-; // Check for invalid configuration entry and re-prompt if needed
-; while (test_config > 3 || test_config < 1) {
+; executeSPI();
+       jsr       _executeSPI
+; while(1)
 main_1:
-       move.l    -24(A6),D0
-       cmp.l     #3,D0
-       bgt.s     main_4
-       move.l    -24(A6),D0
-       cmp.l     #1,D0
-       bge.s     main_3
-main_4:
-; printf("\r\nConfiguration invalid, try again");
-       pea       @m68kus~1_9.L
-       jsr       (A3)
-       addq.w    #4,A7
-; printf("\r\nEnter memory test configuration(1 - bytes, 2 - words, 3 - long words): ");
-       pea       @m68kus~1_7.L
-       jsr       (A3)
-       addq.w    #4,A7
-; scanf("%d", &test_config);
-       pea       -24(A6)
-       pea       @m68kus~1_8.L
-       jsr       (A5)
-       addq.w    #8,A7
        bra       main_1
-main_3:
-; }
-; // Prompt the user to entre a test pattern
-; printf("\r\nChoose between different memory test patterns(1 - 5, 2 - A, 3 - F, 4 - 0): ");
-       pea       @m68kus~1_10.L
-       jsr       (A3)
-       addq.w    #4,A7
-; scanf("%d", &test_pattern);
-       pea       -20(A6)
-       pea       @m68kus~1_8.L
-       jsr       (A5)
-       addq.w    #8,A7
-; // Check for invalid pattern entry and re-prompt if needed
-; while (test_pattern > 4 || test_pattern < 1) {
-main_5:
-       move.l    -20(A6),D0
-       cmp.l     #4,D0
-       bgt.s     main_8
-       move.l    -20(A6),D0
-       cmp.l     #1,D0
-       bge.s     main_7
-main_8:
-; printf("\r\nPattern invalid, try again");
-       pea       @m68kus~1_11.L
-       jsr       (A3)
-       addq.w    #4,A7
-; printf("\r\nChoose between different memory test patterns(1 - 5, 2 - A, 3 - F, 4 - 0): ");
-       pea       @m68kus~1_10.L
-       jsr       (A3)
-       addq.w    #4,A7
-; scanf("%d", &test_pattern);
-       pea       -20(A6)
-       pea       @m68kus~1_8.L
-       jsr       (A5)
-       addq.w    #8,A7
-       bra       main_5
-main_7:
-; }
-; // Prompt the user to entre a starting address
-; printf("\r\nEnter starting address(8020000 - 8030000 inclusive): ");
-       pea       @m68kus~1_12.L
-       jsr       (A3)
-       addq.w    #4,A7
-; scanf("%s", &start_addr);
-       move.l    A4,-(A7)
-       pea       @m68kus~1_13.L
-       jsr       (A5)
-       addq.w    #8,A7
-; start_val = Get7HexDigits(start_addr[0], start_addr[1], start_addr[2], start_addr[3], start_addr[4], start_addr[5], start_addr[6]);
-       move.b    6(A4),D1
-       ext.w     D1
-       ext.l     D1
-       move.l    D1,-(A7)
-       move.b    5(A4),D1
-       ext.w     D1
-       ext.l     D1
-       move.l    D1,-(A7)
-       move.b    4(A4),D1
-       ext.w     D1
-       ext.l     D1
-       move.l    D1,-(A7)
-       move.b    3(A4),D1
-       ext.w     D1
-       ext.l     D1
-       move.l    D1,-(A7)
-       move.b    2(A4),D1
-       ext.w     D1
-       ext.l     D1
-       move.l    D1,-(A7)
-       move.b    1(A4),D1
-       ext.w     D1
-       ext.l     D1
-       move.l    D1,-(A7)
-       move.b    (A4),D1
-       ext.w     D1
-       ext.l     D1
-       move.l    D1,-(A7)
-       jsr       _Get7HexDigits
-       add.w     #28,A7
-       move.l    D0,D3
-; // Check for invalid start address and re-prompt if needed
-; while (start_val < 0x8020000 || start_val > 0x8030000 || strlen(start_addr) > 7) { // start address must be 7 chars and within bounds
-main_9:
-       cmp.l     #134348800,D3
-       blt.s     main_12
-       cmp.l     #134414336,D3
-       bgt.s     main_12
-       move.l    A4,-(A7)
-       jsr       _strlen
-       addq.w    #4,A7
-       cmp.l     #7,D0
-       ble       main_11
-main_12:
-; printf("\r\nStarting address out of bounds.. try again");
-       pea       @m68kus~1_14.L
-       jsr       (A3)
-       addq.w    #4,A7
-; printf("\r\nEnter starting address(8020000 - 8030000 inclusive): ");
-       pea       @m68kus~1_12.L
-       jsr       (A3)
-       addq.w    #4,A7
-; scanf("%s", &start_addr);
-       move.l    A4,-(A7)
-       pea       @m68kus~1_13.L
-       jsr       (A5)
-       addq.w    #8,A7
-; start_val = Get7HexDigits(start_addr[0], start_addr[1], start_addr[2], start_addr[3], start_addr[4], start_addr[5], start_addr[6]);
-       move.b    6(A4),D1
-       ext.w     D1
-       ext.l     D1
-       move.l    D1,-(A7)
-       move.b    5(A4),D1
-       ext.w     D1
-       ext.l     D1
-       move.l    D1,-(A7)
-       move.b    4(A4),D1
-       ext.w     D1
-       ext.l     D1
-       move.l    D1,-(A7)
-       move.b    3(A4),D1
-       ext.w     D1
-       ext.l     D1
-       move.l    D1,-(A7)
-       move.b    2(A4),D1
-       ext.w     D1
-       ext.l     D1
-       move.l    D1,-(A7)
-       move.b    1(A4),D1
-       ext.w     D1
-       ext.l     D1
-       move.l    D1,-(A7)
-       move.b    (A4),D1
-       ext.w     D1
-       ext.l     D1
-       move.l    D1,-(A7)
-       jsr       _Get7HexDigits
-       add.w     #28,A7
-       move.l    D0,D3
-       bra       main_9
-main_11:
-; }
-; // Check for illegal address, start address must be even if writing words or long words to memory
-; while (start_val % 2 != 0 && test_config != 1) {
-main_13:
-       move.l    D3,-(A7)
-       pea       2
-       jsr       LDIV
-       move.l    4(A7),D0
-       addq.w    #8,A7
-       tst.l     D0
-       beq       main_15
-       move.l    -24(A6),D0
-       cmp.l     #1,D0
-       beq       main_15
-; printf("\r\nOdd starting address.. try again");
-       pea       @m68kus~1_15.L
-       jsr       (A3)
-       addq.w    #4,A7
-; printf("\r\nEnter starting address(8020000 - 8030000 inclusive): ");
-       pea       @m68kus~1_12.L
-       jsr       (A3)
-       addq.w    #4,A7
-; scanf("%s", &start_addr);
-       move.l    A4,-(A7)
-       pea       @m68kus~1_13.L
-       jsr       (A5)
-       addq.w    #8,A7
-; start_val = Get7HexDigits(start_addr[0], start_addr[1], start_addr[2], start_addr[3], start_addr[4], start_addr[5], start_addr[6]);
-       move.b    6(A4),D1
-       ext.w     D1
-       ext.l     D1
-       move.l    D1,-(A7)
-       move.b    5(A4),D1
-       ext.w     D1
-       ext.l     D1
-       move.l    D1,-(A7)
-       move.b    4(A4),D1
-       ext.w     D1
-       ext.l     D1
-       move.l    D1,-(A7)
-       move.b    3(A4),D1
-       ext.w     D1
-       ext.l     D1
-       move.l    D1,-(A7)
-       move.b    2(A4),D1
-       ext.w     D1
-       ext.l     D1
-       move.l    D1,-(A7)
-       move.b    1(A4),D1
-       ext.w     D1
-       ext.l     D1
-       move.l    D1,-(A7)
-       move.b    (A4),D1
-       ext.w     D1
-       ext.l     D1
-       move.l    D1,-(A7)
-       jsr       _Get7HexDigits
-       add.w     #28,A7
-       move.l    D0,D3
-       bra       main_13
-main_15:
-; }
-; // Prompt the user to entre an ending address
-; printf("\r\nEnter ending address(8020000 - 8030000 inclusive): ");
-       pea       @m68kus~1_16.L
-       jsr       (A3)
-       addq.w    #4,A7
-; scanf("%s", &end_addr);
-       move.l    A2,-(A7)
-       pea       @m68kus~1_13.L
-       jsr       (A5)
-       addq.w    #8,A7
-; end_val = Get7HexDigits(end_addr[0], end_addr[1], end_addr[2], end_addr[3], end_addr[4], end_addr[5], end_addr[6]);
-       move.b    6(A2),D1
-       ext.w     D1
-       ext.l     D1
-       move.l    D1,-(A7)
-       move.b    5(A2),D1
-       ext.w     D1
-       ext.l     D1
-       move.l    D1,-(A7)
-       move.b    4(A2),D1
-       ext.w     D1
-       ext.l     D1
-       move.l    D1,-(A7)
-       move.b    3(A2),D1
-       ext.w     D1
-       ext.l     D1
-       move.l    D1,-(A7)
-       move.b    2(A2),D1
-       ext.w     D1
-       ext.l     D1
-       move.l    D1,-(A7)
-       move.b    1(A2),D1
-       ext.w     D1
-       ext.l     D1
-       move.l    D1,-(A7)
-       move.b    (A2),D1
-       ext.w     D1
-       ext.l     D1
-       move.l    D1,-(A7)
-       jsr       _Get7HexDigits
-       add.w     #28,A7
-       move.l    D0,D2
-; while (end_val < 0x8020000 || end_val > 0x8030000 || strlen(end_addr) > 7) { // end address must be 7 chars and within bounds
-main_16:
-       cmp.l     #134348800,D2
-       blt.s     main_19
-       cmp.l     #134414336,D2
-       bgt.s     main_19
-       move.l    A2,-(A7)
-       jsr       _strlen
-       addq.w    #4,A7
-       cmp.l     #7,D0
-       ble       main_18
-main_19:
-; printf("\r\nEnding address out of bounds.. try again");
-       pea       @m68kus~1_17.L
-       jsr       (A3)
-       addq.w    #4,A7
-; printf("\r\nEnter ending address(8020000 - 8030000 inclusive): ");
-       pea       @m68kus~1_16.L
-       jsr       (A3)
-       addq.w    #4,A7
-; scanf("%s", &end_addr);
-       move.l    A2,-(A7)
-       pea       @m68kus~1_13.L
-       jsr       (A5)
-       addq.w    #8,A7
-; end_val = Get7HexDigits(end_addr[0], end_addr[1], end_addr[2], end_addr[3], end_addr[4], end_addr[5], end_addr[6]);
-       move.b    6(A2),D1
-       ext.w     D1
-       ext.l     D1
-       move.l    D1,-(A7)
-       move.b    5(A2),D1
-       ext.w     D1
-       ext.l     D1
-       move.l    D1,-(A7)
-       move.b    4(A2),D1
-       ext.w     D1
-       ext.l     D1
-       move.l    D1,-(A7)
-       move.b    3(A2),D1
-       ext.w     D1
-       ext.l     D1
-       move.l    D1,-(A7)
-       move.b    2(A2),D1
-       ext.w     D1
-       ext.l     D1
-       move.l    D1,-(A7)
-       move.b    1(A2),D1
-       ext.w     D1
-       ext.l     D1
-       move.l    D1,-(A7)
-       move.b    (A2),D1
-       ext.w     D1
-       ext.l     D1
-       move.l    D1,-(A7)
-       jsr       _Get7HexDigits
-       add.w     #28,A7
-       move.l    D0,D2
-       bra       main_16
-main_18:
-; }
-; while (end_val < start_val) {
-main_20:
-       cmp.l     D3,D2
-       bge       main_22
-; printf("\r\nInvalid ending address.. try again");
-       pea       @m68kus~1_18.L
-       jsr       (A3)
-       addq.w    #4,A7
-; printf("\r\nEnter ending address(8020000 - 8030000 inclusive): ");
-       pea       @m68kus~1_16.L
-       jsr       (A3)
-       addq.w    #4,A7
-; scanf("%s", &end_addr);
-       move.l    A2,-(A7)
-       pea       @m68kus~1_13.L
-       jsr       (A5)
-       addq.w    #8,A7
-; end_val = Get7HexDigits(end_addr[0], end_addr[1], end_addr[2], end_addr[3], end_addr[4], end_addr[5], end_addr[6]);
-       move.b    6(A2),D1
-       ext.w     D1
-       ext.l     D1
-       move.l    D1,-(A7)
-       move.b    5(A2),D1
-       ext.w     D1
-       ext.l     D1
-       move.l    D1,-(A7)
-       move.b    4(A2),D1
-       ext.w     D1
-       ext.l     D1
-       move.l    D1,-(A7)
-       move.b    3(A2),D1
-       ext.w     D1
-       ext.l     D1
-       move.l    D1,-(A7)
-       move.b    2(A2),D1
-       ext.w     D1
-       ext.l     D1
-       move.l    D1,-(A7)
-       move.b    1(A2),D1
-       ext.w     D1
-       ext.l     D1
-       move.l    D1,-(A7)
-       move.b    (A2),D1
-       ext.w     D1
-       ext.l     D1
-       move.l    D1,-(A7)
-       jsr       _Get7HexDigits
-       add.w     #28,A7
-       move.l    D0,D2
-       bra       main_20
-main_22:
-; }
-; // When writing words, the given address range should be a multiple of 2 bytes (size of a word)
-; while ((end_val - start_val + 1) % 2 != 0  && test_config == 2) {
-main_23:
-       move.l    D2,D0
-       sub.l     D3,D0
-       addq.l    #1,D0
-       move.l    D0,-(A7)
-       pea       2
-       jsr       LDIV
-       move.l    4(A7),D0
-       addq.w    #8,A7
-       tst.l     D0
-       beq       main_25
-       move.l    -24(A6),D0
-       cmp.l     #2,D0
-       bne       main_25
-; printf("\r\nInvalid address range is too small.. try again");
-       pea       @m68kus~1_19.L
-       jsr       (A3)
-       addq.w    #4,A7
-; printf("\r\nEnter ending address(8020000 - 8030000 inclusive): ");
-       pea       @m68kus~1_16.L
-       jsr       (A3)
-       addq.w    #4,A7
-; scanf("%s", &end_addr);
-       move.l    A2,-(A7)
-       pea       @m68kus~1_13.L
-       jsr       (A5)
-       addq.w    #8,A7
-; end_val = Get7HexDigits(end_addr[0], end_addr[1], end_addr[2], end_addr[3], end_addr[4], end_addr[5], end_addr[6]);
-       move.b    6(A2),D1
-       ext.w     D1
-       ext.l     D1
-       move.l    D1,-(A7)
-       move.b    5(A2),D1
-       ext.w     D1
-       ext.l     D1
-       move.l    D1,-(A7)
-       move.b    4(A2),D1
-       ext.w     D1
-       ext.l     D1
-       move.l    D1,-(A7)
-       move.b    3(A2),D1
-       ext.w     D1
-       ext.l     D1
-       move.l    D1,-(A7)
-       move.b    2(A2),D1
-       ext.w     D1
-       ext.l     D1
-       move.l    D1,-(A7)
-       move.b    1(A2),D1
-       ext.w     D1
-       ext.l     D1
-       move.l    D1,-(A7)
-       move.b    (A2),D1
-       ext.w     D1
-       ext.l     D1
-       move.l    D1,-(A7)
-       jsr       _Get7HexDigits
-       add.w     #28,A7
-       move.l    D0,D2
-       bra       main_23
-main_25:
-; }
-; // When writing long words, the given address range should be a multiple of 4 bytes (size of a long word)
-; while ((end_val - start_val + 1) % 4 != 0 && test_config == 3) {
-main_26:
-       move.l    D2,D0
-       sub.l     D3,D0
-       addq.l    #1,D0
-       move.l    D0,-(A7)
-       pea       4
-       jsr       LDIV
-       move.l    4(A7),D0
-       addq.w    #8,A7
-       tst.l     D0
-       beq       main_28
-       move.l    -24(A6),D0
-       cmp.l     #3,D0
-       bne       main_28
-; printf("\r\nInvalid range is too small.. try again");
-       pea       @m68kus~1_20.L
-       jsr       (A3)
-       addq.w    #4,A7
-; printf("\r\nEnter ending address(8020000 - 8030000 inclusive): ");
-       pea       @m68kus~1_16.L
-       jsr       (A3)
-       addq.w    #4,A7
-; scanf("%s", &end_addr);
-       move.l    A2,-(A7)
-       pea       @m68kus~1_13.L
-       jsr       (A5)
-       addq.w    #8,A7
-; end_val = Get7HexDigits(end_addr[0], end_addr[1], end_addr[2], end_addr[3], end_addr[4], end_addr[5], end_addr[6]);
-       move.b    6(A2),D1
-       ext.w     D1
-       ext.l     D1
-       move.l    D1,-(A7)
-       move.b    5(A2),D1
-       ext.w     D1
-       ext.l     D1
-       move.l    D1,-(A7)
-       move.b    4(A2),D1
-       ext.w     D1
-       ext.l     D1
-       move.l    D1,-(A7)
-       move.b    3(A2),D1
-       ext.w     D1
-       ext.l     D1
-       move.l    D1,-(A7)
-       move.b    2(A2),D1
-       ext.w     D1
-       ext.l     D1
-       move.l    D1,-(A7)
-       move.b    1(A2),D1
-       ext.w     D1
-       ext.l     D1
-       move.l    D1,-(A7)
-       move.b    (A2),D1
-       ext.w     D1
-       ext.l     D1
-       move.l    D1,-(A7)
-       jsr       _Get7HexDigits
-       add.w     #28,A7
-       move.l    D0,D2
-       bra       main_26
-main_28:
-; }
-; printf("\r\nWriting to SRAM ...");
-       pea       @m68kus~1_21.L
-       jsr       (A3)
-       addq.w    #4,A7
-; printf("\r\n............................................................................................................");
-       pea       @m68kus~1_22.L
-       jsr       (A3)
-       addq.w    #4,A7
-; printf("\r\n............................................................................................................");
-       pea       @m68kus~1_22.L
-       jsr       (A3)
-       addq.w    #4,A7
-; printf("\r\n............................................................................................................");
-       pea       @m68kus~1_22.L
-       jsr       (A3)
-       addq.w    #4,A7
-; switch (test_pattern) {
-       move.l    -20(A6),D0
-       subq.l    #1,D0
-       blo       main_29
-       cmp.l     #4,D0
-       bhs.s     main_29
-       asl.l     #1,D0
-       move.w    main_31(PC,D0.L),D0
-       jmp       main_31(PC,D0.W)
-main_31:
-       dc.w      main_32-main_31
-       dc.w      main_33-main_31
-       dc.w      main_34-main_31
-       dc.w      main_35-main_31
-main_32:
-; case 1: digit = '5';
-       moveq     #53,D4
-; break;
-       bra.s     main_30
-main_33:
-; case 2: digit = 'A';
-       moveq     #65,D4
-; break;
-       bra.s     main_30
-main_34:
-; case 3: digit = 'F';
-       moveq     #70,D4
-; break;
-       bra.s     main_30
-main_35:
-; case 4: digit = '0';
-       moveq     #48,D4
-; break;
-       bra.s     main_30
-main_29:
-; default: digit = '5';
-       moveq     #53,D4
-main_30:
-; }
-; switch (test_config) {
-       move.l    -24(A6),D0
-       cmp.l     #2,D0
-       beq       main_40
-       bgt.s     main_43
-       cmp.l     #1,D0
-       beq.s     main_39
-       bra       main_37
-main_43:
-       cmp.l     #3,D0
-       beq       main_41
-       bra       main_37
-main_39:
-; case 1: FillMemory(start_val, end_val, Get2HexDigits(digit), 1);
-       pea       1
-       move.l    D0,-(A7)
-       ext.w     D4
-       ext.l     D4
-       move.l    D4,-(A7)
-       jsr       _Get2HexDigits
-       addq.w    #4,A7
-       move.l    D0,D1
-       move.l    (A7)+,D0
-       and.l     #255,D1
-       move.l    D1,-(A7)
-       move.l    D2,-(A7)
-       move.l    D3,-(A7)
-       jsr       _FillMemory
-       add.w     #16,A7
-; break;
-       bra       main_38
-main_40:
-; case 2: FillMemory(start_val, end_val, Get4HexDigits(digit), 2);
-       pea       2
-       move.l    D0,-(A7)
-       ext.w     D4
-       ext.l     D4
-       move.l    D4,-(A7)
-       jsr       _Get4HexDigits
-       addq.w    #4,A7
-       move.l    D0,D1
-       move.l    (A7)+,D0
-       and.l     #255,D1
-       move.l    D1,-(A7)
-       move.l    D2,-(A7)
-       move.l    D3,-(A7)
-       jsr       _FillMemory
-       add.w     #16,A7
-; break;
-       bra       main_38
-main_41:
-; case 3: FillMemory(start_val, end_val, Get8HexDigits(digit), 3);
-       pea       3
-       move.l    D0,-(A7)
-       ext.w     D4
-       ext.l     D4
-       move.l    D4,-(A7)
-       jsr       _Get8HexDigits
-       addq.w    #4,A7
-       move.l    D0,D1
-       move.l    (A7)+,D0
-       and.l     #255,D1
-       move.l    D1,-(A7)
-       move.l    D2,-(A7)
-       move.l    D3,-(A7)
-       jsr       _FillMemory
-       add.w     #16,A7
-; break;
-       bra.s     main_38
-main_37:
-; default: FillMemory(start_val, end_val, Get2HexDigits(digit), 1);;
-       pea       1
-       move.l    D0,-(A7)
-       ext.w     D4
-       ext.l     D4
-       move.l    D4,-(A7)
-       jsr       _Get2HexDigits
-       addq.w    #4,A7
-       move.l    D0,D1
-       move.l    (A7)+,D0
-       and.l     #255,D1
-       move.l    D1,-(A7)
-       move.l    D2,-(A7)
-       move.l    D3,-(A7)
-       jsr       _FillMemory
-       add.w     #16,A7
-main_38:
-; }
-; printf("\r\nFinished writing to SRAM .");
-       pea       @m68kus~1_23.L
-       jsr       (A3)
-       addq.w    #4,A7
-; printf("\r\nCheck SRAM content");
-       pea       @m68kus~1_24.L
-       jsr       (A3)
-       addq.w    #4,A7
-; printf("\r\nReading from SRAM ...");
-       pea       @m68kus~1_25.L
-       jsr       (A3)
-       addq.w    #4,A7
-; printf("\r\nPrinting out every 10k location from SRAM ...");
-       pea       @m68kus~1_26.L
-       jsr       (A3)
-       addq.w    #4,A7
-; printf("\r\n............................................................................................................");
-       pea       @m68kus~1_22.L
-       jsr       (A3)
-       addq.w    #4,A7
-; printf("\r\n............................................................................................................");
-       pea       @m68kus~1_22.L
-       jsr       (A3)
-       addq.w    #4,A7
-; printf("\r\n............................................................................................................");
-       pea       @m68kus~1_22.L
-       jsr       (A3)
-       addq.w    #4,A7
-; printf("\r\n....................... begin reading");
-       pea       @m68kus~1_27.L
-       jsr       (A3)
-       addq.w    #4,A7
-; switch (test_config) {
-       move.l    -24(A6),D0
-       cmp.l     #2,D0
-       beq       main_47
-       bgt.s     main_50
-       cmp.l     #1,D0
-       beq.s     main_46
-       bra       main_44
-main_50:
-       cmp.l     #3,D0
-       beq       main_48
-       bra       main_44
-main_46:
-; case 1: ReadMemory(start_val, end_val, Get2HexDigits(digit), 1);
-       pea       1
-       move.l    D0,-(A7)
-       ext.w     D4
-       ext.l     D4
-       move.l    D4,-(A7)
-       jsr       _Get2HexDigits
-       addq.w    #4,A7
-       move.l    D0,D1
-       move.l    (A7)+,D0
-       and.l     #255,D1
-       move.l    D1,-(A7)
-       move.l    D2,-(A7)
-       move.l    D3,-(A7)
-       jsr       _ReadMemory
-       add.w     #16,A7
-; break;
-       bra       main_45
-main_47:
-; case 2: ReadMemory(start_val, end_val, Get4HexDigits(digit), 2);
-       pea       2
-       move.l    D0,-(A7)
-       ext.w     D4
-       ext.l     D4
-       move.l    D4,-(A7)
-       jsr       _Get4HexDigits
-       addq.w    #4,A7
-       move.l    D0,D1
-       move.l    (A7)+,D0
-       and.l     #255,D1
-       move.l    D1,-(A7)
-       move.l    D2,-(A7)
-       move.l    D3,-(A7)
-       jsr       _ReadMemory
-       add.w     #16,A7
-; break;
-       bra       main_45
-main_48:
-; case 3: ReadMemory(start_val, end_val, Get8HexDigits(digit), 3);
-       pea       3
-       move.l    D0,-(A7)
-       ext.w     D4
-       ext.l     D4
-       move.l    D4,-(A7)
-       jsr       _Get8HexDigits
-       addq.w    #4,A7
-       move.l    D0,D1
-       move.l    (A7)+,D0
-       and.l     #255,D1
-       move.l    D1,-(A7)
-       move.l    D2,-(A7)
-       move.l    D3,-(A7)
-       jsr       _ReadMemory
-       add.w     #16,A7
-; break;
-       bra.s     main_45
-main_44:
-; default: ReadMemory(start_val, end_val, Get2HexDigits(digit), 1);;
-       pea       1
-       move.l    D0,-(A7)
-       ext.w     D4
-       ext.l     D4
-       move.l    D4,-(A7)
-       jsr       _Get2HexDigits
-       addq.w    #4,A7
-       move.l    D0,D1
-       move.l    (A7)+,D0
-       and.l     #255,D1
-       move.l    D1,-(A7)
-       move.l    D2,-(A7)
-       move.l    D3,-(A7)
-       jsr       _ReadMemory
-       add.w     #16,A7
-main_45:
-; }
-; printf("\r\nFinished reading from SRAM ...");
-       pea       @m68kus~1_28.L
-       jsr       (A3)
-       addq.w    #4,A7
-; printf("\r\nend of program ...");
-       pea       @m68kus~1_29.L
-       jsr       (A3)
-       addq.w    #4,A7
-; printf("\r\n............................................................................................................");
-       pea       @m68kus~1_22.L
-       jsr       (A3)
-       addq.w    #4,A7
-; printf("\r\n............................................................................................................");
-       pea       @m68kus~1_22.L
-       jsr       (A3)
-       addq.w    #4,A7
-; // printf("\r\nEnter Integer: ") ;
-; // scanf("%d", &i) ;
-; // printf("You entered %d", i) ;
-; // sprintf(text, "Hello CPEN 412 Student") ;
-; // LCDLine1Message(text) ;
-; // printf("\r\nHello CPEN 412 Student\r\nYour LEDs should be Flashing") ;
-; // printf("\r\nYour LCD should be displaying") ;
-; while(1);
-main_51:
-       bra       main_51
+; ;
 ; // programs should NOT exit as there is nothing to Exit TO !!!!!!
 ; // There is no OS - just press the reset button to end program and call debug
 ; }
        section   const
 @m68kus~1_1:
-       dc.b      13,10,70,105,108,108,105,110,103,32,65,100,100
-       dc.b      114,101,115,115,101,115,32,91,36,37,48,56,88
-       dc.b      32,45,32,36,37,48,56,88,93,32,119,105,116,104
-       dc.b      32,36,37,48,50,88,0
+       dc.b      13,10,10,69,110,116,101,114,32,117,112,112,101
+       dc.b      114,32,98,121,116,101,58,32,0
 @m68kus~1_2:
-       dc.b      13,10,82,101,97,100,105,110,103,32,65,100,100
-       dc.b      114,101,115,115,101,115,32,91,36,37,48,56,88
-       dc.b      32,45,32,36,37,48,56,88,93,32,102,111,114,32
-       dc.b      36,37,48,50,88,0
+       dc.b      13,10,10,85,80,80,69,82,32,66,89,84,69,58,32
+       dc.b      37,120,32,0
 @m68kus~1_3:
-       dc.b      13,10,86,97,108,117,101,32,105,110,99,111,114
-       dc.b      114,101,99,116,32,97,116,32,97,100,100,114,101
-       dc.b      115,115,101,115,32,36,37,48,56,88,32,46,46,46
-       dc.b      32,115,104,111,117,108,100,32,98,101,32,36,37
-       dc.b      48,50,88,32,98,117,116,32,102,111,117,110,100
-       dc.b      32,36,37,48,50,88,0
+       dc.b      13,10,10,69,110,116,101,114,32,109,105,100,32
+       dc.b      98,121,116,101,58,32,0
 @m68kus~1_4:
-       dc.b      13,10,86,97,108,117,101,58,32,36,37,48,50,88
-       dc.b      32,102,111,117,110,100,32,97,116,32,65,100,100
-       dc.b      114,101,115,115,58,32,36,37,48,56,88,0
+       dc.b      13,10,10,77,73,68,32,66,89,84,69,58,32,37,120
+       dc.b      32,0
 @m68kus~1_5:
-       dc.b      13,10,86,97,108,117,101,58,32,36,37,48,50,88
-       dc.b      32,36,37,48,50,88,32,102,111,117,110,100,32
-       dc.b      97,116,32,65,100,100,114,101,115,115,58,32,36
-       dc.b      37,48,56,88,32,45,32,36,37,48,56,88,0
+       dc.b      13,10,10,69,110,116,101,114,32,108,111,119,101
+       dc.b      114,32,98,121,116,101,58,32,0
 @m68kus~1_6:
-       dc.b      13,10,86,97,108,117,101,58,32,36,37,48,50,88
-       dc.b      32,36,37,48,50,88,32,36,37,48,50,88,32,36,37
-       dc.b      48,50,88,32,102,111,117,110,100,32,97,116,32
-       dc.b      65,100,100,114,101,115,115,58,32,36,37,48,56
-       dc.b      88,32,45,32,36,37,48,56,88,0
+       dc.b      13,10,10,76,79,87,69,82,32,66,89,84,69,58,32
+       dc.b      37,120,32,0
 @m68kus~1_7:
-       dc.b      13,10,69,110,116,101,114,32,109,101,109,111
-       dc.b      114,121,32,116,101,115,116,32,99,111,110,102
-       dc.b      105,103,117,114,97,116,105,111,110,40,49,32
-       dc.b      45,32,98,121,116,101,115,44,32,50,32,45,32,119
-       dc.b      111,114,100,115,44,32,51,32,45,32,108,111,110
-       dc.b      103,32,119,111,114,100,115,41,58,32,0
+       dc.b      53,58,32,119,114,105,116,101,32,116,111,32,102
+       dc.b      108,97,115,104,32,10,10,0
 @m68kus~1_8:
-       dc.b      37,100,0
+       dc.b      55,58,32,114,101,97,100,105,110,103,32,102,108
+       dc.b      97,115,104,32,99,104,105,112,32,102,111,114
+       dc.b      32,118,101,114,105,102,105,99,97,116,105,111
+       dc.b      110,32,10,10,0
 @m68kus~1_9:
-       dc.b      13,10,67,111,110,102,105,103,117,114,97,116
-       dc.b      105,111,110,32,105,110,118,97,108,105,100,44
-       dc.b      32,116,114,121,32,97,103,97,105,110,0
+       dc.b      13,10,10,114,101,116,58,32,37,120,32,0
 @m68kus~1_10:
-       dc.b      13,10,67,104,111,111,115,101,32,98,101,116,119
-       dc.b      101,101,110,32,100,105,102,102,101,114,101,110
-       dc.b      116,32,109,101,109,111,114,121,32,116,101,115
-       dc.b      116,32,112,97,116,116,101,114,110,115,40,49
-       dc.b      32,45,32,53,44,32,50,32,45,32,65,44,32,51,32
-       dc.b      45,32,70,44,32,52,32,45,32,48,41,58,32,0
+       dc.b      13,10,10,69,110,116,101,114,32,117,112,112,101
+       dc.b      114,32,98,121,116,101,58,0
 @m68kus~1_11:
-       dc.b      13,10,80,97,116,116,101,114,110,32,105,110,118
-       dc.b      97,108,105,100,44,32,116,114,121,32,97,103,97
-       dc.b      105,110,0
+       dc.b      13,10,10,85,80,80,69,82,32,66,89,84,69,58,32
+       dc.b      37,120,0
 @m68kus~1_12:
-       dc.b      13,10,69,110,116,101,114,32,115,116,97,114,116
-       dc.b      105,110,103,32,97,100,100,114,101,115,115,40
-       dc.b      56,48,50,48,48,48,48,32,45,32,56,48,51,48,48
-       dc.b      48,48,32,105,110,99,108,117,115,105,118,101
-       dc.b      41,58,32,0
+       dc.b      13,10,10,69,110,116,101,114,32,109,105,100,32
+       dc.b      98,121,116,101,58,0
 @m68kus~1_13:
-       dc.b      37,115,0
+       dc.b      13,10,10,77,73,68,32,66,89,84,69,58,32,37,120
+       dc.b      0
 @m68kus~1_14:
-       dc.b      13,10,83,116,97,114,116,105,110,103,32,97,100
-       dc.b      100,114,101,115,115,32,111,117,116,32,111,102
-       dc.b      32,98,111,117,110,100,115,46,46,32,116,114,121
-       dc.b      32,97,103,97,105,110,0
+       dc.b      13,10,10,69,110,116,101,114,32,108,111,119,101
+       dc.b      114,32,98,121,116,101,58,0
 @m68kus~1_15:
-       dc.b      13,10,79,100,100,32,115,116,97,114,116,105,110
-       dc.b      103,32,97,100,100,114,101,115,115,46,46,32,116
-       dc.b      114,121,32,97,103,97,105,110,0
+       dc.b      13,10,10,76,79,87,69,82,32,66,89,84,69,58,32
+       dc.b      37,120,0
 @m68kus~1_16:
-       dc.b      13,10,69,110,116,101,114,32,101,110,100,105
-       dc.b      110,103,32,97,100,100,114,101,115,115,40,56
-       dc.b      48,50,48,48,48,48,32,45,32,56,48,51,48,48,48
-       dc.b      48,32,105,110,99,108,117,115,105,118,101,41
-       dc.b      58,32,0
+       dc.b      13,10,82,101,97,100,105,110,103,32,102,108,97
+       dc.b      115,104,32,99,104,105,112,32,102,111,114,32
+       dc.b      118,101,114,105,102,105,99,97,116,105,111,110
+       dc.b      0
 @m68kus~1_17:
-       dc.b      13,10,69,110,100,105,110,103,32,97,100,100,114
-       dc.b      101,115,115,32,111,117,116,32,111,102,32,98
-       dc.b      111,117,110,100,115,46,46,32,116,114,121,32
-       dc.b      97,103,97,105,110,0
+       dc.b      13,10,80,111,108,108,105,110,103,32,102,108
+       dc.b      97,115,104,32,99,104,105,112,32,116,111,32,115
+       dc.b      101,101,32,105,102,32,114,101,97,100,121,32
+       dc.b      10,10,0
 @m68kus~1_18:
-       dc.b      13,10,73,110,118,97,108,105,100,32,101,110,100
-       dc.b      105,110,103,32,97,100,100,114,101,115,115,46
-       dc.b      46,32,116,114,121,32,97,103,97,105,110,0
+       dc.b      13,10,69,114,97,115,101,32,99,104,105,112,0
 @m68kus~1_19:
-       dc.b      13,10,73,110,118,97,108,105,100,32,97,100,100
-       dc.b      114,101,115,115,32,114,97,110,103,101,32,105
-       dc.b      115,32,116,111,111,32,115,109,97,108,108,46
-       dc.b      46,32,116,114,121,32,97,103,97,105,110,0
+       dc.b      13,10,10,69,110,116,101,114,32,83,80,73,32,111
+       dc.b      112,101,114,97,116,105,111,110,40,49,32,45,32
+       dc.b      69,114,97,115,101,32,67,104,105,112,44,32,50
+       dc.b      32,45,32,87,114,105,116,101,32,116,111,32,83
+       dc.b      80,73,44,32,51,32,45,32,82,101,97,100,32,102
+       dc.b      114,111,109,32,83,80,73,41,58,32,0
 @m68kus~1_20:
-       dc.b      13,10,73,110,118,97,108,105,100,32,114,97,110
-       dc.b      103,101,32,105,115,32,116,111,111,32,115,109
-       dc.b      97,108,108,46,46,32,116,114,121,32,97,103,97
-       dc.b      105,110,0
+       dc.b      13,10,10,83,80,73,32,111,112,101,114,97,116
+       dc.b      105,111,110,58,32,37,120,32,0
 @m68kus~1_21:
-       dc.b      13,10,87,114,105,116,105,110,103,32,116,111
-       dc.b      32,83,82,65,77,32,46,46,46,0
+       dc.b      13,10,67,104,105,112,32,101,114,97,115,101,32
+       dc.b      111,112,101,114,97,116,105,111,110,32,115,101
+       dc.b      108,101,99,116,101,100,0
 @m68kus~1_22:
-       dc.b      13,10,46,46,46,46,46,46,46,46,46,46,46,46,46
-       dc.b      46,46,46,46,46,46,46,46,46,46,46,46,46,46,46
-       dc.b      46,46,46,46,46,46,46,46,46,46,46,46,46,46,46
-       dc.b      46,46,46,46,46,46,46,46,46,46,46,46,46,46,46
-       dc.b      46,46,46,46,46,46,46,46,46,46,46,46,46,46,46
-       dc.b      46,46,46,46,46,46,46,46,46,46,46,46,46,46,46
-       dc.b      46,46,46,46,46,46,46,46,46,46,46,46,46,46,46
-       dc.b      46,46,46,46,46,0
+       dc.b      13,10,69,110,100,32,111,102,32,101,114,97,115
+       dc.b      101,32,111,112,101,114,97,116,105,111,110,32
+       dc.b      46,46,46,0
 @m68kus~1_23:
-       dc.b      13,10,70,105,110,105,115,104,101,100,32,119
-       dc.b      114,105,116,105,110,103,32,116,111,32,83,82
-       dc.b      65,77,32,46,0
+       dc.b      13,10,10,87,114,105,116,101,32,111,112,101,114
+       dc.b      97,116,105,111,110,32,115,101,108,101,99,116
+       dc.b      101,100,32,10,10,0
 @m68kus~1_24:
-       dc.b      13,10,67,104,101,99,107,32,83,82,65,77,32,99
-       dc.b      111,110,116,101,110,116,0
+       dc.b      13,10,10,69,110,116,101,114,32,97,32,118,97
+       dc.b      108,117,101,32,102,111,114,32,119,114,105,116
+       dc.b      101,58,32,0
 @m68kus~1_25:
-       dc.b      13,10,82,101,97,100,105,110,103,32,102,114,111
-       dc.b      109,32,83,82,65,77,32,46,46,46,0
+       dc.b      13,10,86,97,108,117,101,32,116,111,32,119,114
+       dc.b      105,116,101,58,32,37,120,0
 @m68kus~1_26:
-       dc.b      13,10,80,114,105,110,116,105,110,103,32,111
-       dc.b      117,116,32,101,118,101,114,121,32,49,48,107
-       dc.b      32,108,111,99,97,116,105,111,110,32,102,114
-       dc.b      111,109,32,83,82,65,77,32,46,46,46,0
+       dc.b      13,10,86,97,108,117,101,32,114,101,116,117,114
+       dc.b      110,101,100,58,32,37,120,0
 @m68kus~1_27:
-       dc.b      13,10,46,46,46,46,46,46,46,46,46,46,46,46,46
-       dc.b      46,46,46,46,46,46,46,46,46,46,32,98,101,103
-       dc.b      105,110,32,114,101,97,100,105,110,103,0
+       dc.b      13,10,101,110,100,32,111,102,32,119,114,105
+       dc.b      116,101,32,111,112,101,114,97,116,105,111,110
+       dc.b      32,46,46,46,0
 @m68kus~1_28:
-       dc.b      13,10,70,105,110,105,115,104,101,100,32,114
-       dc.b      101,97,100,105,110,103,32,102,114,111,109,32
-       dc.b      83,82,65,77,32,46,46,46,0
+       dc.b      13,10,10,82,101,97,100,32,111,112,101,114,97
+       dc.b      116,105,111,110,32,115,101,108,101,99,116,101
+       dc.b      100,0
 @m68kus~1_29:
-       dc.b      13,10,101,110,100,32,111,102,32,112,114,111
-       dc.b      103,114,97,109,32,46,46,46,0
+       dc.b      13,10,10,86,97,108,117,101,32,114,101,116,117
+       dc.b      114,110,101,100,58,32,37,120,32,0
+@m68kus~1_30:
+       dc.b      13,10,10,101,110,100,32,111,102,32,114,101,97
+       dc.b      100,32,111,112,101,114,97,116,105,111,110,32
+       dc.b      46,46,46,0
+@m68kus~1_31:
+       dc.b      13,10,10,73,110,118,97,108,105,100,32,111,112
+       dc.b      101,114,97,116,105,111,110,32,46,46,46,0
+@m68kus~1_32:
+       dc.b      13,10,10,84,114,121,32,97,103,97,105,110,33
+       dc.b      33,33,33,33,0
+@m68kus~1_33:
+       dc.b      13,10,73,110,116,105,97,108,105,122,105,110
+       dc.b      103,32,83,80,73,10,0
+@m68kus~1_34:
+       dc.b      82,69,65,68,73,78,71,32,73,68,32,33,33,33,33
+       dc.b      33,33,32,32,10,10,0
+@m68kus~1_35:
+       dc.b      13,10,10,77,97,110,58,32,37,120,32,0
+@m68kus~1_36:
+       dc.b      13,10,10,68,101,118,58,32,37,120,32,0
        section   bss
        xdef      _i
 _i:
@@ -1990,8 +1609,5 @@ _Timer3Count:
        xdef      _Timer4Count
 _Timer4Count:
        ds.b      1
-       xref      LDIV
-       xref      _strlen
-       xref      _scanf
        xref      _scanflush
        xref      _printf

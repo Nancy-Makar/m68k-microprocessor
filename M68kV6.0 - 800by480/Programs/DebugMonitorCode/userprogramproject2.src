@@ -1,0 +1,3692 @@
+       section   code
+**********************************************************************************************************
+* CSTART.ASM  -  C startup-code
+*
+*          Initialises the system prior to running the users main() program
+*
+*          1) Sets up the user program stack pointer
+*          2) Switches to User mode in the 68000
+*          3) Enables All Interrupts 1-7 on 68000
+*          4) Copies all initialised C program variables from Rom to Ram prior to running main()
+*
+**********************************************************************************************************
+                align
+
+
+**********************************************************************************************************
+* The Following ORG Statement marks the address of the start of the this CStart Program
+*
+* The debug Monitor and Flash Load and Program routines assume your program lives here
+**********************************************************************************************************
+                org       $08000000
+start:          move.w    #$2000,SR             clear interrupts to enable all, move to supervisor mode
+
+******************************************************************************************
+* Set unitialised global variables to 0 at startup
+******************************************************************************************
+mainloop        movea.l   #BssStart,a0          point a0 to the start of the initialised data section held in ROM
+                move.l    #BssLength,d0         figure out how many bytes of C program variables data to copy
+                beq       go_main               if no data to copy go straight to program
+Zeroinit        move.b    #0,(a0)+              copy the C program initialise variables from rom to ram
+                subq.l    #1,d0
+                bne       Zeroinit
+
+*******************************************************************************************
+* last minute initialisation before calling main
+*******************************************************************************************
+
+                move.l    #-1,__ungetbuf         required for use of scanf() etc in C programs
+                clr.l     __allocp               used by malloc() in C
+                move.l    #heap,__heap           pointer to free memory
+go_main         jsr       _main
+                bra       start
+
+; C:\CPEN412\GITHUB_STEUP\M68KV6.0 - 800BY480\PROGRAMS\DEBUGMONITORCODE\M68KUSERPROGRAM (DE1).C - Compiled by CC68K  Version 5.00 (c) 1991-2005  Peter J. Fondse
+; #include <stdio.h>
+; #include <string.h>
+; #include <ctype.h>
+; //IMPORTANT
+; //
+; // Uncomment one of the two #defines below
+; // Define StartOfExceptionVectorTable as 08030000 if running programs from sram or
+; // 0B000000 for running programs from dram
+; //
+; // In your labs, you will initially start by designing a system with SRam and later move to
+; // Dram, so these constants will need to be changed based on the version of the system you have
+; // building
+; //
+; // The working 68k system SOF file posted on canvas that you can use for your pre-lab
+; // is based around Dram so #define accordingly before building
+; #define StartOfExceptionVectorTable 0x08030000
+; //#define StartOfExceptionVectorTable 0x0B000000
+; /**********************************************************************************************
+; **	Parallel port addresses
+; **********************************************************************************************/
+; #define PortA   *(volatile unsigned char *)(0x00400000)
+; #define PortB   *(volatile unsigned char *)(0x00400002)
+; #define PortC   *(volatile unsigned char *)(0x00400004)
+; #define PortD   *(volatile unsigned char *)(0x00400006)
+; #define PortE   *(volatile unsigned char *)(0x00400008)
+; /*********************************************************************************************
+; **	Hex 7 seg displays port addresses
+; *********************************************************************************************/
+; #define HEX_A        *(volatile unsigned char *)(0x00400010)
+; #define HEX_B        *(volatile unsigned char *)(0x00400012)
+; #define HEX_C        *(volatile unsigned char *)(0x00400014)    // de2 only
+; #define HEX_D        *(volatile unsigned char *)(0x00400016)    // de2 only
+; /**********************************************************************************************
+; **	LCD display port addresses
+; **********************************************************************************************/
+; #define LCDcommand   *(volatile unsigned char *)(0x00400020)
+; #define LCDdata      *(volatile unsigned char *)(0x00400022)
+; /********************************************************************************************
+; **	Timer Port addresses
+; *********************************************************************************************/
+; #define Timer1Data      *(volatile unsigned char *)(0x00400030)
+; #define Timer1Control   *(volatile unsigned char *)(0x00400032)
+; #define Timer1Status    *(volatile unsigned char *)(0x00400032)
+; #define Timer2Data      *(volatile unsigned char *)(0x00400034)
+; #define Timer2Control   *(volatile unsigned char *)(0x00400036)
+; #define Timer2Status    *(volatile unsigned char *)(0x00400036)
+; #define Timer3Data      *(volatile unsigned char *)(0x00400038)
+; #define Timer3Control   *(volatile unsigned char *)(0x0040003A)
+; #define Timer3Status    *(volatile unsigned char *)(0x0040003A)
+; #define Timer4Data      *(volatile unsigned char *)(0x0040003C)
+; #define Timer4Control   *(volatile unsigned char *)(0x0040003E)
+; #define Timer4Status    *(volatile unsigned char *)(0x0040003E)
+; /*********************************************************************************************
+; **	RS232 port addresses
+; *********************************************************************************************/
+; #define RS232_Control     *(volatile unsigned char *)(0x00400040)
+; #define RS232_Status      *(volatile unsigned char *)(0x00400040)
+; #define RS232_TxData      *(volatile unsigned char *)(0x00400042)
+; #define RS232_RxData      *(volatile unsigned char *)(0x00400042)
+; #define RS232_Baud        *(volatile unsigned char *)(0x00400044)
+; /*********************************************************************************************
+; **	PIA 1 and 2 port addresses
+; *********************************************************************************************/
+; #define PIA1_PortA_Data     *(volatile unsigned char *)(0x00400050)         // combined data and data direction register share same address
+; #define PIA1_PortA_Control *(volatile unsigned char *)(0x00400052)
+; #define PIA1_PortB_Data     *(volatile unsigned char *)(0x00400054)         // combined data and data direction register share same address
+; #define PIA1_PortB_Control *(volatile unsigned char *)(0x00400056)
+; #define PIA2_PortA_Data     *(volatile unsigned char *)(0x00400060)         // combined data and data direction register share same address
+; #define PIA2_PortA_Control *(volatile unsigned char *)(0x00400062)
+; #define PIA2_PortB_data     *(volatile unsigned char *)(0x00400064)         // combined data and data direction register share same address
+; #define PIA2_PortB_Control *(volatile unsigned char *)(0x00400066)
+; /* SPI declarations*/
+; /*************************************************************
+; ** SPI Controller registers
+; **************************************************************/
+; // SPI Registers
+; #define SPI_Control         (*(volatile unsigned char *)(0x00408020))
+; #define SPI_Status          (*(volatile unsigned char *)(0x00408022))
+; #define SPI_Data            (*(volatile unsigned char *)(0x00408024))
+; #define SPI_Ext             (*(volatile unsigned char *)(0x00408026))
+; #define SPI_CS              (*(volatile unsigned char *)(0x00408028))
+; // these two macros enable or disable the flash memory chip enable off SSN_O[7..0]
+; // in this case we assume there is only 1 device connected to SSN_O[0] so we can
+; // write hex FE to the SPI_CS to enable it (the enable on the flash chip is active low)
+; // and write FF to disable it
+; #define   Enable_SPI_CS()             SPI_CS = 0xFE
+; #define   Disable_SPI_CS()            SPI_CS = 0xFF
+; /* end */
+; /*********************************************************************************************************************************
+; (( DO NOT initialise global variables here, do it main even if you want 0
+; (( it's a limitation of the compiler
+; (( YOU HAVE BEEN WARNED
+; *********************************************************************************************************************************/
+; unsigned int i, x, y, z, PortA_Count;
+; unsigned char Timer1Count, Timer2Count, Timer3Count, Timer4Count ;
+; /*******************************************************************************************
+; ** Function Prototypes
+; *******************************************************************************************/
+; void Wait1ms(void);
+; void Wait3ms(void);
+; void Init_LCD(void) ;
+; void LCDOutchar(int c);
+; void LCDOutMess(char *theMessage);
+; void LCDClearln(void);
+; void LCDline1Message(char *theMessage);
+; void LCDline2Message(char *theMessage);
+; int sprintf(char *out, const char *format, ...) ;
+; void ReadMemory(char* StartRamPtr, char* EndRamPtr, unsigned char FillData, int config);
+; void FillMemory(char* StartRamPtr, char* EndRamPtr, unsigned char FillData, int config);
+; int Get7HexDigits(char one, char two, char three, char four, char five, char six, char seven);
+; int Get8HexDigits(char pat);
+; int Get4HexDigits(char pat);
+; int Get2HexDigits(char pat);
+; char xtod(int c);
+; void enableWrite(void);
+; int WriteSPIChar(int c);
+; int WriteSPI(int num);
+; void pollSPI(void);
+; /*****************************************************************************************
+; **	Interrupt service routine for Timers
+; **
+; **  Timers 1 - 4 share a common IRQ on the CPU  so this function uses polling to figure
+; **  out which timer is producing the interrupt
+; **
+; *****************************************************************************************/
+; void Timer_ISR()
+; {
+_Timer_ISR:
+; if(Timer1Status == 1) {         // Did Timer 1 produce the Interrupt?
+       move.b    4194354,D0
+       cmp.b     #1,D0
+       bne.s     Timer_ISR_1
+; Timer1Control = 3;      	// reset the timer to clear the interrupt, enable interrupts and allow counter to run
+       move.b    #3,4194354
+; PortA = Timer1Count++ ;     // increment an LED count on PortA with each tick of Timer 1
+       move.b    _Timer1Count.L,D0
+       addq.b    #1,_Timer1Count.L
+       move.b    D0,4194304
+Timer_ISR_1:
+; }
+; if(Timer2Status == 1) {         // Did Timer 2 produce the Interrupt?
+       move.b    4194358,D0
+       cmp.b     #1,D0
+       bne.s     Timer_ISR_3
+; Timer2Control = 3;      	// reset the timer to clear the interrupt, enable interrupts and allow counter to run
+       move.b    #3,4194358
+; PortC = Timer2Count++ ;     // increment an LED count on PortC with each tick of Timer 2
+       move.b    _Timer2Count.L,D0
+       addq.b    #1,_Timer2Count.L
+       move.b    D0,4194308
+Timer_ISR_3:
+; }
+; if(Timer3Status == 1) {         // Did Timer 3 produce the Interrupt?
+       move.b    4194362,D0
+       cmp.b     #1,D0
+       bne.s     Timer_ISR_5
+; Timer3Control = 3;      	// reset the timer to clear the interrupt, enable interrupts and allow counter to run
+       move.b    #3,4194362
+; HEX_A = Timer3Count++ ;     // increment a HEX count on Port HEX_A with each tick of Timer 3
+       move.b    _Timer3Count.L,D0
+       addq.b    #1,_Timer3Count.L
+       move.b    D0,4194320
+Timer_ISR_5:
+; }
+; if(Timer4Status == 1) {         // Did Timer 4 produce the Interrupt?
+       move.b    4194366,D0
+       cmp.b     #1,D0
+       bne.s     Timer_ISR_7
+; Timer4Control = 3;      	// reset the timer to clear the interrupt, enable interrupts and allow counter to run
+       move.b    #3,4194366
+; HEX_B = Timer4Count++ ;     // increment a HEX count on HEX_B with each tick of Timer 4
+       move.b    _Timer4Count.L,D0
+       addq.b    #1,_Timer4Count.L
+       move.b    D0,4194322
+Timer_ISR_7:
+       rts
+; }
+; }
+; /*****************************************************************************************
+; **	Interrupt service routine for ACIA. This device has it's own dedicate IRQ level
+; **  Add your code here to poll Status register and clear interrupt
+; *****************************************************************************************/
+; void ACIA_ISR()
+; {}
+_ACIA_ISR:
+       rts
+; /***************************************************************************************
+; **	Interrupt service routine for PIAs 1 and 2. These devices share an IRQ level
+; **  Add your code here to poll Status register and clear interrupt
+; *****************************************************************************************/
+; void PIA_ISR()
+; {}
+_PIA_ISR:
+       rts
+; /***********************************************************************************
+; **	Interrupt service routine for Key 2 on DE1 board. Add your own response here
+; ************************************************************************************/
+; void Key2PressISR()
+; {}
+_Key2PressISR:
+       rts
+; /***********************************************************************************
+; **	Interrupt service routine for Key 1 on DE1 board. Add your own response here
+; ************************************************************************************/
+; void Key1PressISR()
+; {}
+_Key1PressISR:
+       rts
+; /************************************************************************************
+; **   Delay Subroutine to give the 68000 something useless to do to waste 1 mSec
+; ************************************************************************************/
+; void Wait1ms(void)
+; {
+_Wait1ms:
+       move.l    D2,-(A7)
+; int  i ;
+; for(i = 0; i < 1000; i ++)
+       clr.l     D2
+Wait1ms_1:
+       cmp.l     #1000,D2
+       bge.s     Wait1ms_3
+       addq.l    #1,D2
+       bra       Wait1ms_1
+Wait1ms_3:
+       move.l    (A7)+,D2
+       rts
+; ;
+; }
+; /************************************************************************************
+; **  Subroutine to give the 68000 something useless to do to waste 3 mSec
+; **************************************************************************************/
+; void Wait3ms(void)
+; {
+_Wait3ms:
+       move.l    D2,-(A7)
+; int i ;
+; for(i = 0; i < 3; i++)
+       clr.l     D2
+Wait3ms_1:
+       cmp.l     #3,D2
+       bge.s     Wait3ms_3
+; Wait1ms() ;
+       jsr       _Wait1ms
+       addq.l    #1,D2
+       bra       Wait3ms_1
+Wait3ms_3:
+       move.l    (A7)+,D2
+       rts
+; }
+; /*********************************************************************************************
+; **  Subroutine to initialise the LCD display by writing some commands to the LCD internal registers
+; **  Sets it for parallel port and 2 line display mode (if I recall correctly)
+; *********************************************************************************************/
+; void Init_LCD(void)
+; {
+_Init_LCD:
+; LCDcommand = 0x0c ;
+       move.b    #12,4194336
+; Wait3ms() ;
+       jsr       _Wait3ms
+; LCDcommand = 0x38 ;
+       move.b    #56,4194336
+; Wait3ms() ;
+       jsr       _Wait3ms
+       rts
+; }
+; /*********************************************************************************************
+; **  Subroutine to initialise the RS232 Port by writing some commands to the internal registers
+; *********************************************************************************************/
+; void Init_RS232(void)
+; {
+_Init_RS232:
+; RS232_Control = 0x15 ; //  %00010101 set up 6850 uses divide by 16 clock, set RTS low, 8 bits no parity, 1 stop bit, transmitter interrupt disabled
+       move.b    #21,4194368
+; RS232_Baud = 0x1 ;      // program baud rate generator 001 = 115k, 010 = 57.6k, 011 = 38.4k, 100 = 19.2, all others = 9600
+       move.b    #1,4194372
+       rts
+; }
+; /*********************************************************************************************************
+; **  Subroutine to provide a low level output function to 6850 ACIA
+; **  This routine provides the basic functionality to output a single character to the serial Port
+; **  to allow the board to communicate with HyperTerminal Program
+; **
+; **  NOTE you do not call this function directly, instead you call the normal putchar() function
+; **  which in turn calls _putch() below). Other functions like puts(), printf() call putchar() so will
+; **  call _putch() also
+; *********************************************************************************************************/
+; int _putch( int c)
+; {
+__putch:
+       link      A6,#0
+; while((RS232_Status & (char)(0x02)) != (char)(0x02))    // wait for Tx bit in status register or 6850 serial comms chip to be '1'
+_putch_1:
+       move.b    4194368,D0
+       and.b     #2,D0
+       cmp.b     #2,D0
+       beq.s     _putch_3
+       bra       _putch_1
+_putch_3:
+; ;
+; RS232_TxData = (c & (char)(0x7f));                      // write to the data register to output the character (mask off bit 8 to keep it 7 bit ASCII)
+       move.l    8(A6),D0
+       and.l     #127,D0
+       move.b    D0,4194370
+; return c ;                                              // putchar() expects the character to be returned
+       move.l    8(A6),D0
+       unlk      A6
+       rts
+; }
+; /*********************************************************************************************************
+; **  Subroutine to provide a low level input function to 6850 ACIA
+; **  This routine provides the basic functionality to input a single character from the serial Port
+; **  to allow the board to communicate with HyperTerminal Program Keyboard (your PC)
+; **
+; **  NOTE you do not call this function directly, instead you call the normal getchar() function
+; **  which in turn calls _getch() below). Other functions like gets(), scanf() call getchar() so will
+; **  call _getch() also
+; *********************************************************************************************************/
+; int _getch( void )
+; {
+__getch:
+       link      A6,#-4
+; char c ;
+; while((RS232_Status & (char)(0x01)) != (char)(0x01))    // wait for Rx bit in 6850 serial comms chip status register to be '1'
+_getch_1:
+       move.b    4194368,D0
+       and.b     #1,D0
+       cmp.b     #1,D0
+       beq.s     _getch_3
+       bra       _getch_1
+_getch_3:
+; ;
+; return (RS232_RxData & (char)(0x7f));                   // read received character, mask off top bit and return as 7 bit ASCII character
+       move.b    4194370,D0
+       and.l     #255,D0
+       and.l     #127,D0
+       unlk      A6
+       rts
+; }
+; /******************************************************************************
+; **  Subroutine to output a single character to the 2 row LCD display
+; **  It is assumed the character is an ASCII code and it will be displayed at the
+; **  current cursor position
+; *******************************************************************************/
+; void LCDOutchar(int c)
+; {
+_LCDOutchar:
+       link      A6,#0
+; LCDdata = (char)(c);
+       move.l    8(A6),D0
+       move.b    D0,4194338
+; Wait1ms() ;
+       jsr       _Wait1ms
+       unlk      A6
+       rts
+; }
+; /**********************************************************************************
+; *subroutine to output a message at the current cursor position of the LCD display
+; ************************************************************************************/
+; void LCDOutMessage(char *theMessage)
+; {
+_LCDOutMessage:
+       link      A6,#-4
+; char c ;
+; while((c = *theMessage++) != 0)     // output characters from the string until NULL
+LCDOutMessage_1:
+       move.l    8(A6),A0
+       addq.l    #1,8(A6)
+       move.b    (A0),-1(A6)
+       move.b    (A0),D0
+       beq.s     LCDOutMessage_3
+; LCDOutchar(c) ;
+       move.b    -1(A6),D1
+       ext.w     D1
+       ext.l     D1
+       move.l    D1,-(A7)
+       jsr       _LCDOutchar
+       addq.w    #4,A7
+       bra       LCDOutMessage_1
+LCDOutMessage_3:
+       unlk      A6
+       rts
+; }
+; /******************************************************************************
+; *subroutine to clear the line by issuing 24 space characters
+; *******************************************************************************/
+; void LCDClearln(void)
+; {
+_LCDClearln:
+       move.l    D2,-(A7)
+; int i ;
+; for(i = 0; i < 24; i ++)
+       clr.l     D2
+LCDClearln_1:
+       cmp.l     #24,D2
+       bge.s     LCDClearln_3
+; LCDOutchar(' ') ;       // write a space char to the LCD display
+       pea       32
+       jsr       _LCDOutchar
+       addq.w    #4,A7
+       addq.l    #1,D2
+       bra       LCDClearln_1
+LCDClearln_3:
+       move.l    (A7)+,D2
+       rts
+; }
+; /******************************************************************************
+; **  Subroutine to move the LCD cursor to the start of line 1 and clear that line
+; *******************************************************************************/
+; void LCDLine1Message(char *theMessage)
+; {
+_LCDLine1Message:
+       link      A6,#0
+; LCDcommand = 0x80 ;
+       move.b    #128,4194336
+; Wait3ms();
+       jsr       _Wait3ms
+; LCDClearln() ;
+       jsr       _LCDClearln
+; LCDcommand = 0x80 ;
+       move.b    #128,4194336
+; Wait3ms() ;
+       jsr       _Wait3ms
+; LCDOutMessage(theMessage) ;
+       move.l    8(A6),-(A7)
+       jsr       _LCDOutMessage
+       addq.w    #4,A7
+       unlk      A6
+       rts
+; }
+; /******************************************************************************
+; **  Subroutine to move the LCD cursor to the start of line 2 and clear that line
+; *******************************************************************************/
+; void LCDLine2Message(char *theMessage)
+; {
+_LCDLine2Message:
+       link      A6,#0
+; LCDcommand = 0xC0 ;
+       move.b    #192,4194336
+; Wait3ms();
+       jsr       _Wait3ms
+; LCDClearln() ;
+       jsr       _LCDClearln
+; LCDcommand = 0xC0 ;
+       move.b    #192,4194336
+; Wait3ms() ;
+       jsr       _Wait3ms
+; LCDOutMessage(theMessage) ;
+       move.l    8(A6),-(A7)
+       jsr       _LCDOutMessage
+       addq.w    #4,A7
+       unlk      A6
+       rts
+; }
+; /*********************************************************************************************************************************
+; **  IMPORTANT FUNCTION
+; **  This function install an exception handler so you can capture and deal with any 68000 exception in your program
+; **  You pass it the name of a function in your code that will get called in response to the exception (as the 1st parameter)
+; **  and in the 2nd parameter, you pass it the exception number that you want to take over (see 68000 exceptions for details)
+; **  Calling this function allows you to deal with Interrupts for example
+; ***********************************************************************************************************************************/
+; void InstallExceptionHandler( void (*function_ptr)(), int level)
+; {
+_InstallExceptionHandler:
+       link      A6,#-4
+; volatile long int *RamVectorAddress = (volatile long int *)(StartOfExceptionVectorTable) ;   // pointer to the Ram based interrupt vector table created in Cstart in debug monitor
+       move.l    #134414336,-4(A6)
+; RamVectorAddress[level] = (long int *)(function_ptr);                       // install the address of our function into the exception table
+       move.l    -4(A6),A0
+       move.l    12(A6),D0
+       lsl.l     #2,D0
+       move.l    8(A6),0(A0,D0.L)
+       unlk      A6
+       rts
+; }
+; /*
+; * Support functions for changing memory contents
+; */
+; // converts hex char to 4 bit binary equiv in range 0000-1111 (0-F)
+; // char assumed to be a valid hex char 0-9, a-f, A-F
+; char xtod(int c)
+; {
+_xtod:
+       link      A6,#0
+       move.l    D2,-(A7)
+       move.l    8(A6),D2
+; if ((char)(c) <= (char)('9'))
+       cmp.b     #57,D2
+       bgt.s     xtod_1
+; return c - (char)(0x30);    // 0 - 9 = 0x30 - 0x39 so convert to number by sutracting 0x30
+       move.b    D2,D0
+       sub.b     #48,D0
+       bra.s     xtod_3
+xtod_1:
+; else if ((char)(c) > (char)('F'))    // assume lower case
+       cmp.b     #70,D2
+       ble.s     xtod_4
+; return c - (char)(0x57);    // a-f = 0x61-66 so needs to be converted to 0x0A - 0x0F so subtract 0x57
+       move.b    D2,D0
+       sub.b     #87,D0
+       bra.s     xtod_3
+xtod_4:
+; else
+; return c - (char)(0x37);    // A-F = 0x41-46 so needs to be converted to 0x0A - 0x0F so subtract 0x37
+       move.b    D2,D0
+       sub.b     #55,D0
+xtod_3:
+       move.l    (A7)+,D2
+       unlk      A6
+       rts
+; }
+; int Get2HexDigits(char pat)
+; {
+_Get2HexDigits:
+       link      A6,#0
+       move.l    D2,-(A7)
+; register int i = (xtod(pat) << 4) | (xtod(pat));
+       move.b    11(A6),D1
+       ext.w     D1
+       ext.l     D1
+       move.l    D1,-(A7)
+       jsr       _xtod
+       addq.w    #4,A7
+       and.l     #255,D0
+       asl.l     #4,D0
+       move.l    D0,-(A7)
+       move.b    11(A6),D0
+       ext.w     D0
+       ext.l     D0
+       move.l    D0,-(A7)
+       jsr       _xtod
+       addq.w    #4,A7
+       move.l    D0,D1
+       move.l    (A7)+,D0
+       and.l     #255,D1
+       or.l      D1,D0
+       move.l    D0,D2
+; //if (CheckSumPtr)
+; //  *CheckSumPtr += i;
+; return i;
+       move.l    D2,D0
+       move.l    (A7)+,D2
+       unlk      A6
+       rts
+; }
+; int Get4HexDigits(char pat)
+; {
+_Get4HexDigits:
+       link      A6,#0
+; return (Get2HexDigits(pat) << 8) | (Get2HexDigits(pat));
+       move.b    11(A6),D1
+       ext.w     D1
+       ext.l     D1
+       move.l    D1,-(A7)
+       jsr       _Get2HexDigits
+       addq.w    #4,A7
+       asl.l     #8,D0
+       move.l    D0,-(A7)
+       move.b    11(A6),D0
+       ext.w     D0
+       ext.l     D0
+       move.l    D0,-(A7)
+       jsr       _Get2HexDigits
+       addq.w    #4,A7
+       move.l    D0,D1
+       move.l    (A7)+,D0
+       or.l      D1,D0
+       unlk      A6
+       rts
+; }
+; int Get8HexDigits(char pat)
+; {
+_Get8HexDigits:
+       link      A6,#0
+; return (Get4HexDigits(pat) << 16) | (Get4HexDigits(pat));
+       move.b    11(A6),D1
+       ext.w     D1
+       ext.l     D1
+       move.l    D1,-(A7)
+       jsr       _Get4HexDigits
+       addq.w    #4,A7
+       asl.l     #8,D0
+       asl.l     #8,D0
+       move.l    D0,-(A7)
+       move.b    11(A6),D0
+       ext.w     D0
+       ext.l     D0
+       move.l    D0,-(A7)
+       jsr       _Get4HexDigits
+       addq.w    #4,A7
+       move.l    D0,D1
+       move.l    (A7)+,D0
+       or.l      D1,D0
+       unlk      A6
+       rts
+; }
+; int Get7HexDigits(char one, char two, char three, char four, char five, char six, char seven)
+; {
+_Get7HexDigits:
+       link      A6,#0
+       movem.l   D2/A2,-(A7)
+       lea       _xtod.L,A2
+; register int i = (xtod(one) << 24) | (xtod(two) << 20) | (xtod(three) << 16) | (xtod(four) << 12) | (xtod(five) << 8) | (xtod(six) << 4) | (xtod(seven));
+       move.b    11(A6),D1
+       ext.w     D1
+       ext.l     D1
+       move.l    D1,-(A7)
+       jsr       (A2)
+       addq.w    #4,A7
+       and.l     #255,D0
+       asl.l     #8,D0
+       asl.l     #8,D0
+       asl.l     #8,D0
+       move.l    D0,-(A7)
+       move.b    15(A6),D0
+       ext.w     D0
+       ext.l     D0
+       move.l    D0,-(A7)
+       jsr       (A2)
+       addq.w    #4,A7
+       move.l    D0,D1
+       move.l    (A7)+,D0
+       and.l     #255,D1
+       asl.l     #8,D1
+       asl.l     #8,D1
+       asl.l     #4,D1
+       or.l      D1,D0
+       move.l    D0,-(A7)
+       move.b    19(A6),D0
+       ext.w     D0
+       ext.l     D0
+       move.l    D0,-(A7)
+       jsr       (A2)
+       addq.w    #4,A7
+       move.l    D0,D1
+       move.l    (A7)+,D0
+       and.l     #255,D1
+       asl.l     #8,D1
+       asl.l     #8,D1
+       or.l      D1,D0
+       move.l    D0,-(A7)
+       move.b    23(A6),D0
+       ext.w     D0
+       ext.l     D0
+       move.l    D0,-(A7)
+       jsr       (A2)
+       addq.w    #4,A7
+       move.l    D0,D1
+       move.l    (A7)+,D0
+       and.l     #255,D1
+       asl.l     #8,D1
+       asl.l     #4,D1
+       or.l      D1,D0
+       move.l    D0,-(A7)
+       move.b    27(A6),D0
+       ext.w     D0
+       ext.l     D0
+       move.l    D0,-(A7)
+       jsr       (A2)
+       addq.w    #4,A7
+       move.l    D0,D1
+       move.l    (A7)+,D0
+       and.l     #255,D1
+       asl.l     #8,D1
+       or.l      D1,D0
+       move.l    D0,-(A7)
+       move.b    31(A6),D0
+       ext.w     D0
+       ext.l     D0
+       move.l    D0,-(A7)
+       jsr       (A2)
+       addq.w    #4,A7
+       move.l    D0,D1
+       move.l    (A7)+,D0
+       and.l     #255,D1
+       asl.l     #4,D1
+       or.l      D1,D0
+       move.l    D0,-(A7)
+       move.b    35(A6),D0
+       ext.w     D0
+       ext.l     D0
+       move.l    D0,-(A7)
+       jsr       (A2)
+       addq.w    #4,A7
+       move.l    D0,D1
+       move.l    (A7)+,D0
+       and.l     #255,D1
+       or.l      D1,D0
+       move.l    D0,D2
+; //if (CheckSumPtr)
+; //  *CheckSumPtr += i;
+; return i;
+       move.l    D2,D0
+       movem.l   (A7)+,D2/A2
+       unlk      A6
+       rts
+; }
+; /* SPI functions */
+; /******************************************************************************************
+; ** The following code is for the SPI controller
+; *******************************************************************************************/
+; // return true if the SPI has finished transmitting a byte (to say the Flash chip) return false otherwise
+; // this can be used in a polling algorithm to know when the controller is busy or idle.
+; int TestForSPITransmitDataComplete(void) {
+_TestForSPITransmitDataComplete:
+; /* TODO replace 0 below with a test for status register SPIF bit and if set, return true */
+; return (SPI_Status >= 0x80);
+       move.b    4227106,D0
+       and.w     #255,D0
+       cmp.w     #128,D0
+       blo.s     TestForSPITransmitDataComplete_1
+       moveq     #1,D0
+       bra.s     TestForSPITransmitDataComplete_2
+TestForSPITransmitDataComplete_1:
+       clr.l     D0
+TestForSPITransmitDataComplete_2:
+       rts
+; }
+; /************************************************************************************
+; ** initialises the SPI controller chip to set speed, interrupt capability etc.
+; ************************************************************************************/
+; void SPI_Init(void)
+; {
+_SPI_Init:
+; //TODO
+; //
+; // Program the SPI Control, EXT, CS and Status registers to initialise the SPI controller
+; // Don't forget to call this routine from main() before you do anything else with SPI
+; //
+; // Here are some settings we want to create
+; //
+; // Control Reg     - interrupts disabled, core enabled, Master mode, Polarity and Phase of clock = [0,0], speed =  divide by 32 = approx 700Khz
+; // Ext Reg         - in conjunction with control reg, sets speed above and also sets interrupt flag after every completed transfer (each byte)
+; // SPI_CS Reg      - control selection of slave SPI chips via their CS# signals
+; // Status Reg      - status of SPI controller chip and used to clear any write collision and interrupt on transmit complete flag
+; /* setting up control register */
+; if ((SPI_Control & 0x20) == 0)
+       move.b    4227104,D0
+       and.b     #32,D0
+       bne.s     SPI_Init_1
+; SPI_Control = 0x53; //writing a 0 to reserved bit at position 5
+       move.b    #83,4227104
+       bra.s     SPI_Init_2
+SPI_Init_1:
+; else
+; SPI_Control = 0x73; //writing a 1 to reserved bit at position 5
+       move.b    #115,4227104
+SPI_Init_2:
+; /* setting up extension register */
+; SPI_Ext = SPI_Ext & 0x3c;
+       move.b    4227110,D0
+       and.b     #60,D0
+       move.b    D0,4227110
+; /* enable chip */
+; // Enable_SPI_CS();
+; Disable_SPI_CS(); //change to disable
+       move.b    #255,4227112
+; /* setting up status register */
+; // SPI_Status = SPI_Status & 0x3f;
+; SPI_Status = 0xff;
+       move.b    #255,4227106
+       rts
+; //TODO: figure out what value to write to reserved bits, is there a way to maintain the value of the reerved bit?
+; //TODO: How to write to individual bit positions
+; //assume data can be changed in such a way such that the reserved bits are not updated, may need to read the data first
+; }
+; /************************************************************************************
+; ** return ONLY when the SPI controller has finished transmitting a byte
+; ************************************************************************************/
+; void WaitForSPITransmitComplete(void)
+; {
+_WaitForSPITransmitComplete:
+; // TODO : poll the status register SPIF bit looking for completion of transmission
+; // once transmission is complete, clear the write collision and interrupt on transmit complete flags in the status register (read documentation)
+; // just in case they were set
+; /* loop for polling */
+; while (TestForSPITransmitDataComplete() == 0) {
+WaitForSPITransmitComplete_1:
+       jsr       _TestForSPITransmitDataComplete
+       tst.l     D0
+       bne.s     WaitForSPITransmitComplete_3
+; //do nothing
+; }
+       bra       WaitForSPITransmitComplete_1
+WaitForSPITransmitComplete_3:
+; /* clear bits in the status register */
+; // SPI_Status = SPI_Status & 0x3f;
+; SPI_Status = 0xff;
+       move.b    #255,4227106
+       rts
+; }
+; /************************************************************************************
+; ** Write a byte to the SPI flash chip via the controller and returns (reads) whatever was
+; ** given back by SPI device at the same time (removes the read byte from the FIFO)
+; ************************************************************************************/
+; int WriteSPIChar(int c) //change int to char to take into account 1 byte
+; {
+_WriteSPIChar:
+       link      A6,#-4
+       movem.l   D2/D3/D4/D5/A2/A3/A4,-(A7)
+       lea       _WriteSPI.L,A2
+       lea       _printf.L,A3
+       lea       _Get2HexDigitsVoid.L,A4
+; // todo - write the byte in parameter 'c' to the SPI data register, this will start it transmitting to the flash device
+; // wait for completion of transmission
+; // return the received data from Flash chip (which may not be relevent depending upon what we are doing)
+; // by reading fom the SPI controller Data Register.
+; // note however that in order to get data from an SPI slave device (e.g. flash) chip we have to write a dummy byte to it
+; //
+; // modify '0' below to return back read byte from data register
+; //
+; int ret, upper, mid, lower, dummy;
+; // eraseChip();
+; printf("\r\n\nEnter upper byte: ");
+       pea       @m68kus~1_1.L
+       jsr       (A3)
+       addq.w    #4,A7
+; upper = Get2HexDigitsVoid();
+       jsr       (A4)
+       move.l    D0,D4
+; printf("\r\n\nUPPER BYTE: %x ", upper);
+       move.l    D4,-(A7)
+       pea       @m68kus~1_2.L
+       jsr       (A3)
+       addq.w    #8,A7
+; printf("\r\n\nEnter mid byte: ");
+       pea       @m68kus~1_3.L
+       jsr       (A3)
+       addq.w    #4,A7
+; mid = Get2HexDigitsVoid();
+       jsr       (A4)
+       move.l    D0,D3
+; printf("\r\n\nMID BYTE: %x ", mid);
+       move.l    D3,-(A7)
+       pea       @m68kus~1_4.L
+       jsr       (A3)
+       addq.w    #8,A7
+; printf("\r\n\nEnter lower byte: ");
+       pea       @m68kus~1_5.L
+       jsr       (A3)
+       addq.w    #4,A7
+; lower = Get2HexDigitsVoid();
+       jsr       (A4)
+       move.l    D0,D2
+; printf("\r\n\nLOWER BYTE: %x ", lower);
+       move.l    D2,-(A7)
+       pea       @m68kus~1_6.L
+       jsr       (A3)
+       addq.w    #8,A7
+; enableWrite();
+       jsr       _enableWrite
+; //5: write to flash
+; printf("5: write to flash \n\n");
+       pea       @m68kus~1_7.L
+       jsr       (A3)
+       addq.w    #4,A7
+; Enable_SPI_CS(); //enable cs#
+       move.b    #254,4227112
+; WriteSPI(0x02);
+       pea       2
+       jsr       (A2)
+       addq.w    #4,A7
+; WriteSPI(upper);
+       move.l    D4,-(A7)
+       jsr       (A2)
+       addq.w    #4,A7
+; WriteSPI(mid);
+       move.l    D3,-(A7)
+       jsr       (A2)
+       addq.w    #4,A7
+; WriteSPI(lower);
+       move.l    D2,-(A7)
+       jsr       (A2)
+       addq.w    #4,A7
+; WriteSPI(c);
+       move.l    8(A6),-(A7)
+       jsr       (A2)
+       addq.w    #4,A7
+; Disable_SPI_CS(); //disable cs#
+       move.b    #255,4227112
+; pollSPI();
+       jsr       _pollSPI
+; //7: reading flash chip for verification
+; printf("7: reading flash chip for verification \n\n");
+       pea       @m68kus~1_8.L
+       jsr       (A3)
+       addq.w    #4,A7
+; Enable_SPI_CS(); //enable cs#
+       move.b    #254,4227112
+; WriteSPI(0x03);
+       pea       3
+       jsr       (A2)
+       addq.w    #4,A7
+; WriteSPI(upper);
+       move.l    D4,-(A7)
+       jsr       (A2)
+       addq.w    #4,A7
+; WriteSPI(mid);
+       move.l    D3,-(A7)
+       jsr       (A2)
+       addq.w    #4,A7
+; WriteSPI(lower);
+       move.l    D2,-(A7)
+       jsr       (A2)
+       addq.w    #4,A7
+; /* collecting data into var */
+; ret = WriteSPI(0xee);
+       pea       238
+       jsr       (A2)
+       addq.w    #4,A7
+       move.l    D0,D5
+; printf("\r\n\nret: %x ", ret);
+       move.l    D5,-(A7)
+       pea       @m68kus~1_9.L
+       jsr       (A3)
+       addq.w    #8,A7
+; Disable_SPI_CS(); // disable cs#
+       move.b    #255,4227112
+; return ret;
+       move.l    D5,D0
+       movem.l   (A7)+,D2/D3/D4/D5/A2/A3/A4
+       unlk      A6
+       rts
+; }
+; int readSPI(void) {
+_readSPI:
+       link      A6,#-4
+       movem.l   D2/D3/D4/D5/A2/A3/A4,-(A7)
+       lea       _printf.L,A2
+       lea       _WriteSPI.L,A3
+       lea       _Get2HexDigitsVoid.L,A4
+; int ret, upper, mid, lower, dummy;
+; printf("\r\n\nEnter upper byte:");
+       pea       @m68kus~1_10.L
+       jsr       (A2)
+       addq.w    #4,A7
+; upper = Get2HexDigitsVoid();
+       jsr       (A4)
+       move.l    D0,D5
+; printf("\r\n\nUPPER BYTE: %x", upper);
+       move.l    D5,-(A7)
+       pea       @m68kus~1_11.L
+       jsr       (A2)
+       addq.w    #8,A7
+; printf("\r\n\nEnter mid byte:");
+       pea       @m68kus~1_12.L
+       jsr       (A2)
+       addq.w    #4,A7
+; mid = Get2HexDigitsVoid();
+       jsr       (A4)
+       move.l    D0,D4
+; printf("\r\n\nMID BYTE: %x", mid);
+       move.l    D4,-(A7)
+       pea       @m68kus~1_13.L
+       jsr       (A2)
+       addq.w    #8,A7
+; printf("\r\n\nEnter lower byte:");
+       pea       @m68kus~1_14.L
+       jsr       (A2)
+       addq.w    #4,A7
+; lower = Get2HexDigitsVoid();
+       jsr       (A4)
+       move.l    D0,D3
+; printf("\r\n\nLOWER BYTE: %x", lower);
+       move.l    D3,-(A7)
+       pea       @m68kus~1_15.L
+       jsr       (A2)
+       addq.w    #8,A7
+; // reading flash chip for verification
+; printf("\r\nReading flash chip for verification");
+       pea       @m68kus~1_16.L
+       jsr       (A2)
+       addq.w    #4,A7
+; Enable_SPI_CS(); //enable cs#
+       move.b    #254,4227112
+; WriteSPI(0x03);
+       pea       3
+       jsr       (A3)
+       addq.w    #4,A7
+; WriteSPI(upper);
+       move.l    D5,-(A7)
+       jsr       (A3)
+       addq.w    #4,A7
+; WriteSPI(mid);
+       move.l    D4,-(A7)
+       jsr       (A3)
+       addq.w    #4,A7
+; WriteSPI(lower);
+       move.l    D3,-(A7)
+       jsr       (A3)
+       addq.w    #4,A7
+; /* collecting data into var */
+; ret = WriteSPI(0xee);
+       pea       238
+       jsr       (A3)
+       addq.w    #4,A7
+       move.l    D0,D2
+; printf("\r\n\nret: %x ", ret);
+       move.l    D2,-(A7)
+       pea       @m68kus~1_9.L
+       jsr       (A2)
+       addq.w    #8,A7
+; Disable_SPI_CS(); // disable cs#
+       move.b    #255,4227112
+; return ret;
+       move.l    D2,D0
+       movem.l   (A7)+,D2/D3/D4/D5/A2/A3/A4
+       unlk      A6
+       rts
+; }
+; void enableWrite(void) {
+_enableWrite:
+; //enable write
+; Enable_SPI_CS(); //enable cs#
+       move.b    #254,4227112
+; WriteSPI(0x06);
+       pea       6
+       jsr       _WriteSPI
+       addq.w    #4,A7
+; Disable_SPI_CS(); //disable cs#
+       move.b    #255,4227112
+       rts
+; }
+; void pollSPI(void) {
+_pollSPI:
+       movem.l   D2/A2,-(A7)
+       lea       _WriteSPI.L,A2
+; int status;
+; //poll flash chip to see if rdy
+; printf("\r\nPolling flash chip to see if ready \n\n");
+       pea       @m68kus~1_17.L
+       jsr       _printf
+       addq.w    #4,A7
+; Enable_SPI_CS(); //enable cs#
+       move.b    #254,4227112
+; WriteSPI(0x05);
+       pea       5
+       jsr       (A2)
+       addq.w    #4,A7
+; status = WriteSPI(0xee);
+       pea       238
+       jsr       (A2)
+       addq.w    #4,A7
+       move.l    D0,D2
+; while (status & 0x01 == 1) {
+pollSPI_1:
+       move.l    D2,D0
+       and.l     #1,D0
+       beq.s     pollSPI_3
+; status = WriteSPI(0xee);
+       pea       238
+       jsr       (A2)
+       addq.w    #4,A7
+       move.l    D0,D2
+       bra       pollSPI_1
+pollSPI_3:
+; }
+; Disable_SPI_CS(); // disable cs#
+       move.b    #255,4227112
+       movem.l   (A7)+,D2/A2
+       rts
+; }
+; void eraseChip(void) {
+_eraseChip:
+; //enable write
+; enableWrite();
+       jsr       _enableWrite
+; //erase chip
+; printf("\r\nErase chip");
+       pea       @m68kus~1_18.L
+       jsr       _printf
+       addq.w    #4,A7
+; Enable_SPI_CS(); //enable cs#
+       move.b    #254,4227112
+; WriteSPI(0xc7);
+       pea       199
+       jsr       _WriteSPI
+       addq.w    #4,A7
+; Disable_SPI_CS(); // disable cs#
+       move.b    #255,4227112
+; //poll spi
+; pollSPI();
+       jsr       _pollSPI
+       rts
+; }
+; int WriteSPI(int num) {
+_WriteSPI:
+       link      A6,#0
+; SPI_Data = num;
+       move.l    8(A6),D0
+       move.b    D0,4227108
+; WaitForSPITransmitComplete();
+       jsr       _WaitForSPITransmitComplete
+; return SPI_Data;
+       move.b    4227108,D0
+       and.l     #255,D0
+       unlk      A6
+       rts
+; }
+; void menueSPI(void) {
+_menueSPI:
+       movem.l   D2/D3/D4/A2,-(A7)
+       lea       _printf.L,A2
+; int option, val_to_pass, ret;
+; // char pat;
+; while (1) {
+menueSPI_1:
+; scanflush();
+       jsr       _scanflush
+; printf("\r\n\nEnter SPI operation(1 - Erase Chip, 2 - Write to SPI, 3 - Read from SPI): ");
+       pea       @m68kus~1_19.L
+       jsr       (A2)
+       addq.w    #4,A7
+; option = xtod(_getch());
+       move.l    D0,-(A7)
+       jsr       __getch
+       move.l    D0,D1
+       move.l    (A7)+,D0
+       move.l    D1,-(A7)
+       jsr       _xtod
+       addq.w    #4,A7
+       and.l     #255,D0
+       move.l    D0,D4
+; printf("\r\n\nSPI operation: %x ", option);
+       move.l    D4,-(A7)
+       pea       @m68kus~1_20.L
+       jsr       (A2)
+       addq.w    #8,A7
+; switch (option) {
+       cmp.l     #2,D4
+       beq.s     menueSPI_7
+       bgt.s     menueSPI_10
+       cmp.l     #1,D4
+       beq.s     menueSPI_6
+       bra       menueSPI_4
+menueSPI_10:
+       cmp.l     #3,D4
+       beq       menueSPI_8
+       bra       menueSPI_4
+menueSPI_6:
+; case 1:
+; printf("\r\nChip erase operation selected");
+       pea       @m68kus~1_21.L
+       jsr       (A2)
+       addq.w    #4,A7
+; eraseChip();
+       jsr       _eraseChip
+; printf("\r\nEnd of erase operation ...");
+       pea       @m68kus~1_22.L
+       jsr       (A2)
+       addq.w    #4,A7
+; break;
+       bra       menueSPI_5
+menueSPI_7:
+; case 2:
+; printf("\r\n\nWrite operation selected \n\n");
+       pea       @m68kus~1_23.L
+       jsr       (A2)
+       addq.w    #4,A7
+; printf("\r\n\nEnter a value for write: ");
+       pea       @m68kus~1_24.L
+       jsr       (A2)
+       addq.w    #4,A7
+; val_to_pass = Get2HexDigitsVoid();
+       jsr       _Get2HexDigitsVoid
+       move.l    D0,D3
+; printf("\r\nValue to write: %x", val_to_pass);
+       move.l    D3,-(A7)
+       pea       @m68kus~1_25.L
+       jsr       (A2)
+       addq.w    #8,A7
+; ret = WriteSPIChar(val_to_pass);
+       move.l    D3,-(A7)
+       jsr       _WriteSPIChar
+       addq.w    #4,A7
+       move.l    D0,D2
+; printf("\r\nValue returned: %x", ret);
+       move.l    D2,-(A7)
+       pea       @m68kus~1_26.L
+       jsr       (A2)
+       addq.w    #8,A7
+; printf("\r\nend of write operation ...");
+       pea       @m68kus~1_27.L
+       jsr       (A2)
+       addq.w    #4,A7
+; break;
+       bra       menueSPI_5
+menueSPI_8:
+; case 3:
+; printf("\r\n\nRead operation selected");
+       pea       @m68kus~1_28.L
+       jsr       (A2)
+       addq.w    #4,A7
+; ret = readSPI();
+       jsr       _readSPI
+       move.l    D0,D2
+; printf("\r\n\nValue returned: %x ", ret);
+       move.l    D2,-(A7)
+       pea       @m68kus~1_29.L
+       jsr       (A2)
+       addq.w    #8,A7
+; printf("\r\n\nend of read operation ...");
+       pea       @m68kus~1_30.L
+       jsr       (A2)
+       addq.w    #4,A7
+; break;
+       bra.s     menueSPI_5
+menueSPI_4:
+; default:
+; printf("\r\n\nInvalid operation ...");
+       pea       @m68kus~1_31.L
+       jsr       (A2)
+       addq.w    #4,A7
+; printf("\r\n\nTry again!!!!!");
+       pea       @m68kus~1_32.L
+       jsr       (A2)
+       addq.w    #4,A7
+menueSPI_5:
+       bra       menueSPI_1
+; }
+; }
+; }
+; void executeSPI(void) {
+_executeSPI:
+; printf("\r\nIntializing SPI\n");
+       pea       @m68kus~1_33.L
+       jsr       _printf
+       addq.w    #4,A7
+; SPI_Init();
+       jsr       _SPI_Init
+; menueSPI();
+       jsr       _menueSPI
+       rts
+; }
+; void readID(void) {
+_readID:
+       link      A6,#-16
+       movem.l   A2/A3,-(A7)
+       lea       _WriteSPI.L,A2
+       lea       _printf.L,A3
+; int man, dev, dev2;
+; int dummy;
+; printf("READING ID !!!!!!  \n\n");
+       pea       @m68kus~1_34.L
+       jsr       (A3)
+       addq.w    #4,A7
+; Enable_SPI_CS(); //enable cs#
+       move.b    #254,4227112
+; WriteSPI(0x90);
+       pea       144
+       jsr       (A2)
+       addq.w    #4,A7
+; WriteSPI(0x00);
+       clr.l     -(A7)
+       jsr       (A2)
+       addq.w    #4,A7
+; WriteSPI(0x00);
+       clr.l     -(A7)
+       jsr       (A2)
+       addq.w    #4,A7
+; WriteSPI(0x00);
+       clr.l     -(A7)
+       jsr       (A2)
+       addq.w    #4,A7
+; man = WriteSPI(0xee);
+       pea       238
+       jsr       (A2)
+       addq.w    #4,A7
+       move.l    D0,-16(A6)
+; dev = WriteSPI(0xee);
+       pea       238
+       jsr       (A2)
+       addq.w    #4,A7
+       move.l    D0,-12(A6)
+; Disable_SPI_CS(); //disable cs#
+       move.b    #255,4227112
+; printf("\r\n\nMan: %x ", man);
+       move.l    -16(A6),-(A7)
+       pea       @m68kus~1_35.L
+       jsr       (A3)
+       addq.w    #8,A7
+; printf("\r\n\nDev: %x ", dev);
+       move.l    -12(A6),-(A7)
+       pea       @m68kus~1_36.L
+       jsr       (A3)
+       addq.w    #8,A7
+       movem.l   (A7)+,A2/A3
+       unlk      A6
+       rts
+; }
+; /* end */
+; /* other spare functions */
+; int Get2HexDigitsVoid(void)
+; {
+_Get2HexDigitsVoid:
+       move.l    D2,-(A7)
+; register int i = (xtod(_getch()) << 4) | (xtod(_getch()));
+       move.l    D0,-(A7)
+       jsr       __getch
+       move.l    D0,D1
+       move.l    (A7)+,D0
+       move.l    D1,-(A7)
+       jsr       _xtod
+       addq.w    #4,A7
+       and.l     #255,D0
+       asl.l     #4,D0
+       move.l    D0,-(A7)
+       move.l    D1,-(A7)
+       jsr       __getch
+       move.l    (A7)+,D1
+       move.l    D0,-(A7)
+       jsr       _xtod
+       addq.w    #4,A7
+       move.l    D0,D1
+       move.l    (A7)+,D0
+       and.l     #255,D1
+       or.l      D1,D0
+       move.l    D0,D2
+; return i;
+       move.l    D2,D0
+       move.l    (A7)+,D2
+       rts
+; }
+; /******************************************************************************************************************************
+; * Start of user program
+; ******************************************************************************************************************************/
+; void main()
+; {
+_main:
+       link      A6,#-212
+       move.l    A2,-(A7)
+       lea       _InstallExceptionHandler.L,A2
+; unsigned int row, i=0, count=0, counter1=1;
+       clr.l     -208(A6)
+       clr.l     -204(A6)
+       move.l    #1,-200(A6)
+; char c, text[150] ;
+; int PassFailFlag = 1 ;
+       move.l    #1,-44(A6)
+; int test_config=0;
+       clr.l     -40(A6)
+; int test_pattern=0;
+       clr.l     -36(A6)
+; char start_addr[7];
+; int start_val = 0;
+       clr.l     -24(A6)
+; char end_addr[7];
+; int end_val = 0;
+       clr.l     -12(A6)
+; int val_to_pass, ret;
+; i = x = y = z = PortA_Count =0;
+       clr.l     _PortA_Count.L
+       clr.l     _z.L
+       clr.l     _y.L
+       clr.l     _x.L
+       clr.l     -208(A6)
+; Timer1Count = Timer2Count = Timer3Count = Timer4Count = 0;
+       clr.b     _Timer4Count.L
+       clr.b     _Timer3Count.L
+       clr.b     _Timer2Count.L
+       clr.b     _Timer1Count.L
+; InstallExceptionHandler(PIA_ISR, 25) ;          // install interrupt handler for PIAs 1 and 2 on level 1 IRQ
+       pea       25
+       pea       _PIA_ISR.L
+       jsr       (A2)
+       addq.w    #8,A7
+; InstallExceptionHandler(ACIA_ISR, 26) ;		    // install interrupt handler for ACIA on level 2 IRQ
+       pea       26
+       pea       _ACIA_ISR.L
+       jsr       (A2)
+       addq.w    #8,A7
+; InstallExceptionHandler(Timer_ISR, 27) ;		// install interrupt handler for Timers 1-4 on level 3 IRQ
+       pea       27
+       pea       _Timer_ISR.L
+       jsr       (A2)
+       addq.w    #8,A7
+; InstallExceptionHandler(Key2PressISR, 28) ;	    // install interrupt handler for Key Press 2 on DE1 board for level 4 IRQ
+       pea       28
+       pea       _Key2PressISR.L
+       jsr       (A2)
+       addq.w    #8,A7
+; InstallExceptionHandler(Key1PressISR, 29) ;	    // install interrupt handler for Key Press 1 on DE1 board for level 5 IRQ
+       pea       29
+       pea       _Key1PressISR.L
+       jsr       (A2)
+       addq.w    #8,A7
+; Timer1Data = 0x10;		// program time delay into timers 1-4
+       move.b    #16,4194352
+; Timer2Data = 0x20;
+       move.b    #32,4194356
+; Timer3Data = 0x15;
+       move.b    #21,4194360
+; Timer4Data = 0x25;
+       move.b    #37,4194364
+; Timer1Control = 3;		// write 3 to control register to Bit0 = 1 (enable interrupt from timers) 1 - 4 and allow them to count Bit 1 = 1
+       move.b    #3,4194354
+; Timer2Control = 3;
+       move.b    #3,4194358
+; Timer3Control = 3;
+       move.b    #3,4194362
+; Timer4Control = 3;
+       move.b    #3,4194366
+; Init_LCD();             // initialise the LCD display to use a parallel data interface and 2 lines of display
+       jsr       _Init_LCD
+; Init_RS232() ;          // initialise the RS232 port for use with hyper terminal
+       jsr       _Init_RS232
+; /*************************************************************************************************
+; **  Test of scanf function
+; *************************************************************************************************/
+; scanflush() ;                       // flush any text that may have been typed ahead
+       jsr       _scanflush
+; /*
+; * SPI Program HERE
+; */
+; executeSPI();
+       jsr       _executeSPI
+; while(1)
+main_1:
+       bra       main_1
+; ;
+; // programs should NOT exit as there is nothing to Exit TO !!!!!!
+; // There is no OS - just press the reset button to end program and call debug
+; }
+@vsscanf_scanread:
+       link      A6,#-4
+       movem.l   A2,-(A7)
+       lea       @vsscanf_bufx,A2
+       tst.l     8(A6)
+       beq.s     @vsscanf_scanread_1
+       move.l    8(A6),A0
+       addq.l    #4,8(A6)
+       move.l    (A0),A0
+       move.b    (A0),D0
+       ext.w     D0
+       ext.l     D0
+       move.l    D0,-4(A6)
+       beq.s     @vsscanf_scanread_3
+       move.l    -4(A6),D0
+       bra.s     @vsscanf_scanread_4
+@vsscanf_scanread_3:
+       moveq     #-1,D0
+@vsscanf_scanread_4:
+       bra       @vsscanf_scanread_5
+@vsscanf_scanread_1:
+       move.l    (A2),A0
+       move.b    (A0),D0
+       bne.s     @vsscanf_scanread_6
+       pea       @vsscanf_buf
+       bsr       _gets
+       addq.w    #4,A7
+       move.l    D0,(A2)
+       pea       @vsscanf_1
+       pea       @vsscanf_buf
+       bsr       _strcat
+       addq.w    #8,A7
+@vsscanf_scanread_6:
+       move.l    (A2),A0
+       addq.l    #1,(A2)
+       move.b    (A0),D0
+       ext.w     D0
+       ext.l     D0
+@vsscanf_scanread_5:
+       movem.l   (A7)+,A2
+       unlk      A6
+       rts
+@vsscanf_scanputback:
+       link      A6,#0
+       movem.l   D2/D3,-(A7)
+       move.l    12(A6),D2
+       move.l    8(A6),D3
+       beq.s     @vsscanf_scanputback_1
+       cmp.l     #-1,D2
+       beq.s     @vsscanf_scanputback_3
+       subq.l    #4,D3
+       move.l    D3,A0
+       move.l    (A0),A0
+       move.b    D2,(A0)
+       bra.s     @vsscanf_scanputback_4
+@vsscanf_scanputback_3:
+       move.l    D3,A0
+       subq.l    #1,(A0)
+@vsscanf_scanputback_4:
+       bra.s     @vsscanf_scanputback_6
+@vsscanf_scanputback_1:
+       lea       @vsscanf_buf,A0
+       move.l    A0,D0
+       cmp.l     @vsscanf_bufx,D0
+       bne.s     @vsscanf_scanputback_5
+       clr.b     @vsscanf_buf
+       move.l    D2,-(A7)
+       bsr       _ungetch
+       addq.w    #4,A7
+       bra.s     @vsscanf_scanputback_6
+@vsscanf_scanputback_5:
+       subq.l    #1,@vsscanf_bufx
+       move.l    @vsscanf_bufx,A0
+       move.b    D2,(A0)
+@vsscanf_scanputback_6:
+       move.l    D2,D0
+       movem.l   (A7)+,D2/D3
+       unlk      A6
+       rts
+@vsscanf_scanspace:
+       link      A6,#0
+       movem.l   D2,-(A7)
+@vsscanf_scanspace_1:
+       move.l    8(A6),-(A7)
+       bsr       @vsscanf_scanread
+       addq.w    #4,A7
+       move.l    D0,D2
+       move.l    12(A6),A0
+       addq.l    #1,(A0)
+       move.l    D2,A0
+       lea       __ctype,A1
+       move.b    1(A0,A1.L),D0
+       and.b     #16,D0
+       bne       @vsscanf_scanspace_1
+       move.l    D2,D0
+       movem.l   (A7)+,D2
+       unlk      A6
+       rts
+@vsscanf_scanselect:
+       link      A6,#0
+       movem.l   D2/D3/D4/D5/D6/D7/A2,-(A7)
+       move.l    12(A6),D3
+       move.l    24(A6),D6
+       move.l    20(A6),D7
+       move.l    D3,A0
+       move.b    (A0),D0
+       ext.w     D0
+       ext.l     D0
+       cmp.l     #94,D0
+       bne.s     @vsscanf_scanselect_1
+       move.w    #1,A2
+       addq.l    #1,D3
+       bra.s     @vsscanf_scanselect_2
+@vsscanf_scanselect_1:
+       move.w    #0,A2
+@vsscanf_scanselect_2:
+       move.l    16(A6),D0
+       subq.l    #1,16(A6)
+       tst.l     D0
+       beq       @vsscanf_scanselect_5
+       move.l    8(A6),-(A7)
+       bsr       @vsscanf_scanread
+       addq.w    #4,A7
+       move.l    D0,D4
+       cmp.l     #-1,D4
+       bne.s     @vsscanf_scanselect_6
+       bra       @vsscanf_scanselect_5
+@vsscanf_scanselect_6:
+       move.l    28(A6),A0
+       addq.l    #1,(A0)
+       clr.l     D5
+       clr.l     D2
+@vsscanf_scanselect_8:
+       move.l    D3,A0
+       move.b    0(A0,D2.L),D0
+       ext.w     D0
+       ext.l     D0
+       cmp.l     #93,D0
+       beq       @vsscanf_scanselect_10
+       tst.l     D2
+       beq.s     @vsscanf_scanselect_11
+       move.l    D3,A0
+       move.b    0(A0,D2.L),D0
+       ext.w     D0
+       ext.l     D0
+       cmp.l     #93,D0
+       bne.s     @vsscanf_scanselect_11
+       bra       @vsscanf_scanselect_10
+@vsscanf_scanselect_11:
+       tst.l     D2
+       beq       @vsscanf_scanselect_15
+       move.l    D3,A0
+       move.b    0(A0,D2.L),D0
+       ext.w     D0
+       ext.l     D0
+       cmp.l     #45,D0
+       bne       @vsscanf_scanselect_15
+       move.l    D3,A0
+       move.l    D2,D0
+       subq.l    #1,D0
+       move.l    D3,A1
+       move.l    A0,-(A7)
+       move.l    D2,A0
+       move.b    0(A0,D0.L),D1
+       cmp.b     1(A0,A1.L),D1
+       bge       @vsscanf_scanselect_15
+       move.l    (A7)+,A0
+       move.l    D3,A0
+       move.l    D2,D0
+       subq.l    #1,D0
+       move.b    0(A0,D0.L),D0
+       ext.w     D0
+       ext.l     D0
+       cmp.l     D0,D4
+       blt.s     @vsscanf_scanselect_17
+       move.l    D3,A0
+       move.l    D2,A1
+       move.b    1(A1,A0.L),D0
+       ext.w     D0
+       ext.l     D0
+       cmp.l     D0,D4
+       bgt.s     @vsscanf_scanselect_17
+       bra.s     @vsscanf_scanselect_10
+@vsscanf_scanselect_17:
+       addq.l    #1,D2
+       bra.s     @vsscanf_scanselect_19
+@vsscanf_scanselect_15:
+       move.l    D3,A0
+       move.b    0(A0,D2.L),D0
+       ext.w     D0
+       ext.l     D0
+       cmp.l     D0,D4
+       bne.s     @vsscanf_scanselect_19
+       bra.s     @vsscanf_scanselect_10
+@vsscanf_scanselect_19:
+       addq.l    #1,D2
+       bra       @vsscanf_scanselect_8
+@vsscanf_scanselect_10:
+       tst.l     D2
+       beq.s     @vsscanf_scanselect_23
+       move.l    D3,A0
+       move.b    0(A0,D2.L),D0
+       ext.w     D0
+       ext.l     D0
+       cmp.l     #93,D0
+       beq.s     @vsscanf_scanselect_21
+@vsscanf_scanselect_23:
+       moveq     #1,D5
+@vsscanf_scanselect_21:
+       move.l    A2,D0
+       beq.s     @vsscanf_scanselect_24
+       tst.l     D5
+       bne.s     @vsscanf_scanselect_26
+       tst.l     D7
+       bne.s     @vsscanf_scanselect_28
+       move.l    D6,A0
+       addq.l    #1,D6
+       move.b    D4,(A0)
+@vsscanf_scanselect_28:
+       bra.s     @vsscanf_scanselect_4
+@vsscanf_scanselect_26:
+       bra.s     @vsscanf_scanselect_5
+@vsscanf_scanselect_24:
+       tst.l     D5
+       beq.s     @vsscanf_scanselect_30
+       tst.l     D7
+       bne.s     @vsscanf_scanselect_32
+       move.l    D6,A0
+       addq.l    #1,D6
+       move.b    D4,(A0)
+@vsscanf_scanselect_32:
+       bra.s     @vsscanf_scanselect_4
+@vsscanf_scanselect_30:
+       bra.s     @vsscanf_scanselect_5
+@vsscanf_scanselect_4:
+       bra       @vsscanf_scanselect_2
+@vsscanf_scanselect_5:
+       cmp.l     #-1,D4
+       beq.s     @vsscanf_scanselect_34
+       move.l    D4,-(A7)
+       move.l    8(A6),-(A7)
+       bsr       @vsscanf_scanputback
+       addq.w    #8,A7
+       move.l    28(A6),A0
+       subq.l    #1,(A0)
+@vsscanf_scanselect_34:
+       tst.l     D7
+       bne.s     @vsscanf_scanselect_36
+       move.l    D6,A0
+       clr.b     (A0)
+@vsscanf_scanselect_36:
+       addq.l    #1,D3
+       move.l    D3,A0
+       move.b    (A0),D0
+       ext.w     D0
+       ext.l     D0
+       cmp.l     #93,D0
+       beq.s     @vsscanf_scanselect_40
+       bra       @vsscanf_scanselect_36
+@vsscanf_scanselect_40:
+       addq.l    #1,D3
+       move.l    D3,D0
+       movem.l   (A7)+,D2/D3/D4/D5/D6/D7/A2
+       unlk      A6
+       rts
+_scanflush:
+       lea       @vsscanf_buf,A0
+       move.l    A0,@vsscanf_bufx
+       clr.b     @vsscanf_buf
+       pea       -1
+       bsr       _ungetch
+       addq.w    #4,A7
+       rts
+_vsscanf:
+       link      A6,#-120
+       movem.l   D2/D3/D4/D5/D6/D7/A2/A3/A4/A5,-(A7)
+       lea       @vsscanf_scanread,A3
+       tst.l     8(A6)
+       beq.s     vsscanf_1
+       lea       8(A6),A0
+       bra.s     vsscanf_2
+vsscanf_1:
+       clr.l     D0
+       move.l    D0,A0
+vsscanf_2:
+       move.l    A0,D5
+       clr.l     -28(A6)
+       clr.l     D4
+vsscanf_3:
+       move.l    12(A6),A0
+       addq.l    #1,12(A6)
+       move.b    (A0),D0
+       ext.w     D0
+       ext.l     D0
+       move.l    D0,D3
+       beq       vsscanf_5
+       clr.l     D6
+       move.w    #0,A4
+       cmp.l     #32,D3
+       beq.s     vsscanf_8
+       cmp.l     #9,D3
+       beq.s     vsscanf_8
+       cmp.l     #10,D3
+       bne       vsscanf_6
+vsscanf_8:
+       move.l    D5,-(A7)
+       jsr       (A3)
+       addq.w    #4,A7
+       move.l    D0,D2
+       addq.l    #1,-28(A6)
+       cmp.l     #-1,D2
+       bne.s     vsscanf_11
+       tst.l     D4
+       beq.s     vsscanf_13
+       move.l    D4,D0
+       bra.s     vsscanf_14
+vsscanf_13:
+       moveq     #-1,D0
+vsscanf_14:
+       bra       vsscanf_15
+vsscanf_11:
+       move.l    D2,A0
+       lea       __ctype,A1
+       move.b    1(A0,A1.L),D0
+       and.b     #16,D0
+       bne       vsscanf_8
+       subq.l    #1,-28(A6)
+       move.l    D2,-(A7)
+       move.l    D5,-(A7)
+       bsr       @vsscanf_scanputback
+       addq.w    #8,A7
+       bra       vsscanf_139
+vsscanf_6:
+       cmp.l     #37,D3
+       bne       vsscanf_127
+       move.l    12(A6),A0
+       addq.l    #1,12(A6)
+       move.b    (A0),D0
+       ext.w     D0
+       ext.l     D0
+       move.l    D0,D3
+       clr.l     -20(A6)
+       clr.l     D6
+       clr.l     -24(A6)
+       move.w    #32767,A2
+       cmp.l     #42,D3
+       bne.s     vsscanf_18
+       moveq     #1,D6
+       move.l    12(A6),A0
+       addq.l    #1,12(A6)
+       move.b    (A0),D0
+       ext.w     D0
+       ext.l     D0
+       move.l    D0,D3
+vsscanf_18:
+       move.l    D3,A0
+       lea       __ctype,A1
+       move.b    1(A0,A1.L),D0
+       and.b     #4,D0
+       beq       vsscanf_24
+       move.l    D3,D0
+       sub.l     #48,D0
+       move.l    D0,A2
+vsscanf_22:
+       move.l    12(A6),A0
+       addq.l    #1,12(A6)
+       move.b    (A0),D0
+       ext.w     D0
+       ext.l     D0
+       move.l    D0,D3
+       move.l    D0,A0
+       lea       __ctype,A1
+       move.b    1(A0,A1.L),D0
+       and.l     #255,D0
+       and.l     #4,D0
+       beq.s     vsscanf_24
+       moveq     #-48,D0
+       move.l    A2,-(A7)
+       pea       10
+       bsr       LMUL
+       move.l    (A7),D1
+       addq.w    #8,A7
+       add.l     D3,D1
+       add.l     D1,D0
+       move.l    D0,A2
+       bra       vsscanf_22
+vsscanf_24:
+       cmp.l     #108,D3
+       beq.s     vsscanf_27
+       cmp.l     #76,D3
+       bne.s     vsscanf_25
+vsscanf_27:
+       move.l    #1,-24(A6)
+       move.l    12(A6),A0
+       addq.l    #1,12(A6)
+       move.b    (A0),D0
+       ext.w     D0
+       ext.l     D0
+       move.l    D0,D3
+       bra.s     vsscanf_28
+vsscanf_25:
+       cmp.l     #104,D3
+       bne.s     vsscanf_28
+       move.l    #1,-20(A6)
+       move.l    12(A6),A0
+       addq.l    #1,12(A6)
+       move.b    (A0),D0
+       ext.w     D0
+       ext.l     D0
+       move.l    D0,D3
+vsscanf_28:
+       cmp.l     #91,D3
+       bne       vsscanf_30
+       tst.l     D6
+       bne.s     vsscanf_32
+       move.l    16(A6),A0
+       addq.l    #4,16(A6)
+       move.l    (A0),D7
+vsscanf_32:
+       pea       -28(A6)
+       move.l    D7,-(A7)
+       move.l    D6,-(A7)
+       move.l    A2,-(A7)
+       move.l    12(A6),-(A7)
+       move.l    D5,-(A7)
+       bsr       @vsscanf_scanselect
+       add.w     #24,A7
+       move.l    D0,12(A6)
+       tst.l     D6
+       bne.s     vsscanf_34
+       addq.l    #1,D4
+vsscanf_34:
+       bra       vsscanf_139
+vsscanf_30:
+       cmp.l     #110,D3
+       bne.s     vsscanf_36
+       tst.l     D6
+       bne.s     vsscanf_38
+       move.l    16(A6),A0
+       addq.l    #4,16(A6)
+       move.l    (A0),D7
+       move.l    D7,A0
+       move.l    -28(A6),(A0)
+       addq.l    #1,D4
+vsscanf_38:
+       bra       vsscanf_139
+vsscanf_36:
+       cmp.l     #115,D3
+       bne       vsscanf_40
+       pea       -28(A6)
+       move.l    D5,-(A7)
+       bsr       @vsscanf_scanspace
+       addq.w    #8,A7
+       move.l    D0,D2
+       tst.l     D6
+       bne.s     vsscanf_42
+       move.l    16(A6),A0
+       addq.l    #4,16(A6)
+       move.l    (A0),D7
+vsscanf_42:
+       addq.l    #1,-28(A6)
+vsscanf_44:
+       move.l    A2,D0
+       subq.w    #1,A2
+       tst.l     D0
+       beq       vsscanf_46
+       move.l    D2,A0
+       lea       __ctype,A1
+       move.b    1(A0,A1.L),D0
+       and.b     #16,D0
+       bne.s     vsscanf_46
+       cmp.l     #-1,D2
+       beq.s     vsscanf_46
+       move.w    #1,A4
+       tst.l     D6
+       bne.s     vsscanf_47
+       move.l    D7,A0
+       addq.l    #1,D7
+       move.b    D2,(A0)
+vsscanf_47:
+       move.l    D5,-(A7)
+       jsr       (A3)
+       addq.w    #4,A7
+       move.l    D0,D2
+       addq.l    #1,-28(A6)
+       bra       vsscanf_44
+vsscanf_46:
+       tst.l     D6
+       bne.s     vsscanf_51
+       move.l    D7,A0
+       clr.b     (A0)
+       move.l    A4,D0
+       beq.s     vsscanf_51
+       addq.l    #1,D4
+vsscanf_51:
+       cmp.l     #-1,D2
+       beq.s     vsscanf_55
+       tst.l     D6
+       bne.s     vsscanf_53
+       move.l    A4,D0
+       bne.s     vsscanf_53
+vsscanf_55:
+       tst.l     D4
+       beq.s     vsscanf_56
+       move.l    D4,D0
+       bra.s     vsscanf_59
+vsscanf_56:
+       cmp.l     #-1,D2
+       bne.s     vsscanf_58
+       moveq     #-1,D0
+       bra.s     vsscanf_59
+vsscanf_58:
+       move.l    D4,D0
+vsscanf_59:
+       bra       vsscanf_15
+vsscanf_53:
+       subq.l    #1,-28(A6)
+       move.l    D2,-(A7)
+       move.l    D5,-(A7)
+       bsr       @vsscanf_scanputback
+       addq.w    #8,A7
+       bra       vsscanf_139
+vsscanf_40:
+       cmp.l     #99,D3
+       bne       vsscanf_60
+       tst.l     D6
+       bne.s     vsscanf_62
+       move.l    16(A6),A0
+       addq.l    #4,16(A6)
+       move.l    (A0),D7
+vsscanf_62:
+       move.l    D5,-(A7)
+       jsr       (A3)
+       addq.w    #4,A7
+       move.l    D0,D2
+       addq.l    #1,-28(A6)
+       move.l    A2,D0
+       cmp.l     #32767,D0
+       bne.s     vsscanf_64
+       move.w    #1,A2
+vsscanf_64:
+       cmp.l     #-1,D2
+       bne.s     vsscanf_66
+       tst.l     D6
+       bne.s     vsscanf_66
+       subq.l    #1,D4
+vsscanf_66:
+       move.l    A2,D0
+       subq.w    #1,A2
+       tst.l     D0
+       beq.s     vsscanf_70
+       cmp.l     #-1,D2
+       beq.s     vsscanf_70
+       tst.l     D6
+       bne.s     vsscanf_71
+       move.l    D7,A0
+       addq.l    #1,D7
+       move.b    D2,(A0)
+vsscanf_71:
+       move.l    D5,-(A7)
+       jsr       (A3)
+       addq.w    #4,A7
+       move.l    D0,D2
+       addq.l    #1,-28(A6)
+       bra       vsscanf_66
+vsscanf_70:
+       cmp.l     #-1,D2
+       bne.s     vsscanf_73
+       tst.l     D4
+       beq.s     vsscanf_75
+       move.l    D4,D0
+       bra.s     vsscanf_76
+vsscanf_75:
+       moveq     #-1,D0
+vsscanf_76:
+       bra       vsscanf_15
+vsscanf_73:
+       tst.l     D6
+       bne.s     vsscanf_77
+       addq.l    #1,D4
+vsscanf_77:
+       subq.l    #1,-28(A6)
+       move.l    D2,-(A7)
+       move.l    D5,-(A7)
+       bsr       @vsscanf_scanputback
+       addq.w    #8,A7
+       bra       vsscanf_139
+vsscanf_60:
+       cmp.l     #105,D3
+       bne       vsscanf_82
+       pea       -28(A6)
+       move.l    D5,-(A7)
+       bsr       @vsscanf_scanspace
+       addq.w    #8,A7
+       move.l    D0,D2
+       cmp.l     #48,D2
+       bne       vsscanf_81
+       move.w    #1,A4
+       move.l    D5,-(A7)
+       jsr       (A3)
+       addq.w    #4,A7
+       move.l    D0,D2
+       move.l    D2,-(A7)
+       bsr       _tolower
+       addq.w    #4,A7
+       cmp.l     #120,D0
+       bne.s     vsscanf_83
+       moveq     #120,D3
+       bra.s     vsscanf_84
+vsscanf_83:
+       subq.l    #1,-28(A6)
+       move.l    D2,-(A7)
+       move.l    D5,-(A7)
+       bsr       @vsscanf_scanputback
+       addq.w    #8,A7
+       moveq     #111,D3
+vsscanf_84:
+       addq.l    #1,-28(A6)
+       bra.s     vsscanf_82
+vsscanf_81:
+       subq.l    #1,-28(A6)
+       move.l    D2,-(A7)
+       move.l    D5,-(A7)
+       bsr       @vsscanf_scanputback
+       addq.w    #8,A7
+       moveq     #100,D3
+vsscanf_82:
+       cmp.l     #100,D3
+       beq.s     vsscanf_87
+       cmp.l     #117,D3
+       beq.s     vsscanf_87
+       cmp.l     #120,D3
+       beq.s     vsscanf_87
+       cmp.l     #111,D3
+       bne       vsscanf_85
+vsscanf_87:
+       pea       -28(A6)
+       move.l    D5,-(A7)
+       bsr       @vsscanf_scanspace
+       addq.w    #8,A7
+       move.l    D0,D2
+       move.l    #10,-4(A6)
+       cmp.l     #120,D3
+       bne.s     vsscanf_88
+       move.l    #16,-4(A6)
+vsscanf_88:
+       cmp.l     #111,D3
+       bne.s     vsscanf_90
+       move.l    #8,-4(A6)
+vsscanf_90:
+       tst.l     D6
+       bne.s     vsscanf_92
+       move.l    16(A6),A0
+       addq.l    #4,16(A6)
+       move.l    (A0),D7
+vsscanf_92:
+       clr.l     -32(A6)
+       addq.l    #1,-28(A6)
+       cmp.l     #117,D3
+       beq.s     vsscanf_94
+       cmp.l     #45,D2
+       bne.s     vsscanf_94
+       move.l    D5,-(A7)
+       jsr       (A3)
+       addq.w    #4,A7
+       move.l    D0,D2
+       addq.l    #1,-28(A6)
+       move.l    #1,-32(A6)
+       move.w    #1,A4
+vsscanf_94:
+       move.w    #0,A5
+       cmp.l     #-1,D2
+       bne.s     vsscanf_96
+       tst.l     D4
+       beq.s     vsscanf_98
+       move.l    D4,D0
+       bra.s     vsscanf_99
+vsscanf_98:
+       moveq     #-1,D0
+vsscanf_99:
+       bra       vsscanf_15
+vsscanf_96:
+       move.l    A2,D0
+       subq.w    #1,A2
+       tst.l     D0
+       beq       vsscanf_102
+       cmp.l     #120,D3
+       bne.s     vsscanf_104
+       move.l    D2,-(A7)
+       bsr       _toupper
+       addq.w    #4,A7
+       cmp.l     #65,D0
+       blt.s     vsscanf_104
+       move.l    D2,-(A7)
+       bsr       _toupper
+       addq.w    #4,A7
+       cmp.l     #70,D0
+       ble.s     vsscanf_103
+vsscanf_104:
+       move.l    D2,A0
+       lea       __ctype,A1
+       move.b    1(A0,A1.L),D0
+       and.b     #4,D0
+       beq       vsscanf_102
+vsscanf_103:
+       move.l    D2,A0
+       lea       __ctype,A1
+       move.b    1(A0,A1.L),D0
+       and.b     #4,D0
+       bne.s     vsscanf_105
+       moveq     #-7,D0
+       move.l    D0,-(A7)
+       move.l    D2,-(A7)
+       bsr       _toupper
+       addq.w    #4,A7
+       move.l    D0,D1
+       move.l    (A7)+,D0
+       add.l     D1,D0
+       move.l    D0,D2
+vsscanf_105:
+       move.l    A5,-(A7)
+       move.l    -4(A6),-(A7)
+       bsr       LMUL
+       move.l    (A7),D0
+       addq.w    #8,A7
+       add.l     D2,D0
+       sub.l     #48,D0
+       move.l    D0,A5
+       move.l    D5,-(A7)
+       jsr       (A3)
+       addq.w    #4,A7
+       move.l    D0,D2
+       addq.l    #1,-28(A6)
+       move.w    #1,A4
+       bra       vsscanf_96
+vsscanf_102:
+       cmp.l     #-1,D2
+       beq.s     vsscanf_107
+       move.l    D2,-(A7)
+       move.l    D5,-(A7)
+       bsr       @vsscanf_scanputback
+       addq.w    #8,A7
+       subq.l    #1,-28(A6)
+       move.l    A4,D0
+       bne.s     vsscanf_109
+       move.l    D4,D0
+       bra       vsscanf_15
+vsscanf_109:
+       bra.s     vsscanf_111
+vsscanf_107:
+       move.l    A4,D0
+       bne.s     vsscanf_111
+       tst.l     D4
+       beq.s     vsscanf_113
+       move.l    D4,D0
+       bra.s     vsscanf_114
+vsscanf_113:
+       moveq     #-1,D0
+vsscanf_114:
+       bra       vsscanf_15
+vsscanf_111:
+       tst.l     -32(A6)
+       beq.s     vsscanf_115
+       move.l    A5,D0
+       neg.l     D0
+       move.l    D0,A5
+vsscanf_115:
+       tst.l     D6
+       bne.s     vsscanf_117
+       tst.l     -24(A6)
+       beq.s     vsscanf_119
+       move.l    D7,A0
+       move.l    A5,(A0)
+       bra.s     vsscanf_122
+vsscanf_119:
+       tst.l     -20(A6)
+       beq.s     vsscanf_121
+       move.l    D7,A0
+       move.w    A5,(A0)
+       bra.s     vsscanf_122
+vsscanf_121:
+       move.l    D7,A0
+       move.l    A5,(A0)
+vsscanf_122:
+       addq.l    #1,D4
+vsscanf_117:
+       cmp.l     #-1,D2
+       bne.s     vsscanf_123
+       tst.l     D4
+       beq.s     vsscanf_125
+       move.l    D4,D0
+       bra.s     vsscanf_126
+vsscanf_125:
+       moveq     #-1,D0
+vsscanf_126:
+       bra       vsscanf_15
+vsscanf_123:
+       bra       vsscanf_139
+vsscanf_85:
+       cmp.l     #37,D3
+       bne       vsscanf_127
+       move.l    D5,-(A7)
+       jsr       (A3)
+       addq.w    #4,A7
+       move.l    D0,D2
+       cmp.l     #-1,D2
+       bne.s     vsscanf_129
+       tst.l     D4
+       beq.s     vsscanf_131
+       move.l    D4,D0
+       bra.s     vsscanf_132
+vsscanf_131:
+       moveq     #-1,D0
+vsscanf_132:
+       bra       vsscanf_15
+vsscanf_129:
+       addq.l    #1,-28(A6)
+       cmp.l     D3,D2
+       beq.s     vsscanf_133
+       move.l    D2,-(A7)
+       move.l    D5,-(A7)
+       bsr       @vsscanf_scanputback
+       addq.w    #8,A7
+       subq.l    #1,-28(A6)
+       move.l    D4,D0
+       bra       vsscanf_15
+vsscanf_133:
+       bra       vsscanf_139
+vsscanf_127:
+       move.l    D5,-(A7)
+       jsr       (A3)
+       addq.w    #4,A7
+       move.l    D0,D2
+       addq.l    #1,-28(A6)
+       cmp.l     #-1,D2
+       bne.s     vsscanf_135
+       tst.l     D4
+       beq.s     vsscanf_137
+       move.l    D4,D0
+       bra.s     vsscanf_138
+vsscanf_137:
+       moveq     #-1,D0
+vsscanf_138:
+       bra.s     vsscanf_15
+vsscanf_135:
+       cmp.l     D3,D2
+       beq.s     vsscanf_139
+       move.l    D2,-(A7)
+       move.l    D5,-(A7)
+       bsr       @vsscanf_scanputback
+       addq.w    #8,A7
+       subq.l    #1,-28(A6)
+       move.l    D4,D0
+       bra.s     vsscanf_15
+vsscanf_139:
+       bra       vsscanf_3
+vsscanf_5:
+       move.l    D4,D0
+vsscanf_15:
+       movem.l   (A7)+,D2/D3/D4/D5/D6/D7/A2/A3/A4/A5
+       unlk      A6
+       rts
+_printf:
+       link      A6,#-4
+       movem.l   D2,-(A7)
+       lea       8(A6),A0
+       addq.w    #4,A0
+       move.l    A0,D2
+       move.l    D2,-(A7)
+       move.l    8(A6),-(A7)
+       clr.l     -(A7)
+       bsr       _vsprintf
+       add.w     #12,A7
+       move.l    D0,-4(A6)
+       clr.l     D2
+       move.l    -4(A6),D0
+       movem.l   (A7)+,D2
+       unlk      A6
+       rts
+ULMUL:
+       link    A6,#0
+       movem.l D0/D1,-(A7)
+       move.l  8(A6),D1
+       move.l  12(A6),D0
+       bra.s   lmul_3
+LMUL:
+       link    A6,#0
+       movem.l D0/D1,-(A7)
+       move.l  8(A6),D1
+       move.l  12(A6),D0
+       tst.l   D0
+       bpl.s   lmul_1
+       neg.l   D0
+       tst.l   D1
+       bpl.s   lmul_2
+       neg.l   D1
+       bra.s   lmul_3
+lmul_1:
+       tst.l   D1
+       bpl.s   lmul_3
+       neg.l   D1
+lmul_2:
+       bsr.s   domul
+       neg.l   D1
+       negx.l  D0
+       bra.s   lmul_4
+lmul_3:
+       bsr.s   domul
+lmul_4:
+       move.l  D1,8(A6)
+       movem.l (A7)+,D0/D1
+       unlk    A6
+       rts
+domul:
+       cmpi.l  #$FFFF,D1
+       bhi.s   domul_1
+       cmpi.l  #$FFFF,D0
+       bhi.s   domul_2
+       mulu    D0,D1
+       rts
+domul_1:
+       cmpi.l  #$FFFF,D0
+       bhi.s   domul_4
+       bra.s   domul_3
+domul_2
+       exg     D0,D1
+domul_3:
+       move.l  D2,-(A7)
+       move.l  D1,D2
+       swap    D2
+       mulu    D0,D1
+       mulu    D0,D2
+       swap    D2
+       clr.w   D2
+       add.l   D2,D1
+       move.l  (A7)+,D2
+       rts
+domul_4:
+       movem.l D2/D3,-(A7)
+       move.l  D1,D2
+       move.l  D1,D3
+       mulu    D0,D1
+       swap    D2
+       mulu    D0,D2
+       swap    D0
+       mulu    D0,D3
+       add.l   D3,D2
+       swap    D2
+       clr.w   D2
+       add.l   D2,D1
+       movem.l (A7)+,D2/D3
+       rts
+_gets:
+       link      A6,#0
+       movem.l   D2/D3/D4/A2,-(A7)
+       lea       _putch,A2
+       move.l    8(A6),D4
+       move.l    D4,D2
+gets_1:
+       bsr       _getch
+       move.l    D0,D3
+       cmp.l     #10,D0
+       beq       gets_3
+       cmp.l     #8,D3
+       beq.s     gets_4
+       move.l    D2,A0
+       addq.l    #1,D2
+       move.b    D3,(A0)
+       ext.w     D3
+       ext.l     D3
+       move.l    D3,-(A7)
+       jsr       (A2)
+       addq.w    #4,A7
+       bra.s     gets_6
+gets_4:
+       cmp.l     D4,D2
+       bls.s     gets_6
+       pea       8
+       jsr       (A2)
+       addq.w    #4,A7
+       pea       32
+       jsr       (A2)
+       addq.w    #4,A7
+       pea       8
+       jsr       (A2)
+       addq.w    #4,A7
+       subq.l    #1,D2
+gets_6:
+       bra       gets_1
+gets_3:
+       pea       10
+       jsr       (A2)
+       addq.w    #4,A7
+       move.l    D2,A0
+       clr.b     (A0)
+       move.l    D4,D0
+       movem.l   (A7)+,D2/D3/D4/A2
+       unlk      A6
+       rts
+_tolower:
+       link      A6,#0
+       movem.l   D2,-(A7)
+       move.l    8(A6),D2
+       cmp.l     #65,D2
+       blt.s     tolower_1
+       cmp.l     #90,D2
+       bgt.s     tolower_1
+       or.l      #32,D2
+tolower_1:
+       move.l    D2,D0
+       movem.l   (A7)+,D2
+       unlk      A6
+       rts
+_strcat:
+       move.l    (4,A7),A0	
+       move.l    (8,A7),A1	
+       move.l    A0,D0		
+strcat_0:
+       tst.b     (A0)+
+       bne       strcat_0
+       subq      #1,A0
+strcat_1:
+       move.b    (A1)+,(A0)+
+       bne       strcat_1
+       rts
+_toupper:
+       link      A6,#0
+       movem.l   D2,-(A7)
+       move.l    8(A6),D2
+       cmp.l     #97,D2
+       blt.s     toupper_1
+       cmp.l     #122,D2
+       bgt.s     toupper_1
+       and.l     #95,D2
+toupper_1:
+       move.l    D2,D0
+       movem.l   (A7)+,D2
+       unlk      A6
+       rts
+_ungetch:
+       link      A6,#0
+       move.l    8(A6),__ungetbuf
+       move.l    8(A6),D0
+       unlk      A6
+       rts
+@vsprintf_copy:
+       link      A6,#0
+       move.l    8(A6),A0
+       tst.l     (A0)
+       beq.s     @vsprintf_copy_1
+       move.l    12(A6),D0
+       move.l    8(A6),A0
+       move.l    (A0),A1
+       addq.l    #1,(A0)
+       move.b    D0,(A1)
+       bra.s     @vsprintf_copy_2
+@vsprintf_copy_1:
+       move.l    12(A6),-(A7)
+       bsr       _putch
+       addq.w    #4,A7
+@vsprintf_copy_2:
+       unlk      A6
+       rts
+@vsprintf_getval:
+       link      A6,#0
+       movem.l   D2/D3,-(A7)
+       move.l    8(A6),D2
+       clr.l     D3
+       move.l    D2,A0
+       move.l    (A0),A0
+       move.b    (A0),D0
+       ext.w     D0
+       ext.l     D0
+       cmp.l     #42,D0
+       bne.s     @vsprintf_getval_1
+       move.l    12(A6),A0
+       move.l    (A0),A1
+       addq.l    #4,(A0)
+       move.l    (A1),D3
+       move.l    D2,A0
+       addq.l    #1,(A0)
+       bra       @vsprintf_getval_5
+@vsprintf_getval_1:
+       move.l    D2,A0
+       move.l    (A0),A0
+       move.b    (A0),D0
+       ext.w     D0
+       ext.l     D0
+       cmp.l     #48,D0
+       blt       @vsprintf_getval_5
+       move.l    D2,A0
+       move.l    (A0),A0
+       move.b    (A0),D0
+       ext.w     D0
+       ext.l     D0
+       cmp.l     #57,D0
+       bgt.s     @vsprintf_getval_5
+       move.l    D3,-(A7)
+       pea       10
+       bsr       LMUL
+       move.l    (A7),D0
+       addq.w    #8,A7
+       move.l    D2,A0
+       move.l    (A0),A1
+       addq.l    #1,(A0)
+       move.b    (A1),D1
+       ext.w     D1
+       ext.l     D1
+       add.l     D1,D0
+       sub.l     #48,D0
+       move.l    D0,D3
+       bra       @vsprintf_getval_1
+@vsprintf_getval_5:
+       move.l    D3,D0
+       movem.l   (A7)+,D2/D3
+       unlk      A6
+       rts
+_vsprintf:
+       link      A6,#-52
+       movem.l   D2/D3/D4/D5/D6/D7/A2/A3/A4/A5,-(A7)
+       lea       8(A6),A2
+       lea       @vsprintf_copy,A3
+       lea       _ultoa,A4
+       clr.l     D6
+vsprintf_1:
+       move.l    12(A6),A0
+       tst.b     (A0)
+       beq       vsprintf_3
+       move.l    12(A6),A0
+       move.b    (A0),D0
+       ext.w     D0
+       ext.l     D0
+       cmp.l     #37,D0
+       beq.s     vsprintf_4
+       move.l    12(A6),A0
+       addq.l    #1,12(A6)
+       move.b    (A0),D1
+       ext.w     D1
+       ext.l     D1
+       move.l    D1,-(A7)
+       move.l    A2,-(A7)
+       jsr       (A3)
+       addq.w    #8,A7
+       addq.l    #1,D6
+       bra       vsprintf_2
+vsprintf_4:
+       addq.l    #1,12(A6)
+       clr.b     -45(A6)
+       clr.b     -46(A6)
+       clr.b     -48(A6)
+       clr.b     -49(A6)
+       clr.b     -50(A6)
+       clr.b     -51(A6)
+       clr.l     -4(A6)
+       moveq     #-1,D5
+       lea       -36(A6),A0
+       move.l    A0,D3
+       move.l    A0,D2
+vsprintf_6:
+       move.l    12(A6),A0
+       move.b    (A0),D0
+       ext.w     D0
+       ext.l     D0
+       cmp.l     #43,D0
+       beq.s     vsprintf_12
+       bgt.s     vsprintf_15
+       cmp.l     #35,D0
+       beq       vsprintf_14
+       bgt       vsprintf_9
+       cmp.l     #32,D0
+       beq.s     vsprintf_13
+       bra.s     vsprintf_9
+vsprintf_15:
+       cmp.l     #45,D0
+       beq.s     vsprintf_11
+       bra.s     vsprintf_9
+vsprintf_11:
+       move.b    #1,-51(A6)
+       addq.l    #1,12(A6)
+       bra.s     vsprintf_7
+vsprintf_12:
+       move.b    #1,-50(A6)
+       addq.l    #1,12(A6)
+       bra.s     vsprintf_7
+vsprintf_13:
+       move.b    #1,-49(A6)
+       addq.l    #1,12(A6)
+       bra.s     vsprintf_7
+vsprintf_14:
+       move.b    #1,-48(A6)
+       addq.l    #1,12(A6)
+       bra.s     vsprintf_7
+vsprintf_9:
+       bra.s     vsprintf_8
+vsprintf_7:
+       bra       vsprintf_6
+vsprintf_8:
+       move.l    12(A6),A0
+       move.b    (A0),D0
+       ext.w     D0
+       ext.l     D0
+       cmp.l     #48,D0
+       bne.s     vsprintf_16
+       addq.l    #1,12(A6)
+       move.b    #1,-46(A6)
+vsprintf_16:
+       pea       16(A6)
+       pea       12(A6)
+       bsr       @vsprintf_getval
+       addq.w    #8,A7
+       move.l    D0,A5
+       move.l    12(A6),A0
+       move.b    (A0),D0
+       ext.w     D0
+       ext.l     D0
+       cmp.l     #46,D0
+       bne.s     vsprintf_18
+       addq.l    #1,12(A6)
+       pea       16(A6)
+       pea       12(A6)
+       bsr       @vsprintf_getval
+       addq.w    #8,A7
+       move.l    D0,D5
+vsprintf_18:
+       move.l    12(A6),A0
+       move.b    (A0),D0
+       ext.w     D0
+       ext.l     D0
+       cmp.l     #108,D0
+       bne.s     vsprintf_20
+       addq.l    #1,12(A6)
+       move.b    #1,-45(A6)
+vsprintf_20:
+       move.l    12(A6),A0
+       move.b    (A0),D0
+       ext.w     D0
+       ext.l     D0
+       cmp.l     #111,D0
+       beq       vsprintf_27
+       bgt.s     vsprintf_33
+       cmp.l     #100,D0
+       beq       vsprintf_24
+       bgt.s     vsprintf_34
+       cmp.l     #99,D0
+       beq       vsprintf_30
+       bgt       vsprintf_22
+       cmp.l     #88,D0
+       beq       vsprintf_28
+       bra       vsprintf_22
+vsprintf_34:
+       cmp.l     #105,D0
+       beq.s     vsprintf_24
+       bra       vsprintf_22
+vsprintf_33:
+       cmp.l     #117,D0
+       beq       vsprintf_26
+       bgt.s     vsprintf_35
+       cmp.l     #115,D0
+       beq       vsprintf_31
+       bra       vsprintf_22
+vsprintf_35:
+       cmp.l     #120,D0
+       beq       vsprintf_28
+       bra       vsprintf_22
+vsprintf_24:
+       tst.b     -45(A6)
+       beq.s     vsprintf_36
+       pea       10
+       move.l    D3,-(A7)
+       move.l    16(A6),A0
+       addq.l    #4,16(A6)
+       move.l    (A0),-(A7)
+       bsr       _ltoa
+       add.w     #12,A7
+       bra.s     vsprintf_37
+vsprintf_36:
+       pea       10
+       move.l    D3,-(A7)
+       move.l    16(A6),A0
+       addq.l    #4,16(A6)
+       move.l    (A0),-(A7)
+       bsr       _ltoa
+       add.w     #12,A7
+vsprintf_37:
+       bra       vsprintf_23
+vsprintf_26:
+       tst.b     -45(A6)
+       beq.s     vsprintf_38
+       pea       10
+       move.l    D3,-(A7)
+       move.l    16(A6),A0
+       addq.l    #4,16(A6)
+       move.l    (A0),-(A7)
+       jsr       (A4)
+       add.w     #12,A7
+       bra.s     vsprintf_39
+vsprintf_38:
+       pea       10
+       move.l    D3,-(A7)
+       move.l    16(A6),A0
+       addq.l    #4,16(A6)
+       move.l    (A0),-(A7)
+       jsr       (A4)
+       add.w     #12,A7
+vsprintf_39:
+       bra       vsprintf_23
+vsprintf_27:
+       tst.b     -45(A6)
+       beq.s     vsprintf_40
+       pea       8
+       move.l    D3,-(A7)
+       move.l    16(A6),A0
+       addq.l    #4,16(A6)
+       move.l    (A0),-(A7)
+       jsr       (A4)
+       add.w     #12,A7
+       bra.s     vsprintf_41
+vsprintf_40:
+       pea       8
+       move.l    D3,-(A7)
+       move.l    16(A6),A0
+       addq.l    #4,16(A6)
+       move.l    (A0),-(A7)
+       jsr       (A4)
+       add.w     #12,A7
+vsprintf_41:
+       bra       vsprintf_23
+vsprintf_28:
+       tst.b     -45(A6)
+       beq.s     vsprintf_42
+       pea       16
+       move.l    D3,-(A7)
+       move.l    16(A6),A0
+       addq.l    #4,16(A6)
+       move.l    (A0),-(A7)
+       jsr       (A4)
+       add.w     #12,A7
+       bra.s     vsprintf_43
+vsprintf_42:
+       pea       16
+       move.l    D3,-(A7)
+       move.l    16(A6),A0
+       addq.l    #4,16(A6)
+       move.l    (A0),-(A7)
+       jsr       (A4)
+       add.w     #12,A7
+vsprintf_43:
+       bra       vsprintf_23
+vsprintf_30:
+       move.l    16(A6),A0
+       addq.l    #4,16(A6)
+       move.l    (A0),D0
+       move.l    D2,A0
+       addq.l    #1,D2
+       move.b    D0,(A0)
+       move.l    D2,A0
+       clr.b     (A0)
+       move.l    A5,D0
+       beq.s     vsprintf_44
+       move.l    A5,D0
+       bra.s     vsprintf_45
+vsprintf_44:
+       moveq     #1,D0
+vsprintf_45:
+       move.l    D0,D5
+       bra       vsprintf_23
+vsprintf_31:
+       move.l    16(A6),A0
+       addq.l    #4,16(A6)
+       move.l    (A0),D3
+       cmp.l     #-1,D5
+       bne.s     vsprintf_46
+       move.l    D3,-(A7)
+       bsr       _strlen
+       addq.w    #4,A7
+       move.l    D0,D5
+vsprintf_46:
+       bra.s     vsprintf_23
+vsprintf_22:
+       move.l    12(A6),A0
+       move.l    D2,A1
+       addq.l    #1,D2
+       move.b    (A0),(A1)
+       move.l    D2,A0
+       clr.b     (A0)
+vsprintf_23:
+       move.l    D3,-(A7)
+       bsr       _strlen
+       addq.w    #4,A7
+       move.b    D0,D4
+       move.l    12(A6),A0
+       move.b    (A0),D0
+       ext.w     D0
+       ext.l     D0
+       cmp.l     #115,D0
+       bne.s     vsprintf_48
+       cmp.l     #0,D5
+       blt.s     vsprintf_48
+       ext.w     D4
+       ext.l     D4
+       cmp.l     D5,D4
+       ble.s     vsprintf_50
+       move.b    D5,D0
+       bra.s     vsprintf_51
+vsprintf_50:
+       move.b    D4,D0
+vsprintf_51:
+       move.b    D0,D4
+vsprintf_48:
+       move.l    12(A6),A0
+       move.b    (A0),D0
+       ext.w     D0
+       ext.l     D0
+       cmp.l     #88,D0
+       bne       vsprintf_56
+       lea       -36(A6),A0
+       move.l    A0,D2
+vsprintf_54:
+       move.l    D2,A0
+       tst.b     (A0)
+       beq.s     vsprintf_56
+       move.l    D2,A0
+       move.b    (A0),D1
+       ext.w     D1
+       ext.l     D1
+       move.l    D1,-(A7)
+       bsr       _toupper
+       addq.w    #4,A7
+       move.l    D2,A0
+       move.b    D0,(A0)
+       addq.l    #1,D2
+       bra       vsprintf_54
+vsprintf_56:
+       moveq     #0,D7
+       lea       -44(A6),A0
+       move.l    A0,D2
+       move.l    12(A6),A0
+       move.b    (A0),D0
+       ext.w     D0
+       ext.l     D0
+       cmp.l     #100,D0
+       beq.s     vsprintf_59
+       move.l    12(A6),A0
+       move.b    (A0),D0
+       ext.w     D0
+       ext.l     D0
+       cmp.l     #105,D0
+       bne       vsprintf_65
+vsprintf_59:
+       tst.b     -50(A6)
+       bne.s     vsprintf_62
+       move.l    D3,A0
+       move.b    (A0),D0
+       ext.w     D0
+       ext.l     D0
+       cmp.l     #45,D0
+       bne       vsprintf_60
+vsprintf_62:
+       move.l    D3,A0
+       move.b    (A0),D0
+       ext.w     D0
+       ext.l     D0
+       cmp.l     #45,D0
+       bne.s     vsprintf_63
+       move.l    D3,A0
+       addq.l    #1,D3
+       move.l    D2,A1
+       addq.l    #1,D2
+       move.b    (A0),(A1)
+       subq.b    #1,D4
+       bra.s     vsprintf_64
+vsprintf_63:
+       move.l    D2,A0
+       addq.l    #1,D2
+       move.b    #43,(A0)
+vsprintf_64:
+       addq.l    #1,D7
+       bra       vsprintf_65
+vsprintf_60:
+       tst.b     -49(A6)
+       beq       vsprintf_65
+       move.l    D3,A0
+       move.b    (A0),D0
+       ext.w     D0
+       ext.l     D0
+       cmp.l     #45,D0
+       bne.s     vsprintf_67
+       move.l    D3,A0
+       addq.l    #1,D3
+       move.l    D2,A1
+       addq.l    #1,D2
+       move.b    (A0),(A1)
+       subq.b    #1,D4
+       bra.s     vsprintf_68
+vsprintf_67:
+       move.l    D2,A0
+       addq.l    #1,D2
+       move.b    #32,(A0)
+vsprintf_68:
+       addq.l    #1,D7
+vsprintf_65:
+       tst.b     -48(A6)
+       beq       vsprintf_77
+       move.l    12(A6),A0
+       move.b    (A0),D0
+       ext.w     D0
+       ext.l     D0
+       cmp.l     #111,D0
+       beq.s     vsprintf_73
+       bgt.s     vsprintf_76
+       cmp.l     #88,D0
+       beq.s     vsprintf_73
+       bra       vsprintf_77
+vsprintf_76:
+       cmp.l     #120,D0
+       beq.s     vsprintf_73
+       bra       vsprintf_77
+vsprintf_73:
+       move.l    D2,A0
+       addq.l    #1,D2
+       move.b    #48,(A0)
+       addq.l    #1,D7
+       move.l    12(A6),A0
+       move.b    (A0),D0
+       ext.w     D0
+       ext.l     D0
+       cmp.l     #120,D0
+       beq.s     vsprintf_79
+       move.l    12(A6),A0
+       move.b    (A0),D0
+       ext.w     D0
+       ext.l     D0
+       cmp.l     #88,D0
+       bne.s     vsprintf_77
+vsprintf_79:
+       move.l    D2,A0
+       addq.l    #1,D2
+       move.b    #120,(A0)
+       addq.l    #1,D7
+vsprintf_77:
+       move.l    D2,A0
+       clr.b     (A0)
+       move.l    12(A6),A0
+       move.b    (A0),D0
+       ext.w     D0
+       ext.l     D0
+       cmp.l     #105,D0
+       beq       vsprintf_82
+       bgt.s     vsprintf_93
+       cmp.l     #99,D0
+       beq       vsprintf_96
+       bgt.s     vsprintf_94
+       cmp.l     #88,D0
+       beq       vsprintf_82
+       bgt       vsprintf_80
+       cmp.l     #69,D0
+       beq       vsprintf_82
+       bra       vsprintf_80
+vsprintf_94:
+       cmp.l     #101,D0
+       beq       vsprintf_82
+       bgt       vsprintf_80
+       cmp.l     #100,D0
+       beq.s     vsprintf_82
+       bra       vsprintf_80
+vsprintf_93:
+       cmp.l     #117,D0
+       beq.s     vsprintf_82
+       bgt.s     vsprintf_95
+       cmp.l     #115,D0
+       beq       vsprintf_96
+       bgt       vsprintf_80
+       cmp.l     #111,D0
+       beq.s     vsprintf_82
+       bra       vsprintf_80
+vsprintf_95:
+       cmp.l     #120,D0
+       beq.s     vsprintf_82
+       bra       vsprintf_80
+vsprintf_82:
+       tst.b     -46(A6)
+       beq.s     vsprintf_96
+       tst.b     -51(A6)
+       bne.s     vsprintf_96
+       move.l    A5,D0
+       sub.l     D7,D0
+       ext.w     D4
+       ext.l     D4
+       sub.l     D4,D0
+       move.l    D0,-4(A6)
+vsprintf_96:
+       move.l    -4(A6),D0
+       cmp.l     #0,D0
+       bge.s     vsprintf_98
+       clr.l     -4(A6)
+vsprintf_98:
+       tst.b     -51(A6)
+       bne       vsprintf_104
+       ext.w     D4
+       ext.l     D4
+       move.l    D4,D0
+       add.l     -4(A6),D0
+       add.l     D7,D0
+       move.b    D0,-47(A6)
+vsprintf_102:
+       move.b    -47(A6),D0
+       ext.w     D0
+       ext.l     D0
+       move.l    A5,D1
+       subq.w    #1,A5
+       cmp.l     D1,D0
+       bge.s     vsprintf_104
+       pea       32
+       move.l    A2,-(A7)
+       jsr       (A3)
+       addq.w    #8,A7
+       addq.l    #1,D6
+       bra       vsprintf_102
+vsprintf_104:
+       lea       -44(A6),A0
+       move.l    A0,D2
+vsprintf_105:
+       move.l    D2,A0
+       tst.b     (A0)
+       beq.s     vsprintf_107
+       move.l    D2,A0
+       addq.l    #1,D2
+       move.b    (A0),D1
+       ext.w     D1
+       ext.l     D1
+       move.l    D1,-(A7)
+       move.l    A2,-(A7)
+       jsr       (A3)
+       addq.w    #8,A7
+       addq.l    #1,D6
+       bra       vsprintf_105
+vsprintf_107:
+       move.l    -4(A6),D0
+       move.b    D0,-47(A6)
+vsprintf_108:
+       move.b    -47(A6),D0
+       subq.b    #1,-47(A6)
+       tst.b     D0
+       beq.s     vsprintf_110
+       pea       48
+       move.l    A2,-(A7)
+       jsr       (A3)
+       addq.w    #8,A7
+       addq.l    #1,D6
+       bra       vsprintf_108
+vsprintf_110:
+       move.l    D3,A0
+       tst.b     (A0)
+       beq       vsprintf_113
+       move.l    12(A6),A0
+       move.b    (A0),D0
+       ext.w     D0
+       ext.l     D0
+       cmp.l     #115,D0
+       beq.s     vsprintf_116
+       bgt.s     vsprintf_119
+       cmp.l     #99,D0
+       beq.s     vsprintf_116
+       bra.s     vsprintf_119
+vsprintf_116:
+       move.l    D5,D0
+       subq.l    #1,D5
+       cmp.l     #0,D0
+       bgt.s     vsprintf_119
+       bra.s     vsprintf_115
+vsprintf_119:
+       move.l    D3,A0
+       addq.l    #1,D3
+       move.b    (A0),D1
+       ext.w     D1
+       ext.l     D1
+       move.l    D1,-(A7)
+       move.l    A2,-(A7)
+       jsr       (A3)
+       addq.w    #8,A7
+       addq.l    #1,D6
+       bra.s     vsprintf_112
+vsprintf_115:
+       bra.s     vsprintf_113
+vsprintf_112:
+       bra       vsprintf_110
+vsprintf_113:
+       tst.b     -51(A6)
+       beq       vsprintf_125
+       ext.w     D4
+       ext.l     D4
+       move.l    D4,D0
+       add.l     -4(A6),D0
+       add.l     D7,D0
+       move.b    D0,-47(A6)
+vsprintf_123:
+       move.b    -47(A6),D0
+       ext.w     D0
+       ext.l     D0
+       move.l    A5,D1
+       subq.w    #1,A5
+       cmp.l     D1,D0
+       bge.s     vsprintf_125
+       pea       32
+       move.l    A2,-(A7)
+       jsr       (A3)
+       addq.w    #8,A7
+       subq.l    #1,D6
+       bra       vsprintf_123
+vsprintf_125:
+       bra.s     vsprintf_81
+vsprintf_80:
+       move.l    12(A6),A0
+       move.b    (A0),D1
+       ext.w     D1
+       ext.l     D1
+       move.l    D1,-(A7)
+       move.l    A2,-(A7)
+       jsr       (A3)
+       addq.w    #8,A7
+       addq.l    #1,D6
+vsprintf_81:
+       addq.l    #1,12(A6)
+vsprintf_2:
+       bra       vsprintf_1
+vsprintf_3:
+       tst.l     (A2)
+       beq.s     vsprintf_126
+       clr.b     D1
+       and.l     #255,D1
+       move.l    D1,-(A7)
+       move.l    A2,-(A7)
+       jsr       (A3)
+       addq.w    #8,A7
+vsprintf_126:
+       move.l    D6,D0
+       movem.l   (A7)+,D2/D3/D4/D5/D6/D7/A2/A3/A4/A5
+       unlk      A6
+       rts
+_putch:
+       link      A6,#0
+       movem.l   D2,-(A7)
+       move.l    8(A6),D2
+       cmp.l     #10,D2
+       bne.s     putch_1
+       pea       13
+       bsr       __putch
+       addq.w    #4,A7
+putch_1:
+       move.l    D2,-(A7)
+       bsr       __putch
+       addq.w    #4,A7
+       move.l    D2,D0
+       movem.l   (A7)+,D2
+       unlk      A6
+       rts
+_getch:
+       movem.l   D2,-(A7)
+       move.l    __ungetbuf,D2
+       move.l    __ungetbuf,D0
+       cmp.l     #-1,D0
+       beq.s     getch_1
+       move.l    #-1,__ungetbuf
+       bra.s     getch_3
+getch_1:
+       bsr       __getch
+       move.l    D0,D2
+       cmp.l     #13,D0
+       bne.s     getch_3
+       moveq     #10,D2
+getch_3:
+       move.l    D2,D0
+       movem.l   (A7)+,D2
+       rts
+@itoa_convert:
+       link      A6,#0
+       movem.l   D2/D3/D4/D5,-(A7)
+       move.l    8(A6),D2
+       move.l    16(A6),D3
+       move.l    12(A6),D5
+       move.l    D5,-(A7)
+       move.l    D3,-(A7)
+       bsr       ULDIV
+       move.l    4(A7),D0
+       addq.w    #8,A7
+       move.l    D0,D4
+       cmp.l     D3,D5
+       blo.s     @itoa_convert_1
+       move.l    D3,-(A7)
+       move.l    D5,-(A7)
+       move.l    D3,-(A7)
+       bsr       ULDIV
+       move.l    (A7),D1
+       addq.w    #8,A7
+       move.l    D1,-(A7)
+       move.l    D2,-(A7)
+       bsr       @itoa_convert
+       add.w     #12,A7
+       move.l    D0,D2
+@itoa_convert_1:
+       cmp.l     #9,D4
+       bgt.s     @itoa_convert_3
+       move.l    D4,D0
+       add.l     #48,D0
+       bra.s     @itoa_convert_4
+@itoa_convert_3:
+       move.l    D4,D0
+       add.l     #97,D0
+       sub.l     #10,D0
+@itoa_convert_4:
+       move.l    D2,A0
+       move.b    D0,(A0)
+       move.l    D2,D0
+       addq.l    #1,D0
+       movem.l   (A7)+,D2/D3/D4/D5
+       unlk      A6
+       rts
+_ltoa:
+       link      A6,#0
+       movem.l   D2/D3/D4/D5,-(A7)
+       move.l    8(A6),D2
+       move.l    12(A6),D3
+       move.l    16(A6),D5
+       move.l    D3,D4
+       cmp.l     #2,D5
+       blt.s     ltoa_3
+       cmp.l     #36,D5
+       ble.s     ltoa_1
+ltoa_3:
+       move.l    D3,D0
+       bra       ltoa_4
+ltoa_1:
+       cmp.l     #10,D5
+       bne       ltoa_5
+       cmp.l     #0,D2
+       bge.s     ltoa_5
+       move.l    D2,D0
+       neg.l     D0
+       move.l    D0,D2
+       cmp.l     #0,D2
+       bge.s     ltoa_7
+       pea       @itoa_1
+       move.l    D3,-(A7)
+       bsr       _strcpy
+       addq.w    #8,A7
+       move.l    D3,D0
+       bra.s     ltoa_4
+ltoa_7:
+       move.l    D4,A0
+       addq.l    #1,D4
+       move.b    #45,(A0)
+ltoa_5:
+       move.l    D5,-(A7)
+       move.l    D2,-(A7)
+       move.l    D4,-(A7)
+       bsr       @itoa_convert
+       add.w     #12,A7
+       move.l    D0,D4
+       move.l    D4,A0
+       clr.b     (A0)
+       move.l    D3,D0
+ltoa_4:
+       movem.l   (A7)+,D2/D3/D4/D5
+       unlk      A6
+       rts
+_ultoa:
+       link      A6,#0
+       movem.l   D2/D3/D4,-(A7)
+       move.l    16(A6),D3
+       move.l    12(A6),D4
+       move.l    D4,D2
+       cmp.l     #2,D3
+       blt.s     ultoa_3
+       cmp.l     #36,D3
+       ble.s     ultoa_1
+ultoa_3:
+       move.l    D4,D0
+       bra.s     ultoa_4
+ultoa_1:
+       move.l    D3,-(A7)
+       move.l    8(A6),-(A7)
+       move.l    D2,-(A7)
+       bsr       @itoa_convert
+       add.w     #12,A7
+       move.l    D0,D2
+       move.l    D2,A0
+       clr.b     (A0)
+       move.l    D4,D0
+ultoa_4:
+       movem.l   (A7)+,D2/D3/D4
+       unlk      A6
+       rts
+_itoa:
+       link      A6,#0
+       move.l    16(A6),-(A7)
+       move.l    12(A6),-(A7)
+       move.l    8(A6),-(A7)
+       bsr       _ltoa
+       add.w     #12,A7
+       unlk      A6
+       rts
+_strlen:
+       move.l    (4,A7),A0
+       move.l    A0,A1
+strlen_1:
+       tst.b     (A1)+
+       bne       strlen_1
+       move.l    A1,D0
+       sub.l     A0,D0
+       subq.l    #1,D0
+       rts
+_strcpy:
+       move.l    (4,A7),A0
+       move.l    (8,A7),A1
+       move.l    A0,D0
+strcpy_1:
+       move.b    (A1)+,(A0)+
+       bne       strcpy_1
+       rts
+ULDIV:
+       link    A6,#0
+       movem.l D0/D1,-(A7)
+       move.l  8(A6),D1
+       move.l  12(A6),D0
+       bra.s   ldiv_3
+LDIV:
+       link    A6,#0
+       movem.l D0/D1,-(A7)
+       move.l  8(A6),D1
+       move.l  12(A6),D0
+       tst.l   D0
+       bpl.s   ldiv_1
+       neg.l   D0
+       tst.l   D1
+       bpl.s   ldiv_2
+       neg.l   D1
+       bsr.s   dodiv
+       neg.l   D1
+       bra.s   ldiv_4
+ldiv_1:
+       tst.l   D1
+       bpl.s   ldiv_3
+       neg.l   D1
+       bsr.s   dodiv
+       neg.l   D0
+       bra.s   ldiv_4
+ldiv_2:
+       bsr.s   dodiv
+       neg.l   D0
+       neg.l   D1
+       bra.s   ldiv_4
+ldiv_3:
+       bsr.s   dodiv
+ldiv_4:
+       move.l  D0,8(A6)
+       move.l  D1,12(A6)
+       movem.l (A7)+,D0/D1
+       unlk    A6
+       rts
+dodiv:
+       cmpi.l  #$FFFF,D1
+       bhi.s   dodiv_2
+       cmpi.l  #$FFFF,D0
+       bhi.s   dodiv_1
+       divu    D1,D0
+       move.l  D0,D1
+       clr.w   D1
+       swap    D1
+       andi.l  #$FFFF,D0
+       rts
+dodiv_1:
+       movem.w D0/D2,-(A7)
+       clr.w   D0
+       swap    D0
+       divu    D1,D0
+       move.w  D0,D2
+       move.w  (A7)+,D0
+       divu    D1,D0
+       swap    D0
+       clr.l   D1
+       move.w  D0,D1
+       move.w  D2,D0
+       swap    D0
+       move.w  (A7)+,D2
+       rts
+dodiv_2:
+       movem.l D2/D3/D4,-(A7)
+       move.l  D1,D2
+       clr.w   D2
+       swap    D2
+       addq.l  #1,D2
+       move.l  D0,D3
+       move.l  D1,D4
+       move.l  D2,D1
+       bsr.s   dodiv_1
+       move.l  D4,D1
+       divu    D2,D1
+       divu    D1,D0
+       andi.l  #$FFFF,D0
+dodiv_3:
+       move.l  D4,D1
+       move.l  D4,D2
+       swap    D2
+       mulu    D0,D1
+       mulu    D0,D2
+       swap    D2
+       add.l   D2,D1
+       sub.l   D3,D1
+       bhi.s   dodiv_4
+       neg.l   D1
+       cmp.l   D1,D4
+       bhi.s   dodiv_5
+       addq.l  #1,D0
+       bra.s   dodiv_3
+dodiv_4:
+       subq.l  #1,D0
+       bra.s   dodiv_3
+dodiv_5:
+       movem.l (A7)+,D2/D3/D4
+       rts
+       section   const
+                align
+
+
+@m68kus~1_1:
+       dc.b      13,10,10,69,110,116,101,114,32,117,112,112,101
+       dc.b      114,32,98,121,116,101,58,32,0
+@m68kus~1_2:
+       dc.b      13,10,10,85,80,80,69,82,32,66,89,84,69,58,32
+       dc.b      37,120,32,0
+@m68kus~1_3:
+       dc.b      13,10,10,69,110,116,101,114,32,109,105,100,32
+       dc.b      98,121,116,101,58,32,0
+@m68kus~1_4:
+       dc.b      13,10,10,77,73,68,32,66,89,84,69,58,32,37,120
+       dc.b      32,0
+@m68kus~1_5:
+       dc.b      13,10,10,69,110,116,101,114,32,108,111,119,101
+       dc.b      114,32,98,121,116,101,58,32,0
+@m68kus~1_6:
+       dc.b      13,10,10,76,79,87,69,82,32,66,89,84,69,58,32
+       dc.b      37,120,32,0
+@m68kus~1_7:
+       dc.b      53,58,32,119,114,105,116,101,32,116,111,32,102
+       dc.b      108,97,115,104,32,10,10,0
+@m68kus~1_8:
+       dc.b      55,58,32,114,101,97,100,105,110,103,32,102,108
+       dc.b      97,115,104,32,99,104,105,112,32,102,111,114
+       dc.b      32,118,101,114,105,102,105,99,97,116,105,111
+       dc.b      110,32,10,10,0
+@m68kus~1_9:
+       dc.b      13,10,10,114,101,116,58,32,37,120,32,0
+@m68kus~1_10:
+       dc.b      13,10,10,69,110,116,101,114,32,117,112,112,101
+       dc.b      114,32,98,121,116,101,58,0
+@m68kus~1_11:
+       dc.b      13,10,10,85,80,80,69,82,32,66,89,84,69,58,32
+       dc.b      37,120,0
+@m68kus~1_12:
+       dc.b      13,10,10,69,110,116,101,114,32,109,105,100,32
+       dc.b      98,121,116,101,58,0
+@m68kus~1_13:
+       dc.b      13,10,10,77,73,68,32,66,89,84,69,58,32,37,120
+       dc.b      0
+@m68kus~1_14:
+       dc.b      13,10,10,69,110,116,101,114,32,108,111,119,101
+       dc.b      114,32,98,121,116,101,58,0
+@m68kus~1_15:
+       dc.b      13,10,10,76,79,87,69,82,32,66,89,84,69,58,32
+       dc.b      37,120,0
+@m68kus~1_16:
+       dc.b      13,10,82,101,97,100,105,110,103,32,102,108,97
+       dc.b      115,104,32,99,104,105,112,32,102,111,114,32
+       dc.b      118,101,114,105,102,105,99,97,116,105,111,110
+       dc.b      0
+@m68kus~1_17:
+       dc.b      13,10,80,111,108,108,105,110,103,32,102,108
+       dc.b      97,115,104,32,99,104,105,112,32,116,111,32,115
+       dc.b      101,101,32,105,102,32,114,101,97,100,121,32
+       dc.b      10,10,0
+@m68kus~1_18:
+       dc.b      13,10,69,114,97,115,101,32,99,104,105,112,0
+@m68kus~1_19:
+       dc.b      13,10,10,69,110,116,101,114,32,83,80,73,32,111
+       dc.b      112,101,114,97,116,105,111,110,40,49,32,45,32
+       dc.b      69,114,97,115,101,32,67,104,105,112,44,32,50
+       dc.b      32,45,32,87,114,105,116,101,32,116,111,32,83
+       dc.b      80,73,44,32,51,32,45,32,82,101,97,100,32,102
+       dc.b      114,111,109,32,83,80,73,41,58,32,0
+@m68kus~1_20:
+       dc.b      13,10,10,83,80,73,32,111,112,101,114,97,116
+       dc.b      105,111,110,58,32,37,120,32,0
+@m68kus~1_21:
+       dc.b      13,10,67,104,105,112,32,101,114,97,115,101,32
+       dc.b      111,112,101,114,97,116,105,111,110,32,115,101
+       dc.b      108,101,99,116,101,100,0
+@m68kus~1_22:
+       dc.b      13,10,69,110,100,32,111,102,32,101,114,97,115
+       dc.b      101,32,111,112,101,114,97,116,105,111,110,32
+       dc.b      46,46,46,0
+@m68kus~1_23:
+       dc.b      13,10,10,87,114,105,116,101,32,111,112,101,114
+       dc.b      97,116,105,111,110,32,115,101,108,101,99,116
+       dc.b      101,100,32,10,10,0
+@m68kus~1_24:
+       dc.b      13,10,10,69,110,116,101,114,32,97,32,118,97
+       dc.b      108,117,101,32,102,111,114,32,119,114,105,116
+       dc.b      101,58,32,0
+@m68kus~1_25:
+       dc.b      13,10,86,97,108,117,101,32,116,111,32,119,114
+       dc.b      105,116,101,58,32,37,120,0
+@m68kus~1_26:
+       dc.b      13,10,86,97,108,117,101,32,114,101,116,117,114
+       dc.b      110,101,100,58,32,37,120,0
+@m68kus~1_27:
+       dc.b      13,10,101,110,100,32,111,102,32,119,114,105
+       dc.b      116,101,32,111,112,101,114,97,116,105,111,110
+       dc.b      32,46,46,46,0
+@m68kus~1_28:
+       dc.b      13,10,10,82,101,97,100,32,111,112,101,114,97
+       dc.b      116,105,111,110,32,115,101,108,101,99,116,101
+       dc.b      100,0
+@m68kus~1_29:
+       dc.b      13,10,10,86,97,108,117,101,32,114,101,116,117
+       dc.b      114,110,101,100,58,32,37,120,32,0
+@m68kus~1_30:
+       dc.b      13,10,10,101,110,100,32,111,102,32,114,101,97
+       dc.b      100,32,111,112,101,114,97,116,105,111,110,32
+       dc.b      46,46,46,0
+@m68kus~1_31:
+       dc.b      13,10,10,73,110,118,97,108,105,100,32,111,112
+       dc.b      101,114,97,116,105,111,110,32,46,46,46,0
+@m68kus~1_32:
+       dc.b      13,10,10,84,114,121,32,97,103,97,105,110,33
+       dc.b      33,33,33,33,0
+@m68kus~1_33:
+       dc.b      13,10,73,110,116,105,97,108,105,122,105,110
+       dc.b      103,32,83,80,73,10,0
+@m68kus~1_34:
+       dc.b      82,69,65,68,73,78,71,32,73,68,32,33,33,33,33
+       dc.b      33,33,32,32,10,10,0
+@m68kus~1_35:
+       dc.b      13,10,10,77,97,110,58,32,37,120,32,0
+@m68kus~1_36:
+       dc.b      13,10,10,68,101,118,58,32,37,120,32,0
+       section   data
+                align
+
+*********************************************************************************************************************************************************
+* Section for Initialised Data (in theory should be copied to Ram at startup) but is part of program code as we copy whole program to ram at startup
+********************************************************************************************************************************************************
+
+DataStart       equ       *
+__ungetbuf:     ds.l      1                    ungetbuffer for stdio functions
+__allocp:       ds.l      1                    start of free memory block list
+__heap:         ds.l      1                    begin of free memory
+
+
+@vsscanf_bufx:
+       dc.l      @vsscanf_buf
+@vsscanf_1:
+       dc.b      10,0
+__ctype:
+       dc.b      0,64,64,64,64,64,64,64,64,64,80,80,80,80,80
+       dc.b      64,64,64,64,64,64,64,64,64,64,64,64,64,64,64
+       dc.b      64,64,64,208,160,160,160,160,160,160,160,160
+       dc.b      160,160,160,160,160,160,160,140,140,140,140
+       dc.b      140,140,140,140,140,140,160,160,160,160,160
+       dc.b      160,160,138,138,138,138,138,138,130,130,130
+       dc.b      130,130,130,130,130,130,130,130,130,130,130
+       dc.b      130,130,130,130,130,130,160,160,160,160,160
+       dc.b      160,137,137,137,137,137,137,129,129,129,129
+       dc.b      129,129,129,129,129,129,129,129,129,129,129
+       dc.b      129,129,129,129,129,160,160,160,160,64,0,0,0
+       dc.b      0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+       dc.b      0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+       dc.b      0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+       dc.b      0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+       dc.b      0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+       dc.b      0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+@itoa_1:
+       dc.b      45,50,49,52,55,52,56,51,54,52,56,0
+       section   bss
+                align
+
+DataEnd         equ       *                    this label will equate to the address of the last byte of global variable in it
+DataLength      equ       DataEnd-DataStart    length of data needed to copy to Ram on bootup
+
+*********************************************************************************************************
+* Section for uninitialised Data which is set to zero, i.e. we should set this space to zero at starup
+*********************************************************************************************************
+BssStart       equ       *
+
+_i:
+       ds.b      4
+_x:
+       ds.b      4
+_y:
+       ds.b      4
+_z:
+       ds.b      4
+_PortA_Count:
+       ds.b      4
+_Timer1Count:
+       ds.b      1
+_Timer2Count:
+       ds.b      1
+_Timer3Count:
+       ds.b      1
+_Timer4Count:
+       ds.b      1
+@vsscanf_buf:
+       ds.b      80
+       section   heap
+               align
+
+BssEnd         equ       *
+BssLength      equ       BssEnd-BssStart       length of zeroed data needed to copy to Ram on bootup
+
+*********************************************************************************************************
+* Section for Heap
+*********************************************************************************************************
+
+heap           equ       *
+               align
