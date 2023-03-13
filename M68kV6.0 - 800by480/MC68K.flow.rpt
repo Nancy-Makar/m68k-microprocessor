@@ -1,5 +1,5 @@
 Flow report for MC68K
-Tue Feb 28 21:36:28 2023
+Fri Mar 10 18:49:44 2023
 Quartus Prime Version 18.1.0 Build 625 09/12/2018 SJ Lite Edition
 
 
@@ -40,18 +40,18 @@ refer to the applicable agreement for further details.
 +-------------------------------------------------------------------------------+
 ; Flow Summary                                                                  ;
 +---------------------------------+---------------------------------------------+
-; Flow Status                     ; Successful - Tue Feb 28 21:36:28 2023       ;
+; Flow Status                     ; Successful - Fri Mar 10 18:49:44 2023       ;
 ; Quartus Prime Version           ; 18.1.0 Build 625 09/12/2018 SJ Lite Edition ;
 ; Revision Name                   ; MC68K                                       ;
 ; Top-level Entity Name           ; MC68K                                       ;
 ; Family                          ; Cyclone V                                   ;
 ; Device                          ; 5CSEMA5F31C6                                ;
 ; Timing Models                   ; Final                                       ;
-; Logic utilization (in ALMs)     ; 2,696 / 32,070 ( 8 % )                      ;
-; Total registers                 ; 1454                                        ;
+; Logic utilization (in ALMs)     ; 2,810 / 32,070 ( 9 % )                      ;
+; Total registers                 ; 1462                                        ;
 ; Total pins                      ; 238 / 457 ( 52 % )                          ;
 ; Total virtual pins              ; 0                                           ;
-; Total block memory bits         ; 2,360,560 / 4,065,280 ( 58 % )              ;
+; Total block memory bits         ; 2,365,424 / 4,065,280 ( 58 % )              ;
 ; Total DSP Blocks                ; 0 / 87 ( 0 % )                              ;
 ; Total HSSI RX PCSs              ; 0                                           ;
 ; Total HSSI PMA RX Deserializers ; 0                                           ;
@@ -67,7 +67,7 @@ refer to the applicable agreement for further details.
 +-------------------+---------------------+
 ; Option            ; Setting             ;
 +-------------------+---------------------+
-; Start date & time ; 02/28/2023 21:28:41 ;
+; Start date & time ; 03/10/2023 18:44:56 ;
 ; Main task         ; Compilation         ;
 ; Revision Name     ; MC68K               ;
 +-------------------+---------------------+
@@ -79,7 +79,7 @@ refer to the applicable agreement for further details.
 ; Assignment Name                                   ; Value                                  ; Default Value ; Entity Name ; Section Id     ;
 +---------------------------------------------------+----------------------------------------+---------------+-------------+----------------+
 ; ADV_NETLIST_OPT_SYNTH_WYSIWYG_REMAP               ; On                                     ; Off           ; --          ; --             ;
-; COMPILER_SIGNATURE_ID                             ; 1099277793069.167764852029056          ; --            ; --          ; --             ;
+; COMPILER_SIGNATURE_ID                             ; 1099277793069.167850269523468          ; --            ; --          ; --             ;
 ; DO_COMBINED_ANALYSIS                              ; -- (Not supported for targeted family) ; Off           ; --          ; --             ;
 ; EDA_GENERATE_FUNCTIONAL_NETLIST                   ; Off                                    ; --            ; --          ; eda_simulation ;
 ; EDA_GENERATE_GATE_LEVEL_SIMULATION_COMMAND_SCRIPT ; Off                                    ; --            ; --          ; eda_simulation ;
@@ -106,6 +106,12 @@ refer to the applicable agreement for further details.
 ; MISC_FILE                                         ; Ram32kByte.cmp                         ; --            ; --          ; --             ;
 ; MISC_FILE                                         ; OnChipRom16KWord2.bsf                  ; --            ; --          ; --             ;
 ; MISC_FILE                                         ; OnChipRom16KWord2.cmp                  ; --            ; --          ; --             ;
+; MISC_FILE                                         ; Valid_Data.bsf                         ; --            ; --          ; --             ;
+; MISC_FILE                                         ; Valid_Data_bb.v                        ; --            ; --          ; --             ;
+; MISC_FILE                                         ; Tag_Data.bsf                           ; --            ; --          ; --             ;
+; MISC_FILE                                         ; Tag_Data_bb.v                          ; --            ; --          ; --             ;
+; MISC_FILE                                         ; CacheData.bsf                          ; --            ; --          ; --             ;
+; MISC_FILE                                         ; CacheData_bb.v                         ; --            ; --          ; --             ;
 ; MUX_RESTRUCTURE                                   ; Off                                    ; Auto          ; --          ; --             ;
 ; PARTITION_COLOR                                   ; -- (Not supported for targeted family) ; --            ; --          ; Top            ;
 ; PARTITION_FITTER_PRESERVATION_LEVEL               ; -- (Not supported for targeted family) ; --            ; --          ; Top            ;
@@ -130,12 +136,12 @@ refer to the applicable agreement for further details.
 +----------------------+--------------+-------------------------+---------------------+------------------------------------+
 ; Module Name          ; Elapsed Time ; Average Processors Used ; Peak Virtual Memory ; Total CPU Time (on all processors) ;
 +----------------------+--------------+-------------------------+---------------------+------------------------------------+
-; Analysis & Synthesis ; 00:02:59     ; 1.0                     ; 4969 MB             ; 00:03:22                           ;
-; Fitter               ; 00:03:06     ; 1.3                     ; 7061 MB             ; 00:06:58                           ;
-; Assembler            ; 00:00:15     ; 1.0                     ; 4911 MB             ; 00:00:15                           ;
-; Timing Analyzer      ; 00:00:46     ; 1.8                     ; 5432 MB             ; 00:01:12                           ;
-; EDA Netlist Writer   ; 00:00:06     ; 1.0                     ; 4957 MB             ; 00:00:06                           ;
-; Total                ; 00:07:12     ; --                      ; --                  ; 00:11:53                           ;
+; Analysis & Synthesis ; 00:01:43     ; 1.0                     ; 4973 MB             ; 00:02:06                           ;
+; Fitter               ; 00:02:13     ; 1.4                     ; 7081 MB             ; 00:06:19                           ;
+; Assembler            ; 00:00:12     ; 1.0                     ; 4912 MB             ; 00:00:12                           ;
+; Timing Analyzer      ; 00:00:25     ; 2.2                     ; 5422 MB             ; 00:00:53                           ;
+; EDA Netlist Writer   ; 00:00:05     ; 1.0                     ; 4960 MB             ; 00:00:05                           ;
+; Total                ; 00:04:38     ; --                      ; --                  ; 00:09:35                           ;
 +----------------------+--------------+-------------------------+---------------------+------------------------------------+
 
 

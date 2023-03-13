@@ -1,25 +1,24 @@
 --IP Functional Simulation Model
---VERSION_BEGIN 15.0 cbx_mgl 2015:04:22:18:06:50:SJ cbx_simgen 2015:04:22:18:04:08:SJ  VERSION_END
+--VERSION_BEGIN 18.1 cbx_mgl 2018:09:12:13:10:36:SJ cbx_simgen 2018:09:12:13:04:24:SJ  VERSION_END
 
 
--- Copyright (C) 1991-2015 Altera Corporation. All rights reserved.
--- Your use of Altera Corporation's design tools, logic functions 
+-- Copyright (C) 2018  Intel Corporation. All rights reserved.
+-- Your use of Intel Corporation's design tools, logic functions 
 -- and other software and tools, and its AMPP partner logic 
 -- functions, and any output files from any of the foregoing 
 -- (including device programming or simulation files), and any 
 -- associated documentation or information are expressly subject 
--- to the terms and conditions of the Altera Program License 
--- Subscription Agreement, the Altera Quartus II License Agreement,
--- the Altera MegaCore Function License Agreement, or other 
--- applicable license agreement, including, without limitation, 
--- that your use is for the sole purpose of programming logic 
--- devices manufactured by Altera and sold by Altera or its 
--- authorized distributors.  Please refer to the applicable 
--- agreement for further details.
+-- to the terms and conditions of the Intel Program License 
+-- Subscription Agreement, the Intel Quartus Prime License Agreement,
+-- the Intel FPGA IP License Agreement, or other applicable license
+-- agreement, including, without limitation, that your use is for
+-- the sole purpose of programming logic devices manufactured by
+-- Intel and sold by Intel or its authorized distributors.  Please
+-- refer to the applicable agreement for further details.
 
 -- You may only use these simulation model output files for simulation
 -- purposes and expressly not for synthesis or any other purposes (in which
--- event Altera disclaims all warranties of any kind).
+-- event Intel disclaims all warranties of any kind).
 
 
 --synopsys translate_off
@@ -237,7 +236,7 @@
 		n_cnt_odd_div_duty_en => "false",
 		number_of_clocks => 4,
 		operation_mode => "direct",
-		output_clock_frequency0 => "25.000000 MHz",
+		output_clock_frequency0 => "45.000000 MHz",
 		output_clock_frequency1 => "30.000000 MHz",
 		output_clock_frequency10 => "0 MHz",
 		output_clock_frequency11 => "0 MHz",
@@ -247,8 +246,8 @@
 		output_clock_frequency15 => "0 MHz",
 		output_clock_frequency16 => "0 MHz",
 		output_clock_frequency17 => "0 MHz",
-		output_clock_frequency2 => "50.000000 MHz",
-		output_clock_frequency3 => "50.000000 MHz",
+		output_clock_frequency2 => "90.000000 MHz",
+		output_clock_frequency3 => "90.000000 MHz",
 		output_clock_frequency4 => "0 MHz",
 		output_clock_frequency5 => "0 MHz",
 		output_clock_frequency6 => "0 MHz",
@@ -266,7 +265,7 @@
 		phase_shift16 => "0 ps",
 		phase_shift17 => "0 ps",
 		phase_shift2 => "0 ps",
-		phase_shift3 => "10000 ps",
+		phase_shift3 => "7099 ps",
 		phase_shift4 => "0 ps",
 		phase_shift5 => "0 ps",
 		phase_shift6 => "0 ps",
