@@ -1,5 +1,5 @@
 Assembler report for MC68K
-Fri Mar 10 18:49:10 2023
+Thu Mar 16 13:05:37 2023
 Quartus Prime Version 18.1.0 Build 625 09/12/2018 SJ Lite Edition
 
 
@@ -38,7 +38,7 @@ refer to the applicable agreement for further details.
 +---------------------------------------------------------------+
 ; Assembler Summary                                             ;
 +-----------------------+---------------------------------------+
-; Assembler Status      ; Successful - Fri Mar 10 18:49:10 2023 ;
+; Assembler Status      ; Successful - Thu Mar 16 13:05:37 2023 ;
 ; Revision Name         ; MC68K                                 ;
 ; Top-level Entity Name ; MC68K                                 ;
 ; Family                ; Cyclone V                             ;
@@ -88,14 +88,14 @@ refer to the applicable agreement for further details.
 Info: *******************************************************************
 Info: Running Quartus Prime Assembler
     Info: Version 18.1.0 Build 625 09/12/2018 SJ Lite Edition
-    Info: Processing started: Fri Mar 10 18:48:58 2023
+    Info: Processing started: Thu Mar 16 13:05:10 2023
 Info: Command: quartus_asm --read_settings_files=off --write_settings_files=off MC68K -c MC68K
 Warning (18236): Number of processors has not been specified which may cause overloading on shared machines.  Set the global assignment NUM_PARALLEL_PROCESSORS in your QSF to an appropriate value for best performance.
 Info (115030): Assembler is generating device programming files
 Info: Quartus Prime Assembler was successful. 0 errors, 1 warning
-    Info: Peak virtual memory: 4912 megabytes
-    Info: Processing ended: Fri Mar 10 18:49:11 2023
-    Info: Elapsed time: 00:00:13
-    Info: Total CPU time (on all processors): 00:00:13
+    Info: Peak virtual memory: 4916 megabytes
+    Info: Processing ended: Thu Mar 16 13:05:37 2023
+    Info: Elapsed time: 00:00:27
+    Info: Total CPU time (on all processors): 00:00:26
 
 

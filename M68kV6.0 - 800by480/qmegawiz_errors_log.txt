@@ -113,3 +113,48 @@ C:/M68kV6.0 - 640by480/ClockGen.vhd
 
 Jun 01 06PM:48:39>: Megafunction Altera PLL v16.0 is not listed in any 
 wizard.lst file in the specified library path(s).Wizard launch aborted
+
+C:/CPEN412/github_steup/M68kV6.0 - 800by480/ClockGen.vhd
+
+Mar 15 09PM:15:33>: Megafunction PLL Intel FPGA IP v18.1 is not listed in any 
+wizard.lst file in the specified library path(s).Wizard launch aborted
+
+C:/CPEN412/github_steup/M68kV6.0 - 800by480/ClockGen.vhd
+
+Mar 15 09PM:16:35>: Megafunction PLL Intel FPGA IP v18.1 is not listed in any 
+wizard.lst file in the specified library path(s).Wizard launch aborted
+
+C:/CPEN412/github_steup/M68kV6.0 - 800by480/ClockGen.vhd
+
+Mar 15 09PM:17:57>: Megafunction PLL Intel FPGA IP v18.1 is not listed in any 
+wizard.lst file in the specified library path(s).Wizard launch aborted
+
+C:/CPEN412/github_steup/M68kV6.0 - 800by480/Clock_Gen.v
+
+Mar 15 09PM:22:15>: Megafunction PLL Intel FPGA IP v18.1 is not listed in any 
+wizard.lst file in the specified library path(s).Wizard launch aborted
+
+C:/CPEN412/github_steup/M68kV6.0 - 800by480/Clock_Gen.v
+
+Mar 15 09PM:24:40>: Megafunction PLL Intel FPGA IP v18.1 is not listed in any 
+wizard.lst file in the specified library path(s).Wizard launch aborted
+
+C:/CPEN412/github_steup/M68kV6.0 - 800by480/Clock_Gen.v
+
+Mar 15 09PM:27:50>: Megafunction PLL Intel FPGA IP v18.1 is not listed in any 
+wizard.lst file in the specified library path(s).Wizard launch aborted
+
+C:/CPEN412/github_steup/M68kV6.0 - 800by480/Clock_Gen.v
+
+Mar 15 09PM:28:00>: Megafunction PLL Intel FPGA IP v18.1 is not listed in any 
+wizard.lst file in the specified library path(s).Wizard launch aborted
+
+C:/CPEN412/github_steup/M68kV6.0 - 800by480/Clock_Gen.v
+
+Mar 15 09PM:30:25>: Megafunction PLL Intel FPGA IP v18.1 is not listed in any 
+wizard.lst file in the specified library path(s).Wizard launch aborted
+
+C:/CPEN412/github_steup/M68kV6.0 - 800by480/Clock_Gen.v
+
+Mar 15 09PM:39:52>: Megafunction PLL Intel FPGA IP v18.1 is not listed in any 
+wizard.lst file in the specified library path(s).Wizard launch aborted

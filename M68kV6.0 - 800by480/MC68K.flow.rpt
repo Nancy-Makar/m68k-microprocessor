@@ -1,5 +1,5 @@
 Flow report for MC68K
-Fri Mar 10 18:49:44 2023
+Thu Mar 16 13:06:08 2023
 Quartus Prime Version 18.1.0 Build 625 09/12/2018 SJ Lite Edition
 
 
@@ -40,7 +40,7 @@ refer to the applicable agreement for further details.
 +-------------------------------------------------------------------------------+
 ; Flow Summary                                                                  ;
 +---------------------------------+---------------------------------------------+
-; Flow Status                     ; Successful - Fri Mar 10 18:49:44 2023       ;
+; Flow Status                     ; Successful - Thu Mar 16 13:06:08 2023       ;
 ; Quartus Prime Version           ; 18.1.0 Build 625 09/12/2018 SJ Lite Edition ;
 ; Revision Name                   ; MC68K                                       ;
 ; Top-level Entity Name           ; MC68K                                       ;
@@ -67,7 +67,7 @@ refer to the applicable agreement for further details.
 +-------------------+---------------------+
 ; Option            ; Setting             ;
 +-------------------+---------------------+
-; Start date & time ; 03/10/2023 18:44:56 ;
+; Start date & time ; 03/16/2023 12:59:39 ;
 ; Main task         ; Compilation         ;
 ; Revision Name     ; MC68K               ;
 +-------------------+---------------------+
@@ -79,7 +79,7 @@ refer to the applicable agreement for further details.
 ; Assignment Name                                   ; Value                                  ; Default Value ; Entity Name ; Section Id     ;
 +---------------------------------------------------+----------------------------------------+---------------+-------------+----------------+
 ; ADV_NETLIST_OPT_SYNTH_WYSIWYG_REMAP               ; On                                     ; Off           ; --          ; --             ;
-; COMPILER_SIGNATURE_ID                             ; 1099277793069.167850269523468          ; --            ; --          ; --             ;
+; COMPILER_SIGNATURE_ID                             ; 1099277793069.167899677920000          ; --            ; --          ; --             ;
 ; DO_COMBINED_ANALYSIS                              ; -- (Not supported for targeted family) ; Off           ; --          ; --             ;
 ; EDA_GENERATE_FUNCTIONAL_NETLIST                   ; Off                                    ; --            ; --          ; eda_simulation ;
 ; EDA_GENERATE_GATE_LEVEL_SIMULATION_COMMAND_SCRIPT ; Off                                    ; --            ; --          ; eda_simulation ;
@@ -112,6 +112,16 @@ refer to the applicable agreement for further details.
 ; MISC_FILE                                         ; Tag_Data_bb.v                          ; --            ; --          ; --             ;
 ; MISC_FILE                                         ; CacheData.bsf                          ; --            ; --          ; --             ;
 ; MISC_FILE                                         ; CacheData_bb.v                         ; --            ; --          ; --             ;
+; MISC_FILE                                         ; Tag_Data_Associative.bsf               ; --            ; --          ; --             ;
+; MISC_FILE                                         ; Tag_Data_Associative_bb.v              ; --            ; --          ; --             ;
+; MISC_FILE                                         ; CachedData_Associative.bsf             ; --            ; --          ; --             ;
+; MISC_FILE                                         ; CachedData_Associative_bb.v            ; --            ; --          ; --             ;
+; MISC_FILE                                         ; PLRU_Bits.bsf                          ; --            ; --          ; --             ;
+; MISC_FILE                                         ; PLRU_Bits_bb.v                         ; --            ; --          ; --             ;
+; MISC_FILE                                         ; Valid_Bit_Associative.bsf              ; --            ; --          ; --             ;
+; MISC_FILE                                         ; Valid_Bit_Associative_bb.v             ; --            ; --          ; --             ;
+; MISC_FILE                                         ; Clock_Gen.cmp                          ; --            ; --          ; --             ;
+; MISC_FILE                                         ; Clock_Gen_sim/Clock_Gen.vo             ; --            ; --          ; --             ;
 ; MUX_RESTRUCTURE                                   ; Off                                    ; Auto          ; --          ; --             ;
 ; PARTITION_COLOR                                   ; -- (Not supported for targeted family) ; --            ; --          ; Top            ;
 ; PARTITION_FITTER_PRESERVATION_LEVEL               ; -- (Not supported for targeted family) ; --            ; --          ; Top            ;
@@ -124,6 +134,8 @@ refer to the applicable agreement for further details.
 ; QII_AUTO_PACKED_REGISTERS                         ; Normal                                 ; Auto          ; --          ; --             ;
 ; ROUTER_TIMING_OPTIMIZATION_LEVEL                  ; MAXIMUM                                ; Normal        ; --          ; --             ;
 ; SPD_FILE                                          ; ClockGen.spd                           ; --            ; --          ; --             ;
+; SPD_FILE                                          ; Clock_Gen.spd                          ; --            ; --          ; --             ;
+; SYNTHESIS_ONLY_QIP                                ; On                                     ; --            ; --          ; --             ;
 ; SYNTHESIS_ONLY_QIP                                ; On                                     ; --            ; --          ; --             ;
 ; TIMING_ANALYZER_DO_CCPP_REMOVAL                   ; Off                                    ; On            ; --          ; --             ;
 ; USE_GENERATED_PHYSICAL_CONSTRAINTS                ; Off                                    ; --            ; --          ; eda_blast_fpga ;
@@ -136,12 +148,12 @@ refer to the applicable agreement for further details.
 +----------------------+--------------+-------------------------+---------------------+------------------------------------+
 ; Module Name          ; Elapsed Time ; Average Processors Used ; Peak Virtual Memory ; Total CPU Time (on all processors) ;
 +----------------------+--------------+-------------------------+---------------------+------------------------------------+
-; Analysis & Synthesis ; 00:01:43     ; 1.0                     ; 4973 MB             ; 00:02:06                           ;
-; Fitter               ; 00:02:13     ; 1.4                     ; 7081 MB             ; 00:06:19                           ;
-; Assembler            ; 00:00:12     ; 1.0                     ; 4912 MB             ; 00:00:12                           ;
-; Timing Analyzer      ; 00:00:25     ; 2.2                     ; 5422 MB             ; 00:00:53                           ;
-; EDA Netlist Writer   ; 00:00:05     ; 1.0                     ; 4960 MB             ; 00:00:05                           ;
-; Total                ; 00:04:38     ; --                      ; --                  ; 00:09:35                           ;
+; Analysis & Synthesis ; 00:02:12     ; 1.0                     ; 4965 MB             ; 00:02:41                           ;
+; Fitter               ; 00:03:01     ; 1.5                     ; 7107 MB             ; 00:07:22                           ;
+; Assembler            ; 00:00:27     ; 1.0                     ; 4916 MB             ; 00:00:26                           ;
+; Timing Analyzer      ; 00:00:23     ; 2.2                     ; 5419 MB             ; 00:00:47                           ;
+; EDA Netlist Writer   ; 00:00:05     ; 1.0                     ; 4964 MB             ; 00:00:05                           ;
+; Total                ; 00:06:08     ; --                      ; --                  ; 00:11:21                           ;
 +----------------------+--------------+-------------------------+---------------------+------------------------------------+
 
 
