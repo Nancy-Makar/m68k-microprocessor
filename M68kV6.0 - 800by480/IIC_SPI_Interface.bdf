@@ -600,10 +600,6 @@ refer to the applicable agreement for further details.
 	(flipx)
 )
 (connector
-	(pt 832 336)
-	(pt 832 344)
-)
-(connector
 	(pt 464 328)
 	(pt 792 328)
 	(bus)
@@ -742,10 +738,6 @@ refer to the applicable agreement for further details.
 	(pt 160 80)
 )
 (connector
-	(pt 80 88)
-	(pt 440 88)
-)
-(connector
 	(text "Address[3..1]" (rect -382 360 -321 377)(font "Intel Clear" ))
 	(pt 248 376)
 	(pt -392 376)
@@ -759,14 +751,6 @@ refer to the applicable agreement for further details.
 (connector
 	(pt -352 192)
 	(pt -352 112)
-)
-(connector
-	(pt -352 240)
-	(pt -352 264)
-)
-(connector
-	(pt 80 264)
-	(pt -352 264)
 )
 (connector
 	(pt -440 96)
@@ -836,22 +820,34 @@ refer to the applicable agreement for further details.
 	(pt 832 88)
 )
 (connector
+	(pt -352 240)
+	(pt -352 464)
+)
+(connector
+	(pt 440 88)
+	(pt 128 88)
+)
+(connector
+	(pt 128 440)
 	(pt 248 440)
-	(pt 80 440)
 )
 (connector
-	(pt 80 88)
-	(pt 80 264)
+	(pt 128 88)
+	(pt 128 440)
 )
 (connector
-	(pt 80 264)
-	(pt 80 440)
+	(pt 128 440)
+	(pt 128 464)
+)
+(connector
+	(pt -352 464)
+	(pt 128 464)
 )
 (junction (pt 160 80))
 (junction (pt -392 80))
 (junction (pt -352 112))
 (junction (pt 8 496))
-(junction (pt 80 264))
+(junction (pt 128 440))
 (text "SDA and SCL need pullup resistors (4k7) as they are open drain output" (rect 992 528 1396 542)(font "Arial" (font_size 8)))
 (text "Tristate buffer disabled with a ground connection to allow compilation and simulation" (rect 792 56 1271 70)(font "Arial" (font_size 8)))
 (text "replace ground with your own connected later" (rect 792 72 1057 86)(font "Arial" (font_size 8)))
