@@ -1,5 +1,5 @@
 Analysis & Synthesis report for MC68K
-Mon Mar 20 21:24:04 2023
+Tue Mar 21 17:30:20 2023
 Quartus Prime Version 18.1.0 Build 625 09/12/2018 SJ Lite Edition
 
 
@@ -114,7 +114,7 @@ refer to the applicable agreement for further details.
 +-------------------------------------------------------------------------------+
 ; Analysis & Synthesis Summary                                                  ;
 +---------------------------------+---------------------------------------------+
-; Analysis & Synthesis Status     ; Successful - Mon Mar 20 21:24:04 2023       ;
+; Analysis & Synthesis Status     ; Successful - Tue Mar 21 17:30:19 2023       ;
 ; Quartus Prime Version           ; 18.1.0 Build 625 09/12/2018 SJ Lite Edition ;
 ; Revision Name                   ; MC68K                                       ;
 ; Top-level Entity Name           ; MC68K                                       ;
@@ -234,7 +234,7 @@ refer to the applicable agreement for further details.
 ;                            ;             ;
 ; Usage by Processor         ; % Time Used ;
 ;     Processor 1            ; 100.0%      ;
-;     Processor 2            ;   0.1%      ;
+;     Processor 2            ;   0.0%      ;
 ;     Processor 3            ;   0.0%      ;
 ;     Processor 4            ;   0.0%      ;
 +----------------------------+-------------+
@@ -2966,7 +2966,7 @@ Note: In order to hide this table in the UI and the text report file, please set
 +----------------+--------------+
 ; Partition Name ; Elapsed Time ;
 +----------------+--------------+
-; Top            ; 00:02:27     ;
+; Top            ; 00:02:26     ;
 +----------------+--------------+
 
 
@@ -2976,7 +2976,7 @@ Note: In order to hide this table in the UI and the text report file, please set
 Info: *******************************************************************
 Info: Running Quartus Prime Analysis & Synthesis
     Info: Version 18.1.0 Build 625 09/12/2018 SJ Lite Edition
-    Info: Processing started: Mon Mar 20 21:20:49 2023
+    Info: Processing started: Tue Mar 21 17:26:56 2023
 Info: Command: quartus_map --read_settings_files=on --write_settings_files=off MC68K -c MC68K
 Warning (125092): Tcl Script File Valid_Data.qip not found
     Info (125063): set_global_assignment -name QIP_FILE Valid_Data.qip
@@ -3556,7 +3556,7 @@ Info (12128): Elaborating entity "SCL_SDA_OPEN_DRAIN_DRIVER" for hierarchy "IIC_
 Info (12128): Elaborating entity "InterruptPriorityEncoder" for hierarchy "InterruptPriorityEncoder:inst28"
 Info (12128): Elaborating entity "TraceExceptionGenerator" for hierarchy "TraceExceptionGenerator:inst30"
 Info (11170): Starting IP generation for the debug fabric: alt_sld_fab.
-Info (11172): 2023.03.20.21:21:16 Progress: Loading sldbe7d4d23/alt_sld_fab_wrapper_hw.tcl
+Info (11172): 2023.03.21.17:27:25 Progress: Loading sldbe7d4d23/alt_sld_fab_wrapper_hw.tcl
 Info (11172): Alt_sld_fab.alt_sld_fab: SLD fabric agents which did not specify prefer_host were connected to JTAG
 Info (11172): Alt_sld_fab: Generating alt_sld_fab "alt_sld_fab" for QUARTUS_SYNTH
 Info (11172): Alt_sld_fab: "alt_sld_fab" instantiated alt_sld_fab "alt_sld_fab"
@@ -3752,10 +3752,10 @@ Info (21057): Implemented 5281 device resources after synthesis - the final reso
     Info (21064): Implemented 376 RAM segments
     Info (21065): Implemented 4 PLLs
 Info: Quartus Prime Analysis & Synthesis was successful. 0 errors, 168 warnings
-    Info: Peak virtual memory: 4959 megabytes
-    Info: Processing ended: Mon Mar 20 21:24:04 2023
-    Info: Elapsed time: 00:03:15
-    Info: Total CPU time (on all processors): 00:03:35
+    Info: Peak virtual memory: 4966 megabytes
+    Info: Processing ended: Tue Mar 21 17:30:20 2023
+    Info: Elapsed time: 00:03:24
+    Info: Total CPU time (on all processors): 00:03:37
 
 
 +------------------------------------------+

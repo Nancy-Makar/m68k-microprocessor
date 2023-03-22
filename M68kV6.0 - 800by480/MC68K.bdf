@@ -4667,15 +4667,6 @@ refer to the applicable agreement for further details.
 	(pt -232 -928)
 )
 (connector
-	(pt -256 -880)
-	(pt -232 -880)
-)
-(connector
-	(text "Clock25Mhz" (rect -198 -896 -139 -884)(font "Arial" ))
-	(pt -232 -880)
-	(pt -136 -880)
-)
-(connector
 	(pt 1776 1368)
 	(pt 2104 1368)
 	(bus)
@@ -5388,15 +5379,6 @@ refer to the applicable agreement for further details.
 	(pt 1376 2464)
 )
 (connector
-	(text "Clock25Mhz" (rect 1352 2296 1364 2355)(font "Arial" )(vertical))
-	(pt 1376 2328)
-	(pt 1376 2464)
-)
-(connector
-	(pt 1376 2464)
-	(pt 1376 2816)
-)
-(connector
 	(pt 1544 2480)
 	(pt 1392 2480)
 )
@@ -5447,6 +5429,40 @@ refer to the applicable agreement for further details.
 	(pt 1248 2496)
 	(pt 1248 2848)
 	(bus)
+)
+(connector
+	(pt -256 -880)
+	(pt -232 -880)
+)
+(connector
+	(text "Clock25Mhz" (rect -198 -896 -139 -884)(font "Arial" ))
+	(pt -232 -880)
+	(pt 968 -880)
+)
+(connector
+	(pt 968 504)
+	(pt 968 -880)
+)
+(connector
+	(pt 968 504)
+	(pt 1192 504)
+)
+(connector
+	(pt 1376 2464)
+	(pt 1376 2816)
+)
+(connector
+	(text "Clock25Mhz" (rect 1352 2296 1364 2355)(font "Arial" )(vertical))
+	(pt 1376 1048)
+	(pt 1376 2464)
+)
+(connector
+	(pt 1192 1048)
+	(pt 1192 504)
+)
+(connector
+	(pt 1192 1048)
+	(pt 1376 1048)
 )
 (junction (pt 1280 224))
 (junction (pt 1376 224))
