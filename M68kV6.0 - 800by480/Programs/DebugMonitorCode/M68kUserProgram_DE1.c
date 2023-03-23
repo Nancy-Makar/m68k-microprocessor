@@ -483,6 +483,43 @@ void I2C_Init(void) {
 
 }
 
+void I2C_Check_ACK(void) {
+    int value = I2C_CR;
+
+    return ((value & 0x80) == 0x00);
+}
+
+void I2C_Check_Busy(void) {
+    int value = I2C_CR;
+
+    return ((value & 0x40) > 0x00);
+}
+
+int TestForI2CTransmitDataComplete(void) {
+    int value = I2C_CR;
+
+    return ((value & 0x02) == 0x00);
+}
+
+
+void WaitForI2CTransmitComplete(void)
+{
+
+    /* loop for polling */
+    while (TestForI2CTransmitDataComplete() == 0) {
+        //do nothing
+    }
+
+}
+
+void WaitForI2CSlaveACK(void) {
+    /* loop for polling */
+    while (I2C_Check_ACK() == 0) {
+        //do nothing
+    }
+}
+
+
 /************************************************************************************
 ** return ONLY when the SPI controller has finished transmitting a byte
 ************************************************************************************/
