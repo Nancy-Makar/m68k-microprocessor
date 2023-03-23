@@ -483,13 +483,13 @@ void I2C_Init(void) {
 
 }
 
-void I2C_Check_ACK(void) {
+int I2C_Check_ACK(void) {
     int value = I2C_CR;
 
     return ((value & 0x80) == 0x00);
 }
 
-void I2C_Check_Busy(void) {
+int I2C_Check_Busy(void) {
     int value = I2C_CR;
 
     return ((value & 0x40) > 0x00);
@@ -499,6 +499,19 @@ int TestForI2CTransmitDataComplete(void) {
     int value = I2C_CR;
 
     return ((value & 0x02) == 0x00);
+}
+
+int I2C_Check_Read(void) {
+    int value = I2C_CR;
+
+    return ((value & 0x01) == 0x01);
+
+}
+
+void WaitForI2CRead(void) {
+    while (I2C_Check_Read() == 0) {
+        //do nothing
+    }
 }
 
 
@@ -518,6 +531,153 @@ void WaitForI2CSlaveACK(void) {
         //do nothing
     }
 }
+
+void WaitForI2CBusy(void) {
+    while (I2C_Check_Busy() == 1) {
+        //do nothing
+    }
+}
+
+void WriteI2CChar(void) {
+
+    //wait for previous write to end
+    WaitForI2CBusy();
+
+
+    //Set up TXR for transmission
+    I2C_TXR = 0xa0;
+
+    //set STA bit and WR
+    I2C_CR = 0x91;
+
+    //wait for data transmission from the controller to be completed
+    WaitForI2CTransmitComplete();
+
+    //wait for ack from the slave
+    WaitForI2CSlaveACK();
+
+    //send upper addr
+    I2C_TXR = 0x00;
+
+    //set STA bit and WR
+    I2C_CR = 0x11;
+
+    //wait for data transmission from the controller to be completed
+    WaitForI2CTransmitComplete();
+
+    //wait for ack from the slave
+    WaitForI2CSlaveACK();
+
+    //send lower addr
+    I2C_TXR = 0x00;
+
+    //set STA bit and WR
+    I2C_CR = 0x11;
+
+    //wait for data transmission from the controller to be completed
+    WaitForI2CTransmitComplete();
+
+    //wait for ack from the slave
+    WaitForI2CSlaveACK();
+
+
+    //send data
+    I2C_TXR = 0x88;
+
+    //set STO bit and WR
+    I2C_CR = 0x51;
+
+    //wait for data transmission from the controller to be completed
+    WaitForI2CTransmitComplete();
+
+    //wait for ack from the slave
+    WaitForI2CSlaveACK();
+
+}
+
+int ReadI2CChar(void) {
+    //wait for previous read to end
+    int ret;
+
+    printf("Here3.1.1 \n");
+
+    WaitForI2CBusy();
+
+    printf("Here3.1.2 \n");
+
+    I2C_TXR = 0xa0;
+
+    //set STA bit and WR
+    I2C_CR = 0x91;
+
+    //wait for data transmission from the controller to be completed
+    WaitForI2CTransmitComplete();
+
+    printf("Here3.1.3 \n");
+
+    //wait for ack from the slave
+    WaitForI2CSlaveACK();
+
+    printf("Here3.1 \n");
+
+    //send upper addr
+    I2C_TXR = 0x00;
+
+    //set STA bit and WR
+    I2C_CR = 0x11;
+
+    //wait for data transmission from the controller to be completed
+    WaitForI2CTransmitComplete();
+
+    //wait for ack from the slave
+    WaitForI2CSlaveACK();
+
+    printf("Here3.2 \n");
+
+    //send lower addr
+    I2C_TXR = 0x00;
+
+    //set STA bit and WR
+    I2C_CR = 0x11;
+
+    //wait for data transmission from the controller to be completed
+    WaitForI2CTransmitComplete();
+
+    //wait for ack from the slave
+    WaitForI2CSlaveACK();
+
+    printf("Here3.3 \n");
+
+
+    I2C_TXR = 0xa1;
+
+    //set STA bit and WR
+    I2C_CR = 0x91;
+
+    //wait for data transmission from the controller to be completed
+    WaitForI2CTransmitComplete();
+
+    //wait for ack from the slave
+    WaitForI2CSlaveACK();
+
+    printf("Here3.4 \n");
+
+    I2C_CR = 0x69;
+
+    WaitForI2CRead();
+
+
+    printf("Here3.5 \n");
+
+
+    ret = I2C_TXR;
+
+    printf("\r\n\nEEPROM Value: %x \n", ret);
+
+
+
+}
+
 
 
 /************************************************************************************
@@ -798,7 +958,16 @@ void main()
     /*
     * SPI Program HERE
     */
-    executeSPI();
+   // executeSPI();
+    printf("Here1 \n");
+    I2C_Init();
+    printf("Here2 \n");
+    WriteI2CChar();
+    printf("Here3 \n");
+    ret = ReadI2CChar();
+    printf("Here4 \n");
+
+
 
 
     while(1)
