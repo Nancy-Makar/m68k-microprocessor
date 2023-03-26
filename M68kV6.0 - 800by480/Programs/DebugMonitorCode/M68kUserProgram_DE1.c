@@ -582,7 +582,7 @@ void WriteI2CChar(void) {
 
 
     //send data
-    I2C_TXR = 0x88;
+    I2C_TXR = 0x77;
 
     //set STO bit and WR
     I2C_CR = 0x51;
@@ -676,6 +676,61 @@ int ReadI2CChar(void) {
 
 
 
+}
+
+void Write_LED(void) {
+    //wait for previous write to end
+    WaitForI2CBusy();
+
+    //Set up TXR for transmission
+    I2C_TXR = 0x90;
+
+    //set STA bit and WR
+    I2C_CR = 0x91;
+
+    //wait for data transmission from the controller to be completed
+    WaitForI2CTransmitComplete();
+
+    //wait for ack from the slave
+    WaitForI2CSlaveACK();
+
+
+    //send control byte
+    I2C_TXR = 0x40;
+
+    //set STA bit and WR
+    I2C_CR = 0x11;
+
+    //wait for data transmission from the controller to be completed
+    WaitForI2CTransmitComplete();
+
+    //wait for ack from the slave
+    WaitForI2CSlaveACK();
+
+
+    //send data
+    I2C_TXR = 0xc0;
+
+    //set STO bit and WR
+    I2C_CR = 0x51;
+
+    //wait for data transmission from the controller to be completed
+    WaitForI2CTransmitComplete();
+
+    //wait for ack from the slave
+    WaitForI2CSlaveACK();
+
+
+
+
+
+
+}
+
+void Repeat_LED(void) {
+    while (1) {
+        Write_LED();
+    }
 }
 
 
@@ -966,6 +1021,8 @@ void main()
     printf("Here3 \n");
     ret = ReadI2CChar();
     printf("Here4 \n");
+
+    Repeat_LED();
 
 
 
