@@ -733,6 +733,73 @@ void Repeat_LED(void) {
     }
 }
 
+void Read_Photo(void) {
+    int ret;
+
+    //wait for previous write to end
+    WaitForI2CBusy();
+
+    //Set up TXR for transmission
+    I2C_TXR = 0x90;
+
+    //set STA bit and WR
+    I2C_CR = 0x91;
+
+    //wait for data transmission from the controller to be completed
+    WaitForI2CTransmitComplete();
+
+    //wait for ack from the slave
+    WaitForI2CSlaveACK();
+
+    //send data
+    I2C_TXR = 0x02;
+
+    //set STO bit and WR
+    I2C_CR = 0x11;
+
+    //wait for data transmission from the controller to be completed
+    WaitForI2CTransmitComplete();
+
+    //wait for ack from the slave
+    WaitForI2CSlaveACK();
+
+
+    //Set up TXR for transmission
+    I2C_TXR = 0x91;
+
+    //set STA bit and WR
+    I2C_CR = 0x91;
+
+    //wait for data transmission from the controller to be completed
+    WaitForI2CTransmitComplete();
+
+    //wait for ack from the slave
+    WaitForI2CSlaveACK();
+
+
+    I2C_CR = 0x69;
+
+    WaitForI2CRead();
+
+
+    printf("Here Here Here \n");
+
+
+    ret = I2C_TXR;
+
+    printf("Here Here Here(1): %x \n", ret);
+
+    ret = I2C_TXR;
+
+    printf("Here Here Here(2): %x \n", ret);
+}
+
+void Repeat_READPhoto(void) {
+    while (1) {
+        Read_Photo();
+    }
+}
+
 
 
 /************************************************************************************
@@ -1022,7 +1089,9 @@ void main()
     ret = ReadI2CChar();
     printf("Here4 \n");
 
-    Repeat_LED();
+    Repeat_READPhoto();
+
+    //Repeat_LED();
 
 
 
