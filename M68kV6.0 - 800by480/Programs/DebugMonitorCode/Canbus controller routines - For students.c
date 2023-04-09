@@ -316,10 +316,41 @@ void Init_CanBus_Controller0(void)
 }
 
 // initialisation for Can controller 1
-void Init_CanBus_Controller0(void)
+void Init_CanBus_Controller1(void)
 {
     // TODO - put your Canbus initialisation code for CanController 1 here
     // See section 4.2.1 in the application note for details (PELICAN MODE)
+
+    //setting reset flag in mod register
+    while ((Can1_ModeControlReg & RM_RR_Bit) == ClrByte) {
+        Can1_ModeControlReg = Can1_ModeControlReg | RM_RR_Bit;
+    }
+
+    Can1_ClockDivideReg = CANMode_Bit | CBP_Bit | DivBy2;
+
+    //clr can interrupt
+    Can1_InterruptReg = ClrIntEnSJA;
+
+    //setup code and mask reg
+    Can1_AcceptCode0Reg = ClrByte;
+    Can1_AcceptCode1Reg = ClrByte;
+    Can1_AcceptCode2Reg = ClrByte;
+    Can1_AcceptCode3Reg = ClrByte;
+    Can1_AcceptMask0Reg = DontCare;
+    Can1_AcceptMask1Reg = DontCare;
+    Can1_AcceptMask2Reg = DontCare;
+    Can1_AcceptMask3Reg = DontCare;
+
+    //set up timing requirement
+    Can1_BusTiming0Reg = 0x04;
+    Can1_BusTiming1Reg = 0x7f;
+
+    Can1_OutControlReg = Tx1Float | Tx0PshPull | NormalMode;
+
+    //clr mode register
+    do {
+        Can1_ModeControlReg = ClrByte;
+    } while ((Can1_ModeControlReg & RM_RR_Bit) != ClrByte);
 }
 
 // Transmit for sending a message via Can controller 0
