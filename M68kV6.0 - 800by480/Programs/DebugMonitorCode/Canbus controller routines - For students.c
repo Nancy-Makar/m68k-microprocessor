@@ -428,7 +428,7 @@ void CanBus0_Receive(void)
     // data length code can be more than 8, however the real max data length is 8 bytes regardless
     for (i = 0; i < min(dataLength, 8); i++) 
     {
-        printf("%02X ", CAN0_CONTROLLER(CAN_Address++));
+        printf("%02X ", CAN0_CONTROLLER(CAN_Address+i));
     }
 
     Can0_CommandReg = RRB_Bit;
@@ -453,7 +453,7 @@ void CanBus1_Receive(void)
     // data length code can be more than 8, however the real max data length is 8 bytes regardless
     for (i = 0; i < min(dataLength, 8); i++)
     {
-        printf("%02X ", CAN1_CONTROLLER(CAN_Address++));
+        printf("%02X ", CAN1_CONTROLLER(CAN_Address+i));
     }
 
     // release the Receive Buffer
@@ -487,4 +487,10 @@ void CanBusTest(void)
         printf("\r\n") ;
 
     }
+}
+
+void delay(void) {
+    int i;
+
+    for (i = 0; i < 200; i++);
 }

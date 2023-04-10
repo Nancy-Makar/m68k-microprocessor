@@ -2,6 +2,8 @@
 #include <string.h>
 #include <ctype.h>
 
+#include "Canbus controller routines - For students.c"
+
 
 //IMPORTANT
 //
@@ -153,6 +155,16 @@ void enableWrite(void);
 int WriteSPIChar(int c);
 int WriteSPI(int num);
 void pollSPI(void);
+
+/*canbus prototype*/
+void Init_CanBus_Controller0(void);
+void Init_CanBus_Controller1(void);
+void CanBus0_Transmit(void);
+void CanBus1_Receive(void);
+void CanBus0_Receive(void);
+void CanBus1_Transmit(void);
+void CanBusTest(void);
+void delay(void);
 
 /*****************************************************************************************
 **	Interrupt service routine for Timers
@@ -538,265 +550,466 @@ void WaitForI2CBusy(void) {
     }
 }
 
-void WriteI2CChar(void) {
-
-    //wait for previous write to end
-    WaitForI2CBusy();
 
 
-    //Set up TXR for transmission
-    I2C_TXR = 0xa0;
-
-    //set STA bit and WR
-    I2C_CR = 0x91;
-
-    //wait for data transmission from the controller to be completed
-    WaitForI2CTransmitComplete();
-
-    //wait for ack from the slave
-    WaitForI2CSlaveACK();
-
-    //send upper addr
-    I2C_TXR = 0x00;
-
-    //set STA bit and WR
-    I2C_CR = 0x11;
-
-    //wait for data transmission from the controller to be completed
-    WaitForI2CTransmitComplete();
-
-    //wait for ack from the slave
-    WaitForI2CSlaveACK();
-
-    //send lower addr
-    I2C_TXR = 0x00;
-
-    //set STA bit and WR
-    I2C_CR = 0x11;
-
-    //wait for data transmission from the controller to be completed
-    WaitForI2CTransmitComplete();
-
-    //wait for ack from the slave
-    WaitForI2CSlaveACK();
 
 
-    //send data
-    I2C_TXR = 0x77;
 
-    //set STO bit and WR
-    I2C_CR = 0x51;
 
-    //wait for data transmission from the controller to be completed
-    WaitForI2CTransmitComplete();
+void WriteI2CBlock(int upper, int lower, int n, int b, int data) {
+    int mod;
+    int i;
+    int sum;
+    int addr = (upper << 8) | (lower);
+    i = -1;
 
-    //wait for ack from the slave
-    WaitForI2CSlaveACK();
+    if (n / 128 > 0) {
+        for (i = 0; i < (n / 128); i++) {
+            sum = addr + 128 * i;
+            if (sum <= 0xffff) {
+                WriteI2CPage((sum >> 8), (sum & 0x00ff), 128, b, data);
+            }
+            else
+                break;
+        }
+    }
 
+    if (i == -1)
+        i = 0;
+
+    mod = n % 128;
+    sum = addr + 128 * i;
+
+    if(mod>0) {
+        if (sum <= 0xffff) {
+            WriteI2CPage((sum >> 8), (sum & 0x00ff), mod, b, data);
+        }
+    }
+
+    return;
 }
 
-int ReadI2CChar(void) {
-    //wait for previous read to end
-    int ret;
+void WriteI2CPage(int upper, int lower, int n, int b, int data) {
 
-    printf("Here3.1.1 \n");
+    int i;
+    int addr = (upper << 8) | (lower);
 
     WaitForI2CBusy();
 
-    printf("Here3.1.2 \n");
+    if (b == 0) {
+        I2C_TXR = 0xa0;
+    }
+    else {
+        I2C_TXR = 0xa2;
+    }
+    
+    I2C_CR = 0x91;
 
+    WaitForI2CTransmitComplete();
+
+    WaitForI2CSlaveACK();
+
+    I2C_TXR = upper;
+
+    I2C_CR = 0x11;
+
+    WaitForI2CTransmitComplete();
+
+    WaitForI2CSlaveACK();
+
+    I2C_TXR = lower;
+
+    I2C_CR = 0x11;
+
+    WaitForI2CTransmitComplete();
+
+    WaitForI2CSlaveACK();
+
+    for (i = 0; i < n; i++) {
+        if (addr == 0xffff) {
+            I2C_TXR = data;
+
+            I2C_CR = 0x51;
+
+            WaitForI2CTransmitComplete();
+
+            WaitForI2CSlaveACK();
+
+            break;
+        }
+        else {
+            if (i == n - 1) {
+                I2C_TXR = data;
+
+                I2C_CR = 0x51;
+
+                WaitForI2CTransmitComplete();
+
+                WaitForI2CSlaveACK();
+            }
+            else {
+                I2C_TXR = data;
+
+                I2C_CR = 0x11;
+
+                WaitForI2CTransmitComplete();
+
+                WaitForI2CSlaveACK();
+            }
+
+            addr++;
+        }
+        
+    }
+
+    return;
+   
+}
+
+void WriteI2C128k(int upper, int lower, int n, int b, int data) {
+
+    int addr = (b << 16) | (upper << 8) | (lower);
+
+    if (addr < 0x10000 && (addr + n - 1) >= 0x10000) {
+        WriteI2CBlock(upper, lower, 0x10000 - addr, 0, data);
+        WriteI2CBlock(0x00, 0x00, n - (0x10000 - addr), 1, data);
+    }
+    else {
+        WriteI2CBlock(upper, lower, n, b, data);
+    }
+
+    return;
+}
+
+
+
+
+int ReadI2CChar(int upper, int lower) {
+    int ret;
+    WaitForI2CBusy();
+    printf("finished checking bus availability ... \n");
     I2C_TXR = 0xa0;
-
-    //set STA bit and WR
     I2C_CR = 0x91;
-
-    //wait for data transmission from the controller to be completed
     WaitForI2CTransmitComplete();
-
-    printf("Here3.1.3 \n");
-
-    //wait for ack from the slave
+    printf("start condition transmitted ... \n");
     WaitForI2CSlaveACK();
-
-    printf("Here3.1 \n");
-
-    //send upper addr
-    I2C_TXR = 0x00;
-
-    //set STA bit and WR
+    printf("start condition acknowledged ... \n");
+    I2C_TXR = upper;
     I2C_CR = 0x11;
-
-    //wait for data transmission from the controller to be completed
     WaitForI2CTransmitComplete();
-
-    //wait for ack from the slave
+    printf("upper address transmitted ... \n");
     WaitForI2CSlaveACK();
-
-    printf("Here3.2 \n");
-
-    //send lower addr
-    I2C_TXR = 0x00;
-
-    //set STA bit and WR
+    printf("upper address acknowledged ... \n");
+    I2C_TXR = lower;
     I2C_CR = 0x11;
-
-    //wait for data transmission from the controller to be completed
     WaitForI2CTransmitComplete();
-
-    //wait for ack from the slave
+    printf("lower address transmitted ... \n");
     WaitForI2CSlaveACK();
-
-    printf("Here3.3 \n");
-
-
+    printf("lower address acknowledged ... \n");
     I2C_TXR = 0xa1;
-
-    //set STA bit and WR
     I2C_CR = 0x91;
-
-    //wait for data transmission from the controller to be completed
     WaitForI2CTransmitComplete();
-
-    //wait for ack from the slave
     WaitForI2CSlaveACK();
-
-    printf("Here3.4 \n");
-
     I2C_CR = 0x69;
-
+    printf("stop condition transmitted ... \n");
     WaitForI2CRead();
-
-
-    printf("Here3.5 \n");
-
-
+    printf("read value ready ... \n");
     ret = I2C_TXR;
 
     printf("\r\n\nEEPROM Value: %x \n", ret);
-
-
-
 }
 
-void Write_LED(void) {
-    //wait for previous write to end
+void WriteI2CChar(int upper, int lower, int data) {
     WaitForI2CBusy();
-
-    //Set up TXR for transmission
-    I2C_TXR = 0x90;
-
-    //set STA bit and WR
+    printf("finished checking bus availability ... \n");
+    I2C_TXR = 0xa0;
     I2C_CR = 0x91;
-
-    //wait for data transmission from the controller to be completed
     WaitForI2CTransmitComplete();
-
-    //wait for ack from the slave
+    printf("start condition transmitted ... \n");
     WaitForI2CSlaveACK();
-
-
-    //send control byte
-    I2C_TXR = 0x40;
-
-    //set STA bit and WR
+    printf("start condition acknowledged ... \n");
+    I2C_TXR = upper;
     I2C_CR = 0x11;
-
-    //wait for data transmission from the controller to be completed
     WaitForI2CTransmitComplete();
-
-    //wait for ack from the slave
+    printf("upper address transmitted ... \n");
     WaitForI2CSlaveACK();
-
-
-    //send data
-    I2C_TXR = 0xc0;
-
-    //set STO bit and WR
+    printf("upper address acknowledged ... \n");
+    I2C_TXR = lower;
+    I2C_CR = 0x11;
+    WaitForI2CTransmitComplete();
+    printf("lower address transmitted ... \n");
+    WaitForI2CSlaveACK();
+    printf("lower address acknowledged ... \n");
+    I2C_TXR = data;
     I2C_CR = 0x51;
-
-    //wait for data transmission from the controller to be completed
     WaitForI2CTransmitComplete();
-
-    //wait for ack from the slave
+    printf("data transmitted ... \n");
     WaitForI2CSlaveACK();
+    printf("data acknowledged ... \n");
+}
 
 
+void ReadI2CPage(int upper, int lower, int n, int b) {
+    int ret;
+    int i;
+    int addr;
+    WaitForI2CBusy();
+    printf("finished checking bus availability ... \n");
+    if (b == 0) {
+        I2C_TXR = 0xa0;
+    }
+    else {
+        I2C_TXR = 0xa2;
+    }
+    I2C_CR = 0x91;
+    WaitForI2CTransmitComplete();
+    printf("start condition transmitted ... \n");
+    WaitForI2CSlaveACK();
+    printf("start condition acknowledged ... \n");
+    I2C_TXR = upper;
+    I2C_CR = 0x11;
+    WaitForI2CTransmitComplete();
+    printf("upper address transmitted ... \n");
+    WaitForI2CSlaveACK();
+    printf("upper address acknowledged ... \n");
+    I2C_TXR = lower;
+    I2C_CR = 0x11;
+    WaitForI2CTransmitComplete();
+    printf("lower address transmitted ... \n");
+    WaitForI2CSlaveACK();
+    printf("lower address acknowledged ... \n");
+    if (b == 0) {
+        I2C_TXR = 0xa1;
+    }
+    else {
+        I2C_TXR = 0xa3;
+    }
+    I2C_CR = 0x91;
+    WaitForI2CTransmitComplete();
+    WaitForI2CSlaveACK();
+    for (i = 0; i < n-1; i++) {
+        I2C_CR = 0x21;
+        WaitForI2CRead();
+        ret = I2C_TXR;
+        addr = (b << 16) | (upper << 8) | (lower);
+        printf("\r\n\nEEPROM value %x read at address %x  \n", ret,addr+i);
+    }
+    I2C_CR = 0x69;
+    WaitForI2CRead();
+    ret = I2C_TXR;
+    addr = (b << 16) | (upper << 8) | (lower);
+    printf("\r\n\nEEPROM value %x read at address %x  \n", ret, addr + i);
+}
+
+void ReadI2CBlock(int upper, int lower, int n, int b) {
+    int addr = (b << 16) | (upper << 8) | (lower);
+
+    if (addr < 0x10000 && (addr + n - 1) >= 0x10000) {
+        ReadI2CPage(upper, lower, 0x10000 - addr, 0);
+        if (n - (0x10000 - addr) <= 0x10000) {
+            ReadI2CPage(0x00, 0x00, n - (0x10000 - addr), 1);
+        }
+        else {
+            ReadI2CPage(0x00, 0x00, 0x10000, 1);
+        }
+        
+    }
+    else {
+        if (addr < 0x10000) {
+            ReadI2CPage(upper, lower, n, 0);
+        }
+        else {
+            if (n <= 0x10000) {
+                ReadI2CPage(upper, lower, n, 1);
+            }
+            else {
+                ReadI2CPage(upper, lower, 0x10000, 1);
+            }
+        }
+
+    }
+
+    return;
+}
 
 
+void menueI2C(void) {
+    int option, val_to_pass, ret, upper, lower, b, n;
+    // char pat;
 
+    while (1) {
+        scanflush();
+
+        printf("\r\n\nEnter I2C operation(1 - Write Byte EEPROM, 2 - Read Byte EEPROM, 3 - Write Block EEPROM, 4 - Read Block EEPROM, 5 - Write LED, 6 - Read Photo Resistor, 7 - Read Thermistor, 8 - Read Potentiometer, 9 - Stop LED): ");
+        option = xtod(_getch());
+        printf("\r\n\nI2C operation: %x ", option);
+
+        switch (option) {
+        case 1:
+            printf("\r\nWrite byte EEPROM operation selected");
+            printf("\r\n\nEnter the upper address: ");
+            upper = Get2HexDigitsVoid();
+            printf("\r\n\nEntered: %x", upper);
+            printf("\r\n\nEnter the lower address: ");
+            lower = Get2HexDigitsVoid();
+            printf("\r\n\nEntered: %x", lower);
+            printf("\r\n\nEnter data: ");
+            val_to_pass = Get2HexDigitsVoid();
+            printf("\r\n\nEntered: %x \n", val_to_pass);
+            WriteI2CChar(upper, lower, val_to_pass);
+            printf("\r\nEnd of write byte EEPROM operation ...");
+            break;
+        case 2:
+            printf("\r\nRead byte EEPROM operation selected");
+            printf("\r\n\nEnter the upper address: ");
+            upper = Get2HexDigitsVoid();
+            printf("\r\n\nEntered: %x", upper);
+            printf("\r\n\nEnter the lower address: ");
+            lower = Get2HexDigitsVoid();
+            printf("\r\n\nEntered: %x \n", lower);
+            ret = ReadI2CChar(upper, lower);
+            printf("\r\nEnd of read byte EEPROM operation ...");
+            break;
+        case 3:
+            printf("\r\nWrite block EEPROM operation selected");
+            printf("\r\n\nEnter the upper address: ");
+            upper = Get2HexDigitsVoid();
+            printf("\r\n\nEntered: %x", upper);
+            printf("\r\n\nEnter the lower address: ");
+            lower = Get2HexDigitsVoid();
+            printf("\r\n\nEntered: %x", lower);
+            printf("\r\n\nEnter the block number: ");
+            b = xtod(_getch());
+            printf("\r\n\nEntered: %x", b);
+            printf("\r\n\nEnter data: ");
+            val_to_pass = Get2HexDigitsVoid();
+            printf("\r\n\nEntered: %x", val_to_pass);
+            printf("\r\n\nEnter number of bytes to write: ");
+            n = Get5HexDigitsVoid();
+            printf("\r\n\nEntered: %x", n);
+            WriteI2C128k(upper, lower, n, b, val_to_pass);
+            printf("\r\nEnd of write block EEPROM operation ...");
+            break;
+        case 4:
+            printf("\r\nRead block EEPROM operation selected");
+            printf("\r\n\nEnter the upper address: ");
+            upper = Get2HexDigitsVoid();
+            printf("\r\n\nEntered: %x", upper);
+            printf("\r\n\nEnter the lower address: ");
+            lower = Get2HexDigitsVoid();
+            printf("\r\n\nEntered: %x", lower);
+            printf("\r\n\nEnter the block number: ");
+            b = xtod(_getch());
+            printf("\r\n\nEntered: %x", b);
+            printf("\r\n\nEnter number of bytes to read: ");
+            n = Get5HexDigitsVoid();
+            printf("\r\n\nEntered: %x", n);
+            ReadI2CBlock(upper, lower, n, b);
+            printf("\r\nEnd of read block EEPROM operation ...");
+            break;
+        case 5:
+            printf("\r\nWrite LED operation selected");
+            Repeat_LED();
+            break;
+        case 6:
+            printf("\r\nRead photo resistor operation selected");
+            Repeat_READ_ADC(0x02);
+            break;
+        case 7:
+            printf("\r\nRead thermistor operation selected");
+            Repeat_READ_ADC(0x03);
+            break;
+        case 8:
+            printf("\r\nRead potentiometer operation selected");
+            Repeat_READ_ADC(0x01);
+            break;
+        case 9:
+            printf("\r\nStop LED operation selected");
+            Write_LED(0x00);
+            break;
+        default:
+            printf("\r\n\nInvalid operation ...");
+            printf("\r\n\nTry again!!!!!");
+        }
+    }
 
 }
+
+void executeI2C(void) {
+    printf("\r\nIntializing I2C\n");
+    I2C_Init();
+    menueI2C();
+}
+
+void Write_LED(int data) {
+    WaitForI2CBusy();
+    I2C_TXR = 0x90;
+    I2C_CR = 0x91;
+    WaitForI2CTransmitComplete();
+    WaitForI2CSlaveACK();
+    I2C_TXR = 0x40;
+    I2C_CR = 0x11;
+    WaitForI2CTransmitComplete();
+    WaitForI2CSlaveACK();
+    I2C_TXR = data;
+    I2C_CR = 0x51;
+    WaitForI2CTransmitComplete();
+    WaitForI2CSlaveACK();
+}
+
 
 void Repeat_LED(void) {
+    int data;
+    int flag;
+    data = 0;
+    flag = 0;
     while (1) {
-        Write_LED();
+        Write_LED(data);
+        if (flag == 0) {
+            data = data + 1;
+            if (data > 0xc0) {
+                data = 0xc0 - 1;
+                flag = 1;
+            }
+        }
+        else {
+            if (data == 0x50) {
+                data = 0x51;
+                flag = 0;
+            }
+            else {
+                data = data - 1;
+            }
+        }
     }
 }
 
-void Read_Photo(void) {
+void Read_ADC(int data) {
     int ret;
-
-    //wait for previous write to end
     WaitForI2CBusy();
-
-    //Set up TXR for transmission
     I2C_TXR = 0x90;
-
-    //set STA bit and WR
     I2C_CR = 0x91;
-
-    //wait for data transmission from the controller to be completed
     WaitForI2CTransmitComplete();
-
-    //wait for ack from the slave
     WaitForI2CSlaveACK();
-
-    //send data
-    I2C_TXR = 0x02;
-
-    //set STO bit and WR
+    I2C_TXR = data;
     I2C_CR = 0x11;
-
-    //wait for data transmission from the controller to be completed
     WaitForI2CTransmitComplete();
-
-    //wait for ack from the slave
     WaitForI2CSlaveACK();
-
-
-    //Set up TXR for transmission
     I2C_TXR = 0x91;
-
-    //set STA bit and WR
     I2C_CR = 0x91;
-
-    //wait for data transmission from the controller to be completed
     WaitForI2CTransmitComplete();
-
-    //wait for ack from the slave
     WaitForI2CSlaveACK();
-
-
     I2C_CR = 0x69;
-
     WaitForI2CRead();
-
-
-    printf("Here Here Here \n");
-
-
     ret = I2C_TXR;
-
-    printf("Here Here Here(1): %x \n", ret);
-
+    //printf("ADC value: %x \n", ret);
     ret = I2C_TXR;
-
-    printf("Here Here Here(2): %x \n", ret);
+    printf("ADC value: %x \n", ret);
 }
 
-void Repeat_READPhoto(void) {
+void Repeat_READ_ADC(int data) {
     while (1) {
-        Read_Photo();
+        Read_ADC(data);
     }
 }
 
@@ -1029,6 +1242,14 @@ int Get2HexDigitsVoid(void)
     return i;
 }
 
+int Get5HexDigitsVoid(void)
+{
+    register int i = (xtod(_getch()) << 16) | (xtod(_getch()) << 12) | (xtod(_getch()) << 8) | (xtod(_getch()) << 4) | (xtod(_getch()));
+
+
+    return i;
+}
+
 /******************************************************************************************************************************
 * Start of user program
 ******************************************************************************************************************************/
@@ -1081,15 +1302,74 @@ void main()
     * SPI Program HERE
     */
    // executeSPI();
-    printf("Here1 \n");
-    I2C_Init();
-    printf("Here2 \n");
-    WriteI2CChar();
-    printf("Here3 \n");
-    ret = ReadI2CChar();
-    printf("Here4 \n");
+   // printf("Here1 \n");
+   // I2C_Init();
+  //  printf("Here2 \n");
+  //  WriteI2CChar();
+   // printf("Here3 \n");
+   // ret = ReadI2CChar();
+   // printf("Here4 \n");
 
-    Repeat_READPhoto();
+   // WriteI2C128k(0xff, 0xf0, 32, 0);
+
+//    printf("start consecutive \n");
+
+   // WriteI2CChar2(0xff, 0xf0, 0x55);
+  //  printf("x1 \n");
+    //WriteI2CChar2(0xff, 0xf1, 0x54);
+    //printf("x2 \n");
+    //WriteI2CChar2(0xff, 0xf2, 0x53);
+   // printf("x3 \n");
+    //WriteI2CChar2(0xff, 0xf3, 0x52);
+   // printf("x4 \n");
+   // ret = ReadI2CChar2(0xff, 0xf0);
+   // printf("x5 \n");
+   // ret = ReadI2CChar2(0xff, 0xf1);
+   // printf("x6 \n");
+    //ret = ReadI2CChar2(0xff, 0xf2);
+   // printf("x7 \n");
+   // ret = ReadI2CChar2(0xff, 0xf3);
+
+ //   printf("end consecutive \n");
+
+   // WriteI2CPage(0xff, 0xf0, 16, 0);
+
+   // printf("WriteI2CBlock(0xff, 0xf0, 16, 0);");
+   // WriteI2CBlock(0xff, 0xf0, 16, 0);
+   // printf("WriteI2CBlock(0x00, 0x00, 16, 1);");
+   // WriteI2CBlock(0x00, 0x00, 16, 1);
+   // printf("ReadI2CPage(0);");
+   // ReadI2CPage(0);
+   // printf("ReadI2CPage(1);");
+   // ReadI2CPage(1);
+
+//    printf("end read page \n");
+
+
+    /////////////////////////////////executeI2C();
+
+    Init_CanBus_Controller0();
+    Init_CanBus_Controller1();
+
+
+    while (1) {
+        printf("Canbus0 Transmit  Canbus1 Receive\n");
+        CanBus0_Transmit();
+        CanBus1_Receive();
+        printf("\n");
+
+        printf("Canbus1 Transmit  Canbus0 Receive\n");
+        CanBus1_Transmit();
+        CanBus0_Receive();
+        printf("\n");
+
+    }
+
+
+    //ReadI2CPage(0);
+    //ReadI2CPage(1);
+
+   // Repeat_READPhoto();
 
     //Repeat_LED();
 
