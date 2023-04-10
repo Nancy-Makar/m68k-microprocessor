@@ -263,6 +263,9 @@
 /* definitions for the acceptance code and mask register */
 #define DontCare 0xFF
 
+/* helper macros */
+#define min(a, b) (((a) < (b)) ? (a) : (b))
+
 
 /*  bus timing values for
 **  bit-rate : 100 kBit/s
@@ -287,9 +290,10 @@ void Init_CanBus_Controller0(void)
         Can0_ModeControlReg = Can0_ModeControlReg | RM_RR_Bit;
     }
 
+    // configure the clock divider register
     Can0_ClockDivideReg = CANMode_Bit | CBP_Bit | DivBy2;
 
-    //clr can interrupt
+    //disable CAN interrupt
     Can0_InterruptReg = ClrIntEnSJA;
 
     //setup code and mask reg
@@ -308,7 +312,7 @@ void Init_CanBus_Controller0(void)
 
     Can0_OutControlReg = Tx1Float | Tx0PshPull | NormalMode;
 
-    //clr mode register
+    //clear mode register
     do {
         Can0_ModeControlReg = ClrByte;
     } while ((Can0_ModeControlReg & RM_RR_Bit) != ClrByte);
@@ -328,7 +332,7 @@ void Init_CanBus_Controller1(void)
 
     Can1_ClockDivideReg = CANMode_Bit | CBP_Bit | DivBy2;
 
-    //clr can interrupt
+    //disbale CAN interrupt
     Can1_InterruptReg = ClrIntEnSJA;
 
     //setup code and mask reg
@@ -347,7 +351,7 @@ void Init_CanBus_Controller1(void)
 
     Can1_OutControlReg = Tx1Float | Tx0PshPull | NormalMode;
 
-    //clr mode register
+    //clear mode register
     do {
         Can1_ModeControlReg = ClrByte;
     } while ((Can1_ModeControlReg & RM_RR_Bit) != ClrByte);
@@ -372,13 +376,50 @@ void CanBus0_Receive(void)
 {
     // TODO - put your Canbus receive code for CanController 0 here
     // See section 4.2.4 in the application note for details (PELICAN MODE)
+
+    unsigned char dataLength, i;
+    int CAN_Address = 19;
+    // wait for Receive Buffer Status to be full
+    while (!(Can0_StatusReg & RBS_Bit));
+
+    // decode RxFrame Info to find data length code at the lower 4 bits
+    dataLength = Can0_RxFrameInfo & 0x0f;
+
+    printf("\r\nReceived bytes from CAN Bus 0: ");
+
+    // data length code can be more than 8, however the real max data length is 8 bytes regardless
+    for (i = 0; i < min(dataLength, 8); i++) 
+    {
+        printf("%02X ", CAN0_CONTROLLER(CAN_Address++));
+    }
+
+    Can0_CommandReg = Can0_CommandReg | RRB_Bit;
 }
 
 // Receive for reading a received message via Can controller 1
-void CanBus0_Receive(void)
+void CanBus1_Receive(void)
 {
     // TODO - put your Canbus receive code for CanController 1 here
     // See section 4.2.4 in the application note for details (PELICAN MODE)
+
+    unsigned char dataLength, i;
+    int CAN_Address = 19;
+
+    // wait for Receive Buffer Status to be full
+    while (!(Can1_StatusReg & RBS_Bit));
+
+    // decode RxFrame Info to find data length code at the lower 4 bits
+    dataLength = Can1_RxFrameInfo & 0x0f;
+
+    printf("\r\nReceived bytes from CAN Bus 1: ");
+    // data length code can be more than 8, however the real max data length is 8 bytes regardless
+    for (i = 0; i < min(dataLength, 8); i++)
+    {
+        printf("%02X ", CAN1_CONTROLLER(CAN_Address++));
+    }
+
+    // release the Receive Buffer
+    Can1_CommandReg = Can1_CommandReg | RRB_Bit;
 }
 
 
