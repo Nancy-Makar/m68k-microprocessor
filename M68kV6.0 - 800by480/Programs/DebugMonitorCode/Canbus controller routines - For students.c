@@ -393,7 +393,7 @@ void CanBus0_Receive(void)
         printf("%02X ", CAN0_CONTROLLER(CAN_Address++));
     }
 
-    Can0_CommandReg = Can0_CommandReg | RRB_Bit;
+    Can0_CommandReg = RRB_Bit;
 }
 
 // Receive for reading a received message via Can controller 1
@@ -419,7 +419,7 @@ void CanBus1_Receive(void)
     }
 
     // release the Receive Buffer
-    Can1_CommandReg = Can1_CommandReg | RRB_Bit;
+    Can1_CommandReg = RRB_Bit;
 }
 
 
