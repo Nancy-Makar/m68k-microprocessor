@@ -362,13 +362,51 @@ void CanBus0_Transmit(void)
 {
     // TODO - put your Canbus transmit code for CanController 0 here
     // See section 4.2.2 in the application note for details (PELICAN MODE)
+
+    //wait for transmit buffer to be unlocked
+    do {
+        //poll for the status register
+    } while ((Can0_StatusReg & TBS_Bit) != TBS_Bit);
+
+    Can0_TxFrameInfo = 0x08; //8 bytes
+    Can0_TxBuffer1 = 0xA5; //message id
+    Can0_TxBuffer2 = 0x20; //message id 
+    Can0_TxBuffer3 = 0x77; //data bytes
+    Can0_TxBuffer4 = 0x77;
+    Can0_TxBuffer5 = 0x77;
+    Can0_TxBuffer6 = 0x77;
+    Can0_TxBuffer7 = 0x77;
+    Can0_TxBuffer8 = 0x77;
+    Can0_TxBuffer9 = 0x77;
+    Can0_TxBuffer10 = 0x77;
+
+    Can0_CommandReg = TR_Bit; //set transmit bit 
 }
 
 // Transmit for sending a message via Can controller 1
-void CanBus0_Transmit(void)
+void CanBus1_Transmit(void)
 {
     // TODO - put your Canbus transmit code for CanController 1 here
     // See section 4.2.2 in the application note for details (PELICAN MODE)
+
+    //wait for transmit buffer to be unlocked
+    do {
+        //poll for the status register
+    } while ((Can1_StatusReg & TBS_Bit) != TBS_Bit);
+
+    Can1_TxFrameInfo = 0x08; //8 bytes
+    Can1_TxBuffer1 = 0xA5; //message id
+    Can1_TxBuffer2 = 0x20; //message id 
+    Can1_TxBuffer3 = 0x88; //data bytes
+    Can1_TxBuffer4 = 0x88;
+    Can1_TxBuffer5 = 0x88;
+    Can1_TxBuffer6 = 0x88;
+    Can1_TxBuffer7 = 0x88;
+    Can1_TxBuffer8 = 0x88;
+    Can1_TxBuffer9 = 0x88;
+    Can1_TxBuffer10 = 0x88;
+
+    Can1_CommandReg = TR_Bit; //set transmit bit 
 }
 
 // Receive for reading a received message via Can controller 0
