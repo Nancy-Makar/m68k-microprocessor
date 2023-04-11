@@ -482,8 +482,8 @@ void SPI_Init(void)
 
 void I2C_Init(void) {
     //Using I2C_PRERlo and I2C_PRERhi to convert clock to 100kHz
-    I2C_PRERlo = 0x59;
-    I2C_PRERhi = 0x59; //converts 45MHz to 100kHz
+    I2C_PRERlo = 0x31;
+    I2C_PRERhi = 0x31; //converts 45MHz to 100kHz
     //config clock when the en bit is cleared
     //TODO: Do we need to configure both reg?
 
@@ -1299,56 +1299,18 @@ void main()
     scanflush() ;                       // flush any text that may have been typed ahead
 
     /*
-    * SPI Program HERE
+    * I2C Program HERE
     */
-   // executeSPI();
-   // printf("Here1 \n");
-   // I2C_Init();
-  //  printf("Here2 \n");
-  //  WriteI2CChar();
-   // printf("Here3 \n");
-   // ret = ReadI2CChar();
-   // printf("Here4 \n");
-
-   // WriteI2C128k(0xff, 0xf0, 32, 0);
-
-//    printf("start consecutive \n");
-
-   // WriteI2CChar2(0xff, 0xf0, 0x55);
-  //  printf("x1 \n");
-    //WriteI2CChar2(0xff, 0xf1, 0x54);
-    //printf("x2 \n");
-    //WriteI2CChar2(0xff, 0xf2, 0x53);
-   // printf("x3 \n");
-    //WriteI2CChar2(0xff, 0xf3, 0x52);
-   // printf("x4 \n");
-   // ret = ReadI2CChar2(0xff, 0xf0);
-   // printf("x5 \n");
-   // ret = ReadI2CChar2(0xff, 0xf1);
-   // printf("x6 \n");
-    //ret = ReadI2CChar2(0xff, 0xf2);
-   // printf("x7 \n");
-   // ret = ReadI2CChar2(0xff, 0xf3);
-
- //   printf("end consecutive \n");
-
-   // WriteI2CPage(0xff, 0xf0, 16, 0);
-
-   // printf("WriteI2CBlock(0xff, 0xf0, 16, 0);");
-   // WriteI2CBlock(0xff, 0xf0, 16, 0);
-   // printf("WriteI2CBlock(0x00, 0x00, 16, 1);");
-   // WriteI2CBlock(0x00, 0x00, 16, 1);
-   // printf("ReadI2CPage(0);");
-   // ReadI2CPage(0);
-   // printf("ReadI2CPage(1);");
-   // ReadI2CPage(1);
-
-//    printf("end read page \n");
 
 
-    /////////////////////////////////executeI2C();
 
-    Init_CanBus_Controller0();
+    executeI2C();
+
+
+
+    //////////////////////////////////////////////
+    ////////////////////////////////////////////// test for canbus
+    /*Init_CanBus_Controller0();
     Init_CanBus_Controller1();
 
 
@@ -1364,16 +1326,9 @@ void main()
         printf("\n");
 
     }
-
-
-    //ReadI2CPage(0);
-    //ReadI2CPage(1);
-
-   // Repeat_READPhoto();
-
-    //Repeat_LED();
-
-
+    */
+    //////////////////////////////////////////////
+    //////////////////////////////////////////////
 
 
     while(1)
