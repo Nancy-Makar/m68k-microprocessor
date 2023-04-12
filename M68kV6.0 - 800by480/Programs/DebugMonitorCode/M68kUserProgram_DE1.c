@@ -1013,6 +1013,31 @@ void Repeat_READ_ADC(int data) {
     }
 }
 
+int Read_ADC_Ret(int data) {
+    int ret;
+    WaitForI2CBusy();
+    I2C_TXR = 0x90;
+    I2C_CR = 0x91;
+    WaitForI2CTransmitComplete();
+    WaitForI2CSlaveACK();
+    I2C_TXR = data;
+    I2C_CR = 0x11;
+    WaitForI2CTransmitComplete();
+    WaitForI2CSlaveACK();
+    I2C_TXR = 0x91;
+    I2C_CR = 0x91;
+    WaitForI2CTransmitComplete();
+    WaitForI2CSlaveACK();
+    I2C_CR = 0x69;
+    WaitForI2CRead();
+    ret = I2C_TXR;
+    //printf("ADC value: %x \n", ret);
+    ret = I2C_TXR;
+    printf("ADC value: %x \n", ret);
+
+    return ret;
+}
+
 
 
 /************************************************************************************
@@ -1304,13 +1329,14 @@ void main()
 
 
 
-    executeI2C();
+   // executeI2C();
 
-
+    //Repeat_READ_ADC(0x02);
 
     //////////////////////////////////////////////
     ////////////////////////////////////////////// test for canbus
-    /*Init_CanBus_Controller0();
+    I2C_Init();
+    Init_CanBus_Controller0();
     Init_CanBus_Controller1();
 
 
@@ -1326,7 +1352,7 @@ void main()
         printf("\n");
 
     }
-    */
+    
     //////////////////////////////////////////////
     //////////////////////////////////////////////
 
