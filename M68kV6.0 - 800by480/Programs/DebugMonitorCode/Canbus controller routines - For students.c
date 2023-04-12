@@ -364,6 +364,17 @@ void CanBus0_Transmit(void)
     // See section 4.2.2 in the application note for details (PELICAN MODE)
 
     //wait for transmit buffer to be unlocked
+    int data1, data2, data3;
+
+    data1 = Read_ADC_Ret(0x01);
+    data2 = Read_ADC_Ret(0x02);
+    data3 = Read_ADC_Ret(0x03);
+   // Read_ADC(0x02);
+
+    printf("The value to be transmitted data1: %02X ", data1);
+    printf("The value to be transmitted data2: %02X ", data2);
+    printf("The value to be transmitted data3: %02X ", data3);
+
     do {
         //poll for the status register
     } while ((Can0_StatusReg & TBS_Bit) != TBS_Bit);
@@ -371,9 +382,9 @@ void CanBus0_Transmit(void)
     Can0_TxFrameInfo = 0x08; //8 bytes
     Can0_TxBuffer1 = 0xA5; //message id
     Can0_TxBuffer2 = 0x20; //message id 
-    Can0_TxBuffer3 = 0x77; //data bytes
-    Can0_TxBuffer4 = 0x77;
-    Can0_TxBuffer5 = 0x77;
+    Can0_TxBuffer3 = data1; //data bytes
+    Can0_TxBuffer4 = data2;
+    Can0_TxBuffer5 = data3;
     Can0_TxBuffer6 = 0x77;
     Can0_TxBuffer7 = 0x77;
     Can0_TxBuffer8 = 0x77;
